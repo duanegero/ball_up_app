@@ -9,8 +9,8 @@ import {
   Keyboard,
 } from "react-native";
 import { Link } from "expo-router";
-import ThemedButton from "../../componts/ThemedButton";
-import ThemedTextInput from "../../componts/ThemedTextInput";
+import ThemedButton from "../../components/ThemedButton";
+import ThemedTextInput from "../../components/ThemedTextInput";
 import { useState } from "react";
 
 const SignUp = () => {
@@ -53,9 +53,9 @@ const SignUp = () => {
           <Text style={{ color: "white" }}>Sign Up</Text>
         </ThemedButton>
 
-        <Link href={"/login"} style={styles.link}>
+        {/* <Link href={"/login"} style={styles.link}>
           Login Page
-        </Link>
+        </Link> */}
       </View>
     </TouchableWithoutFeedback>
   );

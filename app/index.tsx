@@ -10,7 +10,10 @@ const Home = () => {
         <Text>Where hoopers train, track, and thrive.</Text>
       </View>
       <Link href={"/trainerLogin"} style={styles.link}>
-        Login Page
+        Trainers Login
+      </Link>
+      <Link href={"/athleteLogin"} style={styles.link}>
+        Athletes Login
       </Link>
       <Link href={"/signUp"} style={styles.link}>
         Sign Up Page

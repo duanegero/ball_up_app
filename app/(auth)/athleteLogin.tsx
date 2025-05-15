@@ -15,7 +15,7 @@ import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Spacer from "../../components/Spacer";
 
-const TrainerLogin = () => {
+const AthleteLogin = () => {
   //state variables
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,9 +28,9 @@ const TrainerLogin = () => {
         data: {
           token: string;
           username: string;
-          trainer_user_id: number;
+          athlete_user_id: number;
         };
-      } = await api.post("/trainer_login", {
+      } = await api.post("/athlete_login", {
         username,
         password,
       });
@@ -38,11 +38,11 @@ const TrainerLogin = () => {
       const {
         token,
         username: loggedInUsername,
-        trainer_user_id,
+        athlete_user_id,
       } = response.data;
 
       //storing token
-      await AsyncStorage.setItem("trainerToken", token);
+      await AsyncStorage.setItem("athleteToken", token);
 
       //alert user success
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
@@ -62,7 +62,7 @@ const TrainerLogin = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedContainer>
-        <Text style={styles.title}>Trainer Access Portal</Text>
+        <Text style={styles.title}>Athlete Access Point</Text>
 
         <Spacer height={80} />
 
@@ -97,7 +97,8 @@ const TrainerLogin = () => {
   );
 };
 
-export default TrainerLogin;
+export default AthleteLogin;
+
 const styles = StyleSheet.create({
   title: {
     fontFamily: "Roboto",
@@ -109,13 +110,5 @@ const styles = StyleSheet.create({
   link: {
     marginVertical: 10,
     borderBottomWidth: 1,
-  },
-  btn: {
-    backgroundColor: "#708999",
-    padding: 15,
-    borderRadius: 5,
-  },
-  pressed: {
-    opacity: 0.8,
   },
 });
