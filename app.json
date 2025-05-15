@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "ballupapp",
     "name": "ball_up_app",
     "slug": "ball_up_app",
     "version": "1.0.0",
@@ -24,6 +25,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": ["expo-router"]
   }
 }
