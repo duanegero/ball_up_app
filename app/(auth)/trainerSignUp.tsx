@@ -18,9 +18,11 @@ import { useState } from "react";
 import Spacer from "../../components/Spacer";
 import api from "../../utils/api";
 
-const SignUp = () => {
+//defining a function
+const TrainerSignUp = () => {
   const router = useRouter();
 
+  //state variables
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -29,10 +31,13 @@ const SignUp = () => {
   const [years_experience, setYears_experience] = useState("");
   const [bio, setBio] = useState("");
 
+  //helper to handle submit button
   const handleSubmit = async (): Promise<void> => {
+    //make string a number
     const years_experience_number = parseInt(years_experience, 10);
 
     try {
+      //variable to handle response from api with expected data
       const response: {
         data: {
           message: string;
@@ -48,8 +53,10 @@ const SignUp = () => {
         bio,
       });
 
+      //variables from response
       const { message, username: signedUpUsername } = response.data;
 
+      //alert user and navigate to login
       Alert.alert(`${message} Username: ${signedUpUsername}`, "", [
         {
           text: "OK",
@@ -57,6 +64,7 @@ const SignUp = () => {
         },
       ]);
 
+      //clear the inputs
       setEmail("");
       setUsername("");
       setPassword("");
@@ -71,17 +79,6 @@ const SignUp = () => {
         error.response?.data?.message || "An error occurred during sign up.";
       Alert.alert("Sign Up Failed", message);
     }
-
-    console.log(
-      "Sign Up Pressed",
-      email,
-      username,
-      password,
-      first_name,
-      last_name,
-      years_experience_number,
-      bio
-    );
   };
 
   return (
@@ -172,5 +169,5 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default TrainerSignUp;
 const styles = StyleSheet.create({});

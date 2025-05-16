@@ -87,9 +87,8 @@ const TrainerLogin = () => {
         <ThemedButton onPress={handleSubmit}>
           <Text>Login</Text>
         </ThemedButton>
-        <Spacer height={20} />
-        <ThemedLink href={"/signUp"}>Sign Up</ThemedLink>
-        <ThemedLink href={"/"}>Home</ThemedLink>
+        <Spacer height={60} />
+        <ThemedLink href={"/trainerSignUp"}>Sign Up</ThemedLink>
       </ThemedContainer>
     </TouchableWithoutFeedback>
   );

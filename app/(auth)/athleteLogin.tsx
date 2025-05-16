@@ -86,12 +86,8 @@ const AthleteLogin = () => {
         <ThemedButton onPress={handleSubmit}>
           <Text>Login</Text>
         </ThemedButton>
-
-        <ThemedLink href={"/"}>Home</ThemedLink>
-
-        {/* <Link href={"/signUp"} style={styles.link}>
-          Sign Up Page
-        </Link> */}
+        <Spacer height={60} />
+        <ThemedLink href={"/athleteSignUp"}>Sign Up</ThemedLink>
       </ThemedContainer>
     </TouchableWithoutFeedback>
   );
