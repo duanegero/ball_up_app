@@ -1,5 +1,5 @@
 import { TextInput, StyleSheet } from "react-native";
-import { ThemedTextInputProps } from "./types/ThemedButtonProps";
+import { ThemedTextInputProps } from "./types/ThemedProps";
 
 const ThemedTextInput: React.FC<ThemedTextInputProps> = ({
   style,

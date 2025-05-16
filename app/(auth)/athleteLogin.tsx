@@ -10,6 +10,8 @@ import { Link } from "expo-router";
 import ThemedContainer from "../../components/ThemedContainer";
 import ThemedButton from "../../components/ThemedButton";
 import ThemedTextInput from "../../components/ThemedTextInput";
+import ThemedTitle from "../../components/ThemedTitle";
+import ThemedLink from "../../components/ThemedLink";
 import { useState } from "react";
 import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -62,7 +64,7 @@ const AthleteLogin = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedContainer>
-        <Text style={styles.title}>Athlete Access Point</Text>
+        <ThemedTitle>Athlete Access Point</ThemedTitle>
 
         <Spacer height={80} />
 
@@ -85,9 +87,7 @@ const AthleteLogin = () => {
           <Text>Login</Text>
         </ThemedButton>
 
-        <Link href={"/"} style={styles.link}>
-          Home
-        </Link>
+        <ThemedLink href={"/"}>Home</ThemedLink>
 
         {/* <Link href={"/signUp"} style={styles.link}>
           Sign Up Page
@@ -99,16 +99,4 @@ const AthleteLogin = () => {
 
 export default AthleteLogin;
 
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: "Roboto",
-    fontSize: 28,
-    fontWeight: "bold",
-    letterSpacing: 3,
-    color: "#708090",
-  },
-  link: {
-    marginVertical: 10,
-    borderBottomWidth: 1,
-  },
-});
+const styles = StyleSheet.create({});

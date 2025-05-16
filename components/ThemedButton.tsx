@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from "react-native";
-import type { ThemedButtonProps } from "./types/ThemedButtonProps";
+import type { ThemedButtonProps } from "./types/ThemedProps";
 
 const ThemedButton: React.FC<ThemedButtonProps> = ({
   style,
@@ -17,7 +17,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: "#708999",
+    backgroundColor: "#708090",
     padding: 15,
     borderRadius: 4,
     width: "80%",
@@ -29,6 +29,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     letterSpacing: 1,
+    fontFamily: "System",
+    fontWeight: "700",
   },
   pressed: {
     opacity: 0.8,

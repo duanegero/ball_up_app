@@ -1,52 +1,33 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
+import ThemedContainer from "../components/ThemedContainer";
+import ThemedTitle from "../components/ThemedTitle";
+import ThemedLink from "../components/ThemedLink";
+import Spacer from "../components/Spacer";
 
 const Home = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ball Up</Text>
+    <ThemedContainer>
+      <ThemedTitle>Ball Up</ThemedTitle>
 
       <View>
-        <Text>Where hoopers train, track, and thrive.</Text>
+        <Text>"Where hoopers train, track, and thrive."</Text>
       </View>
-      <Link href={"/trainerLogin"} style={styles.link}>
-        Trainers Login
-      </Link>
-      <Link href={"/athleteLogin"} style={styles.link}>
-        Athletes Login
-      </Link>
-      <Link href={"/signUp"} style={styles.link}>
+      <Spacer height={50} />
+      <ThemedLink href={"/trainerLogin"}>Trainers</ThemedLink>
+      <ThemedLink href={"/athleteLogin"}>Athletes</ThemedLink>
+      {/* <Link href={"/signUp"} style={styles.link}>
         Sign Up Page
       </Link>
       <Link href={"/about"} style={styles.link}>
         About Page
       </Link>
       <Link href={"/trainerslist"} style={styles.link}>
-        Trainers Page
-      </Link>
-    </View>
+        Trainers Page */}
+      {/* </Link> */}
+    </ThemedContainer>
   );
 };
 
 export default Home;
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF0F5",
-    borderRadius: 4,
-    padding: 5,
-  },
-  title: {
-    fontFamily: "Roboto",
-    fontSize: 28,
-    fontWeight: "bold",
-    letterSpacing: 3,
-    color: "#708090",
-  },
-  link: {
-    marginVertical: 10,
-    borderBottomWidth: 1,
-  },
-});
+const styles = StyleSheet.create({});

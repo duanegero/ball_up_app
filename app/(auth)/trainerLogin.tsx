@@ -10,6 +10,8 @@ import { Link } from "expo-router";
 import ThemedContainer from "../../components/ThemedContainer";
 import ThemedButton from "../../components/ThemedButton";
 import ThemedTextInput from "../../components/ThemedTextInput";
+import ThemedTitle from "../../components/ThemedTitle";
+import ThemedLink from "../../components/ThemedLink";
 import { useState } from "react";
 import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -62,7 +64,7 @@ const TrainerLogin = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ThemedContainer>
-        <Text style={styles.title}>Trainer Access Portal</Text>
+        <ThemedTitle>Trainer Access Portal</ThemedTitle>
 
         <Spacer height={80} />
 
@@ -85,9 +87,7 @@ const TrainerLogin = () => {
           <Text>Login</Text>
         </ThemedButton>
 
-        <Link href={"/"} style={styles.link}>
-          Home
-        </Link>
+        <ThemedLink href={"/"}>Home</ThemedLink>
 
         {/* <Link href={"/signUp"} style={styles.link}>
           Sign Up Page
@@ -98,24 +98,4 @@ const TrainerLogin = () => {
 };
 
 export default TrainerLogin;
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: "Roboto",
-    fontSize: 28,
-    fontWeight: "bold",
-    letterSpacing: 3,
-    color: "#708090",
-  },
-  link: {
-    marginVertical: 10,
-    borderBottomWidth: 1,
-  },
-  btn: {
-    backgroundColor: "#708999",
-    padding: 15,
-    borderRadius: 5,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-});
+const styles = StyleSheet.create({});

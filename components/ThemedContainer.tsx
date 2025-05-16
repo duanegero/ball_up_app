@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, ViewStyle } from "react-native";
-import { ThemedContainerProps } from "./types/ThemedButtonProps";
+import { ThemedContainerProps } from "./types/ThemedProps";
 
 const ThemedContainer: React.FC<ThemedContainerProps> = ({
   style,
