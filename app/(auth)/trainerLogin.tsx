@@ -66,13 +66,14 @@ const TrainerLogin = () => {
       <ThemedContainer>
         <ThemedTitle>Trainer Access Portal</ThemedTitle>
 
-        <Spacer height={80} />
+        <Spacer height={40} />
 
         <ThemedTextInput
           style={{ width: "80%", marginBottom: 20 }}
           placeholder="Username"
           onChangeText={setUsername}
           value={username}
+          autoCapitalize="none"
         />
 
         <ThemedTextInput
@@ -86,12 +87,9 @@ const TrainerLogin = () => {
         <ThemedButton onPress={handleSubmit}>
           <Text>Login</Text>
         </ThemedButton>
-
+        <Spacer height={20} />
+        <ThemedLink href={"/signUp"}>Sign Up</ThemedLink>
         <ThemedLink href={"/"}>Home</ThemedLink>
-
-        {/* <Link href={"/signUp"} style={styles.link}>
-          Sign Up Page
-        </Link> */}
       </ThemedContainer>
     </TouchableWithoutFeedback>
   );
