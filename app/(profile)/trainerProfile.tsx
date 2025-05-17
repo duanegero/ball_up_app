@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, SafeAreaView } from "react-native";
+import { StyleSheet, Text, View, SafeAreaView, ScrollView } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
-import ThemedContainer from "../../components/ThemedContainer";
+import ThemedCircle from "../../components/ThemedCircle";
+import ThemedText from "../../components/ThemedText";
 import Spacer from "../../components/Spacer";
 
 const TrainerProfile = () => {
@@ -36,24 +37,49 @@ const TrainerProfile = () => {
   }, [trainer_user_id]);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
       {trainer ? (
-        <View>
-          <ThemedTitle>{trainer.username} </ThemedTitle>
-          <Spacer height={40} />
-          <View style={styles.shadowCard}>
-            <Text>Name</Text>
-            <Text>
-              {trainer.last_name},{trainer.first_name}
-            </Text>
-            <Text>Email</Text>
-            <Text>{trainer.email}</Text>
-            <Text>Years Experience</Text>
-            <Text>{trainer.years_experience}</Text>
-            <Text>Bio</Text>
-            <Text>{trainer.bio}</Text>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View>
+            <ThemedTitle style={{ marginTop: 30 }}>Your Profile </ThemedTitle>
+            <Spacer height={140} />
+            <View style={styles.shadowCard}>
+              <ThemedText
+                style={{
+                  marginVertical: 10,
+                  borderBottomWidth: 1,
+                  paddingHorizontal: 10,
+                }}>
+                Name
+              </ThemedText>
+              <ThemedText>
+                {trainer.last_name},{trainer.first_name}
+              </ThemedText>
+              <ThemedText
+                style={{
+                  marginVertical: 10,
+                  borderBottomWidth: 1,
+                  paddingHorizontal: 10,
+                }}>
+                Email
+              </ThemedText>
+              <ThemedText>{trainer.email}</ThemedText>
+              <ThemedText
+                style={{
+                  marginVertical: 10,
+                  borderBottomWidth: 1,
+                  paddingHorizontal: 10,
+                }}>
+                Bio
+              </ThemedText>
+              <ThemedText>{trainer.bio}</ThemedText>
+            </View>
+            <View style={{ alignItems: "center" }}>
+              <ThemedText>Years Experience</ThemedText>
+              <ThemedCircle value={trainer.years_experience} />
+            </View>
           </View>
-        </View>
+        </ScrollView>
       ) : (
         <Text>Loading...</Text>
       )}
@@ -65,14 +91,16 @@ export default TrainerProfile;
 
 const styles = StyleSheet.create({
   shadowCard: {
+    alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 10,
+    borderRadius: 12,
+    padding: 20,
+    marginHorizontal: 16,
+    marginBottom: 24,
     elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 3.84,
   },
 });

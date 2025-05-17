@@ -32,3 +32,9 @@ export type ThemedTextProps = {
   numberOfLines?: number;
   ellipsizeMode?: "head" | "middle" | "tail" | "clip";
 };
+
+export type ThemedCircleProps = {
+  value: string | number;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+};
