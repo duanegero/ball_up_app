@@ -6,7 +6,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import ThemedContainer from "../../components/ThemedContainer";
 import ThemedButton from "../../components/ThemedButton";
 import ThemedTextInput from "../../components/ThemedTextInput";
@@ -18,6 +18,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Spacer from "../../components/Spacer";
 
 const TrainerLogin = () => {
+  const router = useRouter();
+
   //state variables
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -48,6 +50,11 @@ const TrainerLogin = () => {
 
       //alert user success
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
+
+      router.push({
+        pathname: "/trainerProfile",
+        params: { trainer_user_id: trainer_user_id },
+      });
 
       //set state variables
       setUsername("");

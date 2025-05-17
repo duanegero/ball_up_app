@@ -3,6 +3,7 @@ import { Link } from "expo-router";
 import ThemedContainer from "../components/ThemedContainer";
 import ThemedTitle from "../components/ThemedTitle";
 import ThemedLink from "../components/ThemedLink";
+import ThemedText from "../components/ThemedText";
 import Spacer from "../components/Spacer";
 
 const Home = () => {
@@ -11,7 +12,7 @@ const Home = () => {
       <ThemedTitle>Ball Up</ThemedTitle>
 
       <View>
-        <Text>"Where hoopers train, track, and thrive."</Text>
+        <ThemedText>"Where hoopers train, track, and thrive."</ThemedText>
       </View>
       <Spacer height={50} />
       <ThemedLink href={"/trainerLogin"}>Trainers</ThemedLink>

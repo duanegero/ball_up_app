@@ -25,3 +25,10 @@ export type ThemedLinkProps = {
   style?: TextStyle | ViewStyle | (TextStyle | ViewStyle)[];
   children: React.ReactNode;
 };
+
+export type ThemedTextProps = {
+  style?: TextStyle | TextStyle[];
+  children?: React.ReactNode;
+  numberOfLines?: number;
+  ellipsizeMode?: "head" | "middle" | "tail" | "clip";
+};
