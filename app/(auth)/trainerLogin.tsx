@@ -48,12 +48,13 @@ const TrainerLogin = () => {
       //storing token
       await AsyncStorage.setItem("trainerToken", token);
 
+      await AsyncStorage.setItem("trainerId", trainer_user_id.toString());
+
       //alert user success
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
 
       router.push({
         pathname: "/trainerProfile",
-        params: { trainer_user_id: trainer_user_id },
       });
 
       //set state variables

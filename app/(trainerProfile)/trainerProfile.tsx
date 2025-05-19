@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View, SafeAreaView, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedCircle from "../../components/ThemedCircle";
 import ThemedText from "../../components/ThemedText";
+import ThemedLable from "../../components/ThemedLable";
 import Spacer from "../../components/Spacer";
 
 const TrainerProfile = () => {
-  const { trainer_user_id } = useLocalSearchParams();
-
   interface Trainer {
     trainer_user_id: number;
     username: string;
@@ -25,16 +25,24 @@ const TrainerProfile = () => {
   useEffect(() => {
     const fetchTrainer = async () => {
       try {
+        const idString = await AsyncStorage.getItem("trainerId");
+
+        if (!idString) {
+          console.warn("No trainer ID found.");
+          return;
+        }
+
+        const trainer_user_id = parseInt(idString, 10);
+
         const response = await api.get(`/trainers/${trainer_user_id}`);
         setTrainer(response.data);
       } catch (error) {
         console.error("Error fetching trainer:", error);
       }
     };
-    if (trainer_user_id) {
-      fetchTrainer();
-    }
-  }, [trainer_user_id]);
+
+    fetchTrainer();
+  }, []);
 
   return (
     <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
@@ -42,40 +50,19 @@ const TrainerProfile = () => {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View>
             <ThemedTitle style={{ marginTop: 30 }}>Your Profile </ThemedTitle>
-            <Spacer height={140} />
+            <Spacer height={50} />
             <View style={styles.shadowCard}>
-              <ThemedText
-                style={{
-                  marginVertical: 10,
-                  borderBottomWidth: 1,
-                  paddingHorizontal: 10,
-                }}>
-                Name
-              </ThemedText>
+              <ThemedLable>Name</ThemedLable>
               <ThemedText>
                 {trainer.last_name},{trainer.first_name}
               </ThemedText>
-              <ThemedText
-                style={{
-                  marginVertical: 10,
-                  borderBottomWidth: 1,
-                  paddingHorizontal: 10,
-                }}>
-                Email
-              </ThemedText>
+              <ThemedLable>Email</ThemedLable>
               <ThemedText>{trainer.email}</ThemedText>
-              <ThemedText
-                style={{
-                  marginVertical: 10,
-                  borderBottomWidth: 1,
-                  paddingHorizontal: 10,
-                }}>
-                Bio
-              </ThemedText>
+              <ThemedLable>Bio</ThemedLable>
               <ThemedText>{trainer.bio}</ThemedText>
             </View>
             <View style={{ alignItems: "center" }}>
-              <ThemedText>Years Experience</ThemedText>
+              <ThemedLable>Years Experience</ThemedLable>
               <ThemedCircle value={trainer.years_experience} />
             </View>
           </View>
@@ -102,5 +89,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3.84,
+  },
+  lable: {
+    fontFamily: "Avenir",
+    fontWeight: "bold",
+    fontSize: 24,
+    color: "#708090",
+    letterSpacing: 2,
+    marginVertical: 10,
+    borderBottomWidth: 2,
+    paddingHorizontal: 10,
+    borderColor: "#708090",
   },
 });

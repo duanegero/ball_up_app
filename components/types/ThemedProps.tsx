@@ -38,3 +38,8 @@ export type ThemedCircleProps = {
   style?: ViewStyle;
   textStyle?: TextStyle;
 };
+
+export type ThemedLableProps = {
+  style?: TextStyle | TextStyle[];
+  children?: React.ReactNode;
+};
