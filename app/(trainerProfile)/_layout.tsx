@@ -34,7 +34,7 @@ const DashboardLayout = () => {
           title: "Drills",
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? "list-circle" : "list-circle-outline"}
+              name={focused ? "clipboard" : "clipboard-outline"}
               size={size}
               color={color}
             />

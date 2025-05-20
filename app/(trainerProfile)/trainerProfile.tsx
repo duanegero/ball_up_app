@@ -7,6 +7,7 @@ import ThemedTitle from "../../components/ThemedTitle";
 import ThemedCircle from "../../components/ThemedCircle";
 import ThemedText from "../../components/ThemedText";
 import ThemedLable from "../../components/ThemedLable";
+import ThemedCard from "../../components/ThemedCard";
 import Spacer from "../../components/Spacer";
 
 const TrainerProfile = () => {
@@ -51,7 +52,7 @@ const TrainerProfile = () => {
           <View>
             <ThemedTitle style={{ marginTop: 30 }}>Your Profile </ThemedTitle>
             <Spacer height={50} />
-            <View style={styles.shadowCard}>
+            <ThemedCard>
               <ThemedLable>Name</ThemedLable>
               <ThemedText>
                 {trainer.last_name},{trainer.first_name}
@@ -60,7 +61,7 @@ const TrainerProfile = () => {
               <ThemedText>{trainer.email}</ThemedText>
               <ThemedLable>Bio</ThemedLable>
               <ThemedText>{trainer.bio}</ThemedText>
-            </View>
+            </ThemedCard>
             <View style={{ alignItems: "center" }}>
               <ThemedLable>Years Experience</ThemedLable>
               <ThemedCircle value={trainer.years_experience} />
@@ -76,29 +77,4 @@ const TrainerProfile = () => {
 
 export default TrainerProfile;
 
-const styles = StyleSheet.create({
-  shadowCard: {
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-  },
-  lable: {
-    fontFamily: "Avenir",
-    fontWeight: "bold",
-    fontSize: 24,
-    color: "#708090",
-    letterSpacing: 2,
-    marginVertical: 10,
-    borderBottomWidth: 2,
-    paddingHorizontal: 10,
-    borderColor: "#708090",
-  },
-});
+const styles = StyleSheet.create({});

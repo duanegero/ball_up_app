@@ -43,3 +43,8 @@ export type ThemedLableProps = {
   style?: TextStyle | TextStyle[];
   children?: React.ReactNode;
 };
+
+export type ThemedCardProps = {
+  style?: ViewStyle | ViewStyle[];
+  children?: React.ReactNode;
+};
