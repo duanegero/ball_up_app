@@ -8,28 +8,30 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedText from "../../components/ThemedText";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
-const TrainerDrills = () => {
+const TrainerAthletes = () => {
   //interface for typescript
-  interface Drill {
-    drill_id: number;
-    drill_type: string;
-    description: string;
-    level: string;
+  interface Athlete {
+    athlete_user_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    age: number;
+    level: number;
   }
 
-  //state variable to set drills
-  const [drills, setDrills] = useState<Drill[]>([]);
+  //state variable to set athletes
+  const [athletes, setAthletes] = useState<Athlete[]>([]);
 
   useEffect(() => {
     //async function to fetch
-    const fetchTrainerDrills = async () => {
+    const fetchTrainerAthletes = async () => {
       try {
         //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
@@ -43,65 +45,41 @@ const TrainerDrills = () => {
         //make id a number
         const trainer_user_id = parseInt(idString, 10);
         //variable to handle api call
-        const response = await api.get(`/trainers/drills/${trainer_user_id}`);
+        const response = await api.get(`/trainers/athletes/${trainer_user_id}`);
         //set state variable with response
-        setDrills(response.data);
+        setAthletes(response.data);
       } catch (error) {
         //catch and log if any errors
-        console.error("Error fetching trainer drills", error);
+        console.error("Error fetching trainer athletes", error);
       }
     };
+
     //call function
-    fetchTrainerDrills();
+    fetchTrainerAthletes();
   }, []);
 
-  //async function to handle delete press
-  const handleDelete = async (drill_id: number): Promise<void> => {
-    //alert user to confirm
-    Alert.alert("Delete Drill", "Are you sure you want to delete this drill?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            //api call to delete
-            await api.delete(`/drills/${drill_id}`);
-
-            //reset drills with new list
-            setDrills((prevDrills) =>
-              prevDrills.filter((d) => d.drill_id !== drill_id)
-            );
-          } catch (error) {
-            //catch and log if any errors
-            console.error("Error deleting drill", error);
-          }
-        },
-      },
-    ]);
-  };
-
   return (
-    <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
       <ScrollView>
-        <View style={{ backgroundColor: "#FFF0F5" }}>
-          <ThemedTitle>Drills</ThemedTitle>
+        <View style={{ backgroundColor: "#ccffe5" }}>
+          <ThemedTitle>Your Athletes</ThemedTitle>
+
           <View style={styles.headerRow}>
             <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Type</Text>
+              <Text style={styles.headerText}>Name</Text>
             </View>
             <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Description</Text>
+              <Text style={styles.headerText}>Age</Text>
             </View>
             <View style={styles.headerCell}>
               <Text style={styles.headerText}>Level</Text>
             </View>
             <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Delete</Text>
+              <Text style={styles.headerText}>Sessions</Text>
             </View>
           </View>
 
-          {drills.map((drill: any, index: number) => (
+          {athletes.map((athlete: any, index: number) => (
             <View
               key={index}
               style={[
@@ -109,24 +87,28 @@ const TrainerDrills = () => {
                 index % 2 === 0 ? styles.rowEven : styles.rowOdd,
               ]}>
               <View style={styles.cell}>
-                <ThemedText>{drill.drill_type}</ThemedText>
+                <ThemedText>{athlete.first_name}</ThemedText>
               </View>
               <View style={styles.cell}>
-                <ThemedText>{drill.description}</ThemedText>
+                <ThemedText>{athlete.age}</ThemedText>
               </View>
               <View style={styles.cell}>
-                <ThemedText>{drill.level}</ThemedText>
+                <ThemedText>{athlete.level}</ThemedText>
               </View>
               <View style={styles.cell}>
-                <Pressable onPress={() => handleDelete(drill.drill_id)}>
-                  <Ionicons name="trash" size={24} color={"red"} />
+                <Pressable>
+                  <Ionicons
+                    name="basketball-outline"
+                    size={24}
+                    color={"orange"}
+                  />
                 </Pressable>
               </View>
             </View>
           ))}
         </View>
       </ScrollView>
-      <View style={styles.addPressContainer}>
+      {/* <View style={styles.addPressContainer}>
         <Pressable
           style={({ pressed }) => [
             styles.addPressButton,
@@ -134,7 +116,7 @@ const TrainerDrills = () => {
           ]}>
           <Text style={styles.addPressText}>Add New</Text>
         </Pressable>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };
@@ -168,16 +150,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   rowOdd: {
-    backgroundColor: "#FFF0F5",
+    backgroundColor: "#ccffe5",
   },
   addPressContainer: {
     alignItems: "center",
     marginVertical: 10,
     paddingBottom: 5,
   },
-
   addPressButton: {
-    backgroundColor: "#D6EAF8",
+    backgroundColor: "#ffd1b3",
     paddingVertical: 16,
     paddingHorizontal: 52,
     borderRadius: 30,
@@ -186,11 +167,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
-
   addPressButtonPressed: {
     opacity: 0.7,
   },
-
   addPressText: {
     fontFamily: "Avenir",
     fontSize: 18,
@@ -202,4 +181,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrainerDrills;
+export default TrainerAthletes;

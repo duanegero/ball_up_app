@@ -53,6 +53,7 @@ const TrainerLogin = () => {
       //alert user success
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
 
+      //take user to profile screen
       router.push({
         pathname: "/trainerProfile",
       });

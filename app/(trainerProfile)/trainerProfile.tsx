@@ -11,6 +11,7 @@ import ThemedCard from "../../components/ThemedCard";
 import Spacer from "../../components/Spacer";
 
 const TrainerProfile = () => {
+  //interface for typescript
   interface Trainer {
     trainer_user_id: number;
     username: string;
@@ -21,27 +22,35 @@ const TrainerProfile = () => {
     bio: string;
   }
 
+  //state vaiable
   const [trainer, setTrainer] = useState<Trainer | null>(null);
 
   useEffect(() => {
+    //async function to fetch
     const fetchTrainer = async () => {
       try {
+        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
 
+        //if nothing returned responed error
         if (!idString) {
           console.warn("No trainer ID found.");
           return;
         }
 
+        //make id a number
         const trainer_user_id = parseInt(idString, 10);
 
+        //variable to handle api call
         const response = await api.get(`/trainers/${trainer_user_id}`);
+        //set state variable with response
         setTrainer(response.data);
       } catch (error) {
+        //catch and log if any errors
         console.error("Error fetching trainer:", error);
       }
     };
-
+    //call function
     fetchTrainer();
   }, []);
 

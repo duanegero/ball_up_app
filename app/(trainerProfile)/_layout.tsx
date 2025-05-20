@@ -41,6 +41,20 @@ const DashboardLayout = () => {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="trainerAthletes"
+        options={{
+          title: "Athletes",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "people" : "people-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 };
