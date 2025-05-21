@@ -55,6 +55,20 @@ const DashboardLayout = () => {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="trainerSession"
+        options={{
+          title: "Sessions",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "list" : "list-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 };

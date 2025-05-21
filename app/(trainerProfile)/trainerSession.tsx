@@ -13,25 +13,19 @@ import {
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedText from "../../components/ThemedText";
-import { Ionicons } from "@expo/vector-icons";
 
-const TrainerAthletes = () => {
-  //interface for typescript
-  interface Athlete {
-    athlete_user_id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-    age: number;
+const TrainerSession = () => {
+  interface Session {
+    length: number;
     level: number;
+    session_name: string;
+    trainer_user_id: number;
   }
 
-  //state variable to set athletes
-  const [athletes, setAthletes] = useState<Athlete[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
 
   useEffect(() => {
-    //async function to fetch
-    const fetchTrainerAthletes = async () => {
+    const fetchTrainerSessions = async () => {
       try {
         //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
@@ -41,45 +35,49 @@ const TrainerAthletes = () => {
           console.warn("No trainer ID found.");
           return;
         }
-
         //make id a number
         const trainer_user_id = parseInt(idString, 10);
-        //variable to handle api call
-        const response = await api.get(`/trainers/athletes/${trainer_user_id}`);
-        //set state variable with response
-        setAthletes(response.data);
+
+        const response = await api.get(`trainers/sessions/${trainer_user_id}`);
+
+        setSessions(response.data);
       } catch (error) {
         //catch and log if any errors
-        console.error("Error fetching trainer athletes", error);
+        console.error("Error fetching trainer sessions", error);
       }
     };
-
-    //call function
-    fetchTrainerAthletes();
+    fetchTrainerSessions();
   }, []);
 
   return (
     <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
       <ScrollView>
         <View style={{ backgroundColor: "#ccffe5" }}>
-          <ThemedTitle>Your Athletes</ThemedTitle>
+          <ThemedTitle>Your Sessions</ThemedTitle>
+        </View>
 
-          <View style={styles.headerRow}>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Name</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Age</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Level</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Sessions</Text>
-            </View>
+        <View style={styles.headerRow}>
+          <View style={styles.headerCell}>
+            <Text style={styles.headerText}>Session Name</Text>
           </View>
+          <View style={styles.headerCell}>
+            <Text style={styles.headerText}>Length</Text>
+          </View>
+          <View style={styles.headerCell}>
+            <Text style={styles.headerText}>Level Name</Text>
+          </View>
+        </View>
 
-          {athletes.map((athlete: any, index: number) => (
+        {sessions.map((session: any, index: number) => (
+          <Pressable
+            key={index}
+            onPress={() => {
+              console.log(session.session_name);
+            }}
+            style={[
+              styles.dataRow,
+              index % 2 === 0 ? styles.rowEven : styles.rowOdd,
+            ]}>
             <View
               key={index}
               style={[
@@ -87,27 +85,27 @@ const TrainerAthletes = () => {
                 index % 2 === 0 ? styles.rowEven : styles.rowOdd,
               ]}>
               <View style={styles.cell}>
-                <ThemedText>{athlete.first_name}</ThemedText>
+                <ThemedText>{session.session_name}</ThemedText>
               </View>
               <View style={styles.cell}>
-                <ThemedText>{athlete.age}</ThemedText>
+                <ThemedText>{session.length}</ThemedText>
               </View>
               <View style={styles.cell}>
-                <ThemedText>{athlete.level}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <Pressable>
-                  <Ionicons
-                    name="basketball-outline"
-                    size={24}
-                    color={"orange"}
-                  />
-                </Pressable>
+                <ThemedText>{session.level}</ThemedText>
               </View>
             </View>
-          ))}
-        </View>
+          </Pressable>
+        ))}
       </ScrollView>
+      <View style={styles.addPressContainer}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.addPressButton,
+            pressed && styles.addPressButtonPressed,
+          ]}>
+          <Text style={styles.addPressText}>Add New</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 };
@@ -172,4 +170,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrainerAthletes;
+export default TrainerSession;
