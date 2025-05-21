@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+
 import {
   View,
   Text,
@@ -16,12 +17,15 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TrainerDrills = () => {
+  const router = useRouter();
+
   //interface for typescript
   interface Drill {
     drill_id: number;
     drill_type: string;
     description: string;
     level: string;
+    trainer_user_id: number;
   }
 
   //state variable to set drills
@@ -128,6 +132,7 @@ const TrainerDrills = () => {
       </ScrollView>
       <View style={styles.addPressContainer}>
         <Pressable
+          onPress={() => router.push("/createDrill")}
           style={({ pressed }) => [
             styles.addPressButton,
             pressed && styles.addPressButtonPressed,
