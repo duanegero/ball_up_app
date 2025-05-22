@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -13,8 +13,11 @@ import {
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedText from "../../components/ThemedText";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const TrainerSession = () => {
+  const router = useRouter();
+
   interface Session {
     length: number;
     level: number;
@@ -64,7 +67,10 @@ const TrainerSession = () => {
             <Text style={styles.headerText}>Length</Text>
           </View>
           <View style={styles.headerCell}>
-            <Text style={styles.headerText}>Level Name</Text>
+            <Text style={styles.headerText}>Level</Text>
+          </View>
+          <View style={styles.headerCell}>
+            <Text style={styles.headerText}>Edit</Text>
           </View>
         </View>
 
@@ -93,12 +99,18 @@ const TrainerSession = () => {
               <View style={styles.cell}>
                 <ThemedText>{session.level}</ThemedText>
               </View>
+              <View style={styles.cell}>
+                <Pressable>
+                  <Ionicons name="create-outline" size={24} color={"#708090"} />
+                </Pressable>
+              </View>
             </View>
           </Pressable>
         ))}
       </ScrollView>
       <View style={styles.addPressContainer}>
         <Pressable
+          onPress={() => router.push("/createSession")}
           style={({ pressed }) => [
             styles.addPressButton,
             pressed && styles.addPressButtonPressed,

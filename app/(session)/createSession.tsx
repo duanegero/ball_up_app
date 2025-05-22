@@ -17,29 +17,31 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import api from "../../utils/api";
-import ThemedText from "../../components/ThemedText";
 import ThemedTitle from "../../components/ThemedTitle";
+import ThemedText from "../../components/ThemedText";
+import ThemedTextInput from "../../components/ThemedTextInput";
 
-const CreateDrill = () => {
+const CreateSession = () => {
   //variable to handle router
   const router = useRouter();
 
-  //typescript interface
-  interface Drill {
-    drill_type: string;
-    description: string;
+  //interface for typescript
+  interface Session {
+    length: number;
     level: number;
+    session_name: string;
     trainer_user_id: number;
   }
 
-  //state variables
-  const [drill_type, setDrill_type] = useState("");
+  //state variables to handle user data
+  const [length, setLength] = useState(0);
   const [level, setLevel] = useState(1);
-  const [description, setDescription] = useState("");
+  const [session_name, setSession_name] = useState("");
 
   //function to handle submit
   const handleSubmit = async (): Promise<void> => {
-    if (!drill_type || !description || !level) {
+    //if all fields not filled alert
+    if (!length || !level || !session_name) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
@@ -57,44 +59,36 @@ const CreateDrill = () => {
     const trainer_user_id = parseInt(idString, 10);
 
     try {
-      //variable to handle api call
+      //varaible to handle api call
       const response: {
         data: {
-          message: string;
-          newDrill: {
-            drill_id: number;
-            drill_type: string;
-            description: string;
-            level: number;
-            trainer_user_id: number;
-            created_at: string;
-          };
+          length: number;
+          level: number;
+          session_name: string;
+          trainer_user_id: number;
         };
-      } = await api.post("/drills", {
-        drill_type,
+      } = await api.post("/sessions", {
+        length,
         level,
-        description,
+        session_name,
         trainer_user_id,
       });
 
       //alert the user success
-      Alert.alert(
-        "New Drill Created",
-        `Type: ${response.data.newDrill.drill_type}`
-      );
+      Alert.alert("New Session Created");
 
-      //clear the input
-      setDescription("");
+      //clear the input field
+      setSession_name("");
 
-      //route back to drills list
-      router.push("/trainerDrills");
+      //route back to sessions screen
+      router.push("/trainerSession");
     } catch (error: any) {
       //catch log and alert any errors
-      console.error("Create drill error:", error);
+      console.error("Create session error:", error);
       const message =
         error.response?.data?.message ||
-        "An error occurred during creating new drill.";
-      Alert.alert("Create Drill Failed", message);
+        "An error occurred during creating new session.";
+      Alert.alert("Create Session Failed", message);
     }
   };
 
@@ -103,34 +97,31 @@ const CreateDrill = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
+        <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
           <ScrollView>
-            <ThemedTitle>Create Drill</ThemedTitle>
-            <View style={styles.drillCard}>
+            <ThemedTitle>Create Session</ThemedTitle>
+            <View>
               <View style={{ width: "80%", alignSelf: "center" }}>
-                <Picker
-                  selectedValue={drill_type}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setDrill_type(itemValue)
-                  }>
-                  <Picker.Item label="Select type..." value="" />
-                  <Picker.Item label="Warm-Up" value="warmup" />
-                  <Picker.Item label="Shooting" value="shoot" />
-                  <Picker.Item label="Passing" value="pass" />
-                  <Picker.Item label="Dribbling" value="dribble" />
-                  <Picker.Item label="Rebound/Defence" value="reb_defence" />
-                </Picker>
+                <ThemedText style={{ textAlign: "center" }}>
+                  Session Name:
+                </ThemedText>
+                <ThemedTextInput
+                  onChangeText={setSession_name}
+                  value={session_name}></ThemedTextInput>
               </View>
 
               <View style={{ width: "80%", alignSelf: "center" }}>
-                <ThemedText style={{ textAlign: "center" }}>
-                  Description:
-                </ThemedText>
-                <TextInput
-                  style={styles.input}
-                  multiline={true}
-                  onChangeText={setDescription}
-                  value={description}></TextInput>
+                <Picker
+                  selectedValue={length}
+                  onValueChange={(itemValue, itemIndex) =>
+                    setLength(itemValue)
+                  }>
+                  <Picker.Item label="Select length..." value="" />
+                  <Picker.Item label="30 minutes" value={30} />
+                  <Picker.Item label="45 minutes" value={45} />
+                  <Picker.Item label="1 hour" value={60} />
+                  <Picker.Item label="1 hour 30 minutes" value={90} />
+                </Picker>
               </View>
 
               <View style={{ width: "80%", alignSelf: "center" }}>
@@ -155,7 +146,7 @@ const CreateDrill = () => {
                 styles.addPressButton,
                 pressed && styles.addPressButtonPressed,
               ]}>
-              <Text style={styles.addPressText}>Submit</Text>
+              <Text style={styles.addPressText}>Add New</Text>
             </Pressable>
           </View>
         </SafeAreaView>
@@ -164,22 +155,9 @@ const CreateDrill = () => {
   );
 };
 
-export default CreateDrill;
+export default CreateSession;
 
 const styles = StyleSheet.create({
-  drillCard: {
-    alignItems: "center",
-    backgroundColor: "#FFF0F5",
-    borderRadius: 12,
-    padding: 20,
-    marginHorizontal: 14,
-    marginBottom: 20,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4.84,
-  },
   input: {
     backgroundColor: "white",
     color: "black",
@@ -194,9 +172,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     paddingBottom: 5,
   },
-
   addPressButton: {
-    backgroundColor: "#D6EAF8",
+    backgroundColor: "#ffd1b3",
     paddingVertical: 16,
     paddingHorizontal: 52,
     borderRadius: 30,
@@ -205,11 +182,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
-
   addPressButtonPressed: {
     opacity: 0.7,
   },
-
   addPressText: {
     fontFamily: "Avenir",
     fontSize: 18,
