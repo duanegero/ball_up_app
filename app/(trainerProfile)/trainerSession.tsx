@@ -14,14 +14,16 @@ import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedText from "../../components/ThemedText";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import axios from "axios";
 
 const TrainerSession = () => {
   const router = useRouter();
 
   interface Session {
+    session_id: number;
+    session_name: string;
     length: number;
     level: number;
-    session_name: string;
     trainer_user_id: number;
   }
 
@@ -52,6 +54,75 @@ const TrainerSession = () => {
     fetchTrainerSessions();
   }, []);
 
+  const handlePress = async (session: any) => {
+    try {
+      const response = await api.get(
+        `sessions/session_drills/${session.session_id}`
+      );
+      const drills = response.data;
+
+      const drillNames = drills
+        .map((d: any) => `• ${d.drill.drill_name}`)
+        .join("\n");
+
+      Alert.alert(
+        `${session.session_name}`,
+        `Drills:\n\n${drillNames}`,
+        [
+          {
+            text: "Edit",
+            onPress: () =>
+              router.push({
+                pathname: "/editSession",
+                params: { sessionId: session.session_id },
+              }),
+          },
+          {
+            text: "Delete",
+            onPress: () => {
+              Alert.alert(
+                "Confirm Delete",
+                `Are you sure you want to delete "${session.session_name}"?`,
+                [
+                  {
+                    text: "Yes, Delete",
+                    onPress: async () => {
+                      try {
+                        await api.delete(`sessions/${session.session_id}`);
+                        setSessions((prev) =>
+                          prev.filter(
+                            (s) => s.session_id !== session.session_id
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Failed to delete session", error);
+                      }
+                    },
+                    style: "destructive",
+                  },
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                  },
+                ],
+                { cancelable: true }
+              );
+            },
+            style: "destructive",
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ],
+        { cancelable: true }
+      );
+    } catch (error) {
+      console.error("Failed to fetch drills", error);
+      Alert.alert("Error", "Could not fetch drills for this session.");
+    }
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
       <ScrollView>
@@ -69,9 +140,6 @@ const TrainerSession = () => {
           <View style={styles.headerCell}>
             <Text style={styles.headerText}>Level</Text>
           </View>
-          <View style={styles.headerCell}>
-            <Text style={styles.headerText}>Edit</Text>
-          </View>
         </View>
 
         {sessions.map((session: any, index: number) => (
@@ -79,6 +147,7 @@ const TrainerSession = () => {
             key={index}
             onPress={() => {
               console.log(session.session_name);
+              handlePress(session);
             }}
             style={[
               styles.dataRow,
@@ -98,11 +167,6 @@ const TrainerSession = () => {
               </View>
               <View style={styles.cell}>
                 <ThemedText>{session.level}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <Pressable>
-                  <Ionicons name="create-outline" size={24} color={"#708090"} />
-                </Pressable>
               </View>
             </View>
           </Pressable>

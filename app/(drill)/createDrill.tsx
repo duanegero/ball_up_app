@@ -19,6 +19,7 @@ import { Picker } from "@react-native-picker/picker";
 import api from "../../utils/api";
 import ThemedText from "../../components/ThemedText";
 import ThemedTitle from "../../components/ThemedTitle";
+import ThemedTextInput from "../../components/ThemedTextInput";
 
 const CreateDrill = () => {
   //variable to handle router
@@ -36,10 +37,11 @@ const CreateDrill = () => {
   const [drill_type, setDrill_type] = useState("");
   const [level, setLevel] = useState(1);
   const [description, setDescription] = useState("");
+  const [drill_name, setDrill_name] = useState("");
 
   //function to handle submit
   const handleSubmit = async (): Promise<void> => {
-    if (!drill_type || !description || !level) {
+    if (!drill_type || !description || !level || !drill_name) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
@@ -68,6 +70,7 @@ const CreateDrill = () => {
             level: number;
             trainer_user_id: number;
             created_at: string;
+            drill_name: string;
           };
         };
       } = await api.post("/drills", {
@@ -75,6 +78,7 @@ const CreateDrill = () => {
         level,
         description,
         trainer_user_id,
+        drill_name,
       });
 
       //alert the user success
@@ -107,6 +111,14 @@ const CreateDrill = () => {
           <ScrollView>
             <ThemedTitle>Create Drill</ThemedTitle>
             <View style={styles.drillCard}>
+              <View style={{ width: "80%", alignSelf: "center" }}>
+                <TextInput
+                  style={styles.inputTwo}
+                  onChangeText={setDrill_name}
+                  value={drill_name}
+                  placeholder="Drill Name"></TextInput>
+              </View>
+
               <View style={{ width: "80%", alignSelf: "center" }}>
                 <Picker
                   selectedValue={drill_type}
@@ -186,6 +198,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 2,
     height: 120,
+    textAlignVertical: "top",
+    textAlign: "left",
+  },
+  inputTwo: {
+    backgroundColor: "white",
+    color: "black",
+    padding: 6,
+    borderRadius: 2,
+    height: 60,
     textAlignVertical: "top",
     textAlign: "left",
   },
