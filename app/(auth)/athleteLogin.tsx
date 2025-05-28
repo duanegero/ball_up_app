@@ -6,7 +6,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import ThemedContainer from "../../components/ThemedContainer";
 import ThemedButton from "../../components/ThemedButton";
 import ThemedTextInput from "../../components/ThemedTextInput";
@@ -18,6 +18,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Spacer from "../../components/Spacer";
 
 const AthleteLogin = () => {
+  const router = useRouter();
+
   //state variables
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -46,8 +48,15 @@ const AthleteLogin = () => {
       //storing token
       await AsyncStorage.setItem("athleteToken", token);
 
+      await AsyncStorage.setItem("athleteId", athlete_user_id.toString());
+
       //alert user success
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
+
+      //take user to profile screen
+      router.push({
+        pathname: "/athleteProfile",
+      });
 
       //set state variables
       setUsername("");
@@ -73,6 +82,7 @@ const AthleteLogin = () => {
           placeholder="Username"
           onChangeText={setUsername}
           value={username}
+          autoCapitalize="none"
         />
 
         <ThemedTextInput
