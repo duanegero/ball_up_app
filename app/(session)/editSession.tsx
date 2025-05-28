@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+//interfaces for typescript
 type Drill = {
   drill_id: number;
   drill_name: string;
@@ -22,15 +23,21 @@ type SessionDrill = {
 };
 
 const EditSession = () => {
+  //getting ID from params
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
+
+  //state variables to handle drills
   const [drills, setDrills] = useState<Drill[]>([]);
   const [selectedDrill, setSelectedDrill] = useState<string>("");
   const [sessionDrills, setSessionDrills] = useState<SessionDrill[]>([]);
 
   useEffect(() => {
+    //asynce function
     const fetchSessionDrills = async () => {
       try {
+        //variable to handle api
         const response = await api.get(`/sessions/session_drills/${sessionId}`);
+        //set state
         setSessionDrills(response.data);
       } catch (error) {
         console.error("Error fetching session drills:", error);
@@ -69,8 +76,10 @@ const EditSession = () => {
   }, []);
 
   const handleAddDrill = async () => {
+    //if no drill selected return
     if (!selectedDrill) return;
 
+    //make the id a number
     const drillId = parseInt(selectedDrill, 10);
 
     // Prevent duplicates
@@ -81,14 +90,17 @@ const EditSession = () => {
       return;
     }
 
+    //get id of drill to add
     const drillToAdd = drills.find((d) => d.drill_id === drillId);
     if (!drillToAdd) return;
 
     try {
+      //post new drill
       await api.post(`/sessions/session_drills/${sessionId}`, {
         drill_id: drillToAdd.drill_id,
       });
 
+      //set state with new add
       setSessionDrills((prev) => [
         ...prev,
         {
@@ -98,9 +110,27 @@ const EditSession = () => {
         },
       ]);
 
+      //rest picker
       setSelectedDrill("");
     } catch (error) {
       console.error("Failed to add drill to session:", error);
+    }
+  };
+
+  const handleRemove = async (drill_id: number, session_id_str: string) => {
+    const session_id = Number(session_id_str);
+    try {
+      await api.delete(`/sessions/session_drills/${drill_id}`, {
+        data: { session_id },
+      });
+
+      setSessionDrills((prevDrills) =>
+        prevDrills.filter(
+          (d) => !(d.drill_id === drill_id && d.session_id === session_id)
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete session drill:", error);
     }
   };
 
@@ -146,6 +176,9 @@ const EditSession = () => {
             <Text>
               {item.drill?.drill_name} - Level {item.drill?.level}
             </Text>
+            <Pressable onPress={() => handleRemove(item.drill_id, sessionId)}>
+              <Text>Remove</Text>
+            </Pressable>
           </View>
         )}
       />
