@@ -1,17 +1,23 @@
-import { StyleSheet, Text, View, SafeAreaView, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedCircle from "../../components/ThemedCircle";
-import ThemedText from "../../components/ThemedText";
-import ThemedLable from "../../components/ThemedLable";
-import ThemedCard from "../../components/ThemedCard";
-import Spacer from "../../components/Spacer";
+
+const { width } = Dimensions.get("window");
 
 const AthleteProfile = () => {
-  //interface for typescript
+  const router = useRouter();
+
   interface Athlete {
     athlete_user_id: number;
     username: string;
@@ -22,75 +28,190 @@ const AthleteProfile = () => {
     level: number;
   }
 
-  //state vaiable
   const [athlete, setAthlete] = useState<Athlete | null>(null);
 
   useEffect(() => {
-    //async function to fetch
     const fetchAthlete = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("athleteId");
-
-        //if nothing returned responed error
         if (!idString) {
           console.warn("No athlete ID found.");
           return;
         }
-
-        //make id a number
         const athlete_user_id = parseInt(idString, 10);
-
-        //variable to handle api call
         const response = await api.get(`/athletes/${athlete_user_id}`);
-
-        //set state variable with response
         setAthlete(response.data);
       } catch (error) {
-        //catch and log if any errors
-        console.error("Error fetching trainer:", error);
+        console.error("Error fetching athlete:", error);
       }
     };
-    //call function
     fetchAthlete();
   }, []);
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
+    <SafeAreaView style={styles.safeArea}>
       {athlete ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View>
-            <ThemedTitle style={{ marginTop: 30 }}>Your Profile</ThemedTitle>
-            <Spacer height={50} />
-            <ThemedCard>
-              <ThemedLable>Name</ThemedLable>
-              <ThemedText>
-                {athlete.last_name}, {athlete.first_name}
-              </ThemedText>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* Profile Initials Placeholder */}
+          <View style={styles.profileImagePlaceholder}>
+            <Text style={styles.profileInitials}>
+              {athlete.first_name[0]}
+              {athlete.last_name[0]}
+            </Text>
+          </View>
 
-              <ThemedLable>Email</ThemedLable>
-              <ThemedText>{athlete.email}</ThemedText>
+          {/* Username as title */}
+          <Text style={styles.title}>{athlete.username}</Text>
 
-              <ThemedLable>Username</ThemedLable>
-              <ThemedText>{athlete.username}</ThemedText>
-            </ThemedCard>
+          {/* Profile info card */}
+          <View style={styles.card}>
+            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.value}>
+              {athlete.first_name} {athlete.last_name}
+            </Text>
 
-            <View style={{ alignItems: "center" }}>
-              <ThemedLable>Age</ThemedLable>
-              <ThemedCircle value={athlete.age} />
+            <Text style={styles.label}>Age</Text>
+            <Text style={styles.value}>{athlete.age}</Text>
 
-              <Spacer height={20} />
+            <Text style={styles.label}>Level</Text>
+            <Text style={styles.value}>{athlete.level}</Text>
 
-              <ThemedLable>Level</ThemedLable>
-              <ThemedCircle value={athlete.level} />
-            </View>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{athlete.email}</Text>
+          </View>
+          <View style={styles.editButtonContainer}>
+            <Pressable
+              style={styles.editButton}
+              onPress={() => router.push("/editProfile")}>
+              <Text style={styles.editButtonText}>Edit</Text>
+            </Pressable>
           </View>
         </ScrollView>
       ) : (
-        <Text>Loading...</Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text style={styles.loading}>Loading Profile...</Text>
+        </View>
       )}
     </SafeAreaView>
   );
 };
 
 export default AthleteProfile;
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f2f4f7",
+  },
+  scrollContainer: {
+    padding: 20,
+    flexGrow: 1,
+  },
+  title: {
+    fontSize: width * 0.07,
+    fontWeight: "700",
+    color: "#1f2937",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#d1d5db",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  profileInitials: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6b7280",
+    marginTop: 12,
+  },
+  value: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#111827",
+    marginTop: 4,
+  },
+  levelContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  levelLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#6b7280",
+    marginBottom: 16,
+  },
+  levelCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#2563eb",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#2563eb",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  levelValue: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#ffffff",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loading: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#6b7280",
+    marginTop: 20,
+  },
+  editButtonContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  editButton: {
+    backgroundColor: "#2563eb",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  editButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
