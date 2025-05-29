@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams } from "expo-router";
 import {
   View,
   Text,
@@ -11,12 +10,8 @@ import {
   SafeAreaView,
 } from "react-native";
 import api from "../../../utils/api";
-import ThemedTitle from "../../../components/ThemedTitle";
-import ThemedText from "../../../components/ThemedText";
-import { Ionicons } from "@expo/vector-icons";
 
 const TrainerAthletes = () => {
-  //interface for typescript
   interface Session {
     session_id: number;
     session_name: string;
@@ -33,31 +28,20 @@ const TrainerAthletes = () => {
     age: number;
     level: number;
   }
-  const [trainerId, setTrainerId] = useState<number | null>(null);
 
-  //state variable to set athletes
+  const [trainerId, setTrainerId] = useState<number | null>(null);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
 
   useEffect(() => {
     const fetchTrainerSessions = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
-
-        //if nothing returned responed error
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-        //make id a number
+        if (!idString) return console.warn("No trainer ID found.");
         const trainer_user_id = parseInt(idString, 10);
-
         const response = await api.get(`trainers/sessions/${trainer_user_id}`);
-
         setSessions(response.data);
       } catch (error) {
-        //catch and log if any errors
         console.error("Error fetching trainer sessions", error);
       }
     };
@@ -65,32 +49,18 @@ const TrainerAthletes = () => {
   }, []);
 
   useEffect(() => {
-    //async function to fetch
     const fetchTrainerAthletes = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
-
-        //if nothing returned responed error
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-
-        //make id a number
+        if (!idString) return console.warn("No trainer ID found.");
         const trainer_user_id = parseInt(idString, 10);
         setTrainerId(trainer_user_id);
-        //variable to handle api call
         const response = await api.get(`/trainers/athletes/${trainer_user_id}`);
-        //set state variable with response
         setAthletes(response.data);
       } catch (error) {
-        //catch and log if any errors
         console.error("Error fetching trainer athletes", error);
       }
     };
-
-    //call function
     fetchTrainerAthletes();
   }, []);
 
@@ -103,19 +73,14 @@ const TrainerAthletes = () => {
 
       const sessionNames =
         athleteSessions.length > 0
-          ? athleteSessions
-              .map((s: any, index: number) => s.session.session_name)
-              .join("\n")
+          ? athleteSessions.map((s: any) => s.session.session_name).join("\n")
           : "No sessions assigned.";
 
       Alert.alert(
         `${athlete.first_name} ${athlete.last_name}`,
         `Current Sessions:\n${sessionNames}`,
         [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
+          { text: "Cancel", style: "cancel" },
           {
             text: "Add Session",
             onPress: () => {
@@ -155,10 +120,7 @@ const TrainerAthletes = () => {
                 "Confirm Delete",
                 `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
                 [
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                  },
+                  { text: "Cancel", style: "cancel" },
                   {
                     text: "Yes, Remove",
                     style: "destructive",
@@ -173,9 +135,7 @@ const TrainerAthletes = () => {
                         await api.delete(
                           `/trainers/athlete/${athlete.athlete_user_id}`,
                           {
-                            data: {
-                              trainer_user_id: trainerId,
-                            },
+                            data: { trainer_user_id: trainerId },
                           }
                         );
 
@@ -206,112 +166,74 @@ const TrainerAthletes = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView>
-        <View style={{ backgroundColor: "#ccffe5" }}>
-          <ThemedTitle>Your Athletes</ThemedTitle>
+        <Text style={styles.title}>My Athletes</Text>
 
-          <View style={styles.headerRow}>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Name</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Age</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Level</Text>
-            </View>
-          </View>
-
-          {athletes.map((athlete: any, index: number) => (
-            <Pressable
-              key={index}
-              onPress={() => handlePress(athlete)}
-              style={[
-                styles.dataRow,
-                index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-              ]}>
-              <View
-                key={index}
-                style={[
-                  styles.dataRow,
-                  index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-                ]}>
-                <View style={styles.cell}>
-                  <ThemedText>{athlete.first_name}</ThemedText>
-                </View>
-                <View style={styles.cell}>
-                  <ThemedText>{athlete.age}</ThemedText>
-                </View>
-                <View style={styles.cell}>
-                  <ThemedText>{athlete.level}</ThemedText>
-                </View>
-              </View>
-            </Pressable>
-          ))}
+        <View style={styles.headerRow}>
+          <Text style={styles.headerCell}>Name</Text>
+          <Text style={styles.headerCell}>Age</Text>
+          <Text style={styles.headerCell}>Level</Text>
         </View>
+
+        {athletes.map((athlete, index) => (
+          <Pressable
+            key={athlete.athlete_user_id}
+            onPress={() => handlePress(athlete)}
+            style={[
+              styles.dataRow,
+              { backgroundColor: index % 2 === 0 ? "#f1f1f1" : "#ffffff" },
+            ]}>
+            <Text style={styles.cell}>{athlete.first_name}</Text>
+            <Text style={styles.cell}>{athlete.age}</Text>
+            <Text style={styles.cell}>{athlete.level}</Text>
+          </Pressable>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#ffffff",
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: "#333",
+    textAlign: "center",
+  },
   headerRow: {
     flexDirection: "row",
-    backgroundColor: "#eee",
-    paddingVertical: 10,
-  },
-  dataRow: {
-    flexDirection: "row",
-    paddingVertical: 10,
-    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    paddingBottom: 8,
+    marginBottom: 8,
   },
   headerCell: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    fontWeight: "600",
+    fontSize: 26,
+    color: "#555",
+    textAlign: "center",
   },
-  headerText: {
-    fontFamily: "Avenir",
-    letterSpacing: 2,
+  dataRow: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#ddd",
   },
   cell: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  rowOdd: {
-    backgroundColor: "#ccffe5",
-  },
-  addPressContainer: {
-    alignItems: "center",
-    marginVertical: 10,
-    paddingBottom: 5,
-  },
-  addPressButton: {
-    backgroundColor: "#ffd1b3",
-    paddingVertical: 16,
-    paddingHorizontal: 52,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-  addPressButtonPressed: {
-    opacity: 0.7,
-  },
-  addPressText: {
-    fontFamily: "Avenir",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2F4F4F",
-    letterSpacing: 1.5,
     textAlign: "center",
-    textTransform: "uppercase",
+    fontSize: 24,
+    color: "#333",
   },
 });
 

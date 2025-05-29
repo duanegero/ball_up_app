@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
-
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
+  TouchableOpacity,
   Alert,
+  SafeAreaView,
 } from "react-native";
-import api from "../../../utils/api";
-import ThemedTitle from "../../../components/ThemedTitle";
-import ThemedText from "../../../components/ThemedText";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import api from "../../../utils/api";
+import { useRouter } from "expo-router";
 
 const TrainerDrills = () => {
   const router = useRouter();
 
-  //interface for typescript
   interface Drill {
     drill_id: number;
     drill_type: string;
@@ -28,40 +24,30 @@ const TrainerDrills = () => {
     trainer_user_id: number;
   }
 
-  //state variable to set drills
   const [drills, setDrills] = useState<Drill[]>([]);
 
   useEffect(() => {
-    //async function to fetch
     const fetchTrainerDrills = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
-
-        //if nothing returned responed error
         if (!idString) {
           console.warn("No trainer ID found.");
           return;
         }
 
-        //make id a number
         const trainer_user_id = parseInt(idString, 10);
-        //variable to handle api call
         const response = await api.get(`/trainers/drills/${trainer_user_id}`);
-        //set state variable with response
         setDrills(response.data);
       } catch (error) {
-        //catch and log if any errors
         console.error("Error fetching trainer drills", error);
+        Alert.alert("Error", "Could not load drills.");
       }
     };
-    //call function
+
     fetchTrainerDrills();
   }, []);
 
-  //async function to handle delete press
-  const handleDelete = async (drill_id: number): Promise<void> => {
-    //alert user to confirm
+  const handleDelete = (drill_id: number) => {
     Alert.alert("Delete Drill", "Are you sure you want to delete this drill?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -69,16 +55,13 @@ const TrainerDrills = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            //api call to delete
             await api.delete(`/drills/${drill_id}`);
-
-            //reset drills with new list
             setDrills((prevDrills) =>
               prevDrills.filter((d) => d.drill_id !== drill_id)
             );
           } catch (error) {
-            //catch and log if any errors
             console.error("Error deleting drill", error);
+            Alert.alert("Error", "Failed to delete drill.");
           }
         },
       },
@@ -86,125 +69,93 @@ const TrainerDrills = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
-      <ScrollView>
-        <View style={{ backgroundColor: "#FFF0F5" }}>
-          <ThemedTitle>Drills</ThemedTitle>
-          <View style={styles.headerRow}>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Type</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Description</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Level</Text>
-            </View>
-            <View style={styles.headerCell}>
-              <Text style={styles.headerText}>Delete</Text>
-            </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.heading}>My Drills</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {drills.map((drill) => (
+          <View key={drill.drill_id} style={styles.card}>
+            <Text style={styles.label}>
+              Type: <Text style={styles.value}>{drill.drill_type}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Description: <Text style={styles.value}>{drill.description}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Level: <Text style={styles.value}>{drill.level}</Text>
+            </Text>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDelete(drill.drill_id)}>
+              <Ionicons name="trash" size={20} color="#fff" />
+              <Text style={styles.deleteText}>Delete</Text>
+            </TouchableOpacity>
           </View>
-
-          {drills.map((drill: any, index: number) => (
-            <View
-              key={index}
-              style={[
-                styles.dataRow,
-                index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-              ]}>
-              <View style={styles.cell}>
-                <ThemedText>{drill.drill_type}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <ThemedText>{drill.description}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <ThemedText>{drill.level}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <Pressable onPress={() => handleDelete(drill.drill_id)}>
-                  <Ionicons name="trash" size={24} color={"red"} />
-                </Pressable>
-              </View>
-            </View>
-          ))}
-        </View>
+        ))}
       </ScrollView>
-      <View style={styles.addPressContainer}>
-        <Pressable
-          onPress={() => router.push("/createDrill")}
-          style={({ pressed }) => [
-            styles.addPressButton,
-            pressed && styles.addPressButtonPressed,
-          ]}>
-          <Text style={styles.addPressText}>Add New</Text>
-        </Pressable>
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/createDrill")}>
+        <Text style={styles.addText}>Add New Drill</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
+export default TrainerDrills;
+
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    backgroundColor: "#eee",
-    paddingVertical: 10,
-  },
-  dataRow: {
-    flexDirection: "row",
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  headerCell: {
+  container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#fff",
+    padding: 16,
   },
-  headerText: {
-    fontFamily: "Avenir",
-    letterSpacing: 2,
+  scrollContainer: {
+    paddingBottom: 20,
   },
-  cell: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  rowOdd: {
-    backgroundColor: "#FFF0F5",
-  },
-  addPressContainer: {
-    alignItems: "center",
-    marginVertical: 10,
-    paddingBottom: 5,
-  },
-
-  addPressButton: {
-    backgroundColor: "#D6EAF8",
-    paddingVertical: 16,
-    paddingHorizontal: 52,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-
-  addPressButtonPressed: {
-    opacity: 0.7,
-  },
-
-  addPressText: {
-    fontFamily: "Avenir",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2F4F4F",
-    letterSpacing: 1.5,
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
     textAlign: "center",
-    textTransform: "uppercase",
+  },
+  card: {
+    backgroundColor: "#f2f2f2",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  value: {
+    fontWeight: "normal",
+  },
+  deleteButton: {
+    flexDirection: "row",
+    backgroundColor: "#FF4C4C",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  deleteText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  addButton: {
+    backgroundColor: "#007BFF",
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  addText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
-
-export default TrainerDrills;

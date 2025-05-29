@@ -61,7 +61,7 @@ const AthleteProfile = () => {
           </View>
 
           {/* Username as title */}
-          <Text style={styles.title}>{athlete.username}</Text>
+          <Text style={styles.title}>{athlete.username}'s Proflie</Text>
 
           {/* Profile info card */}
           <View style={styles.card}>

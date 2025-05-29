@@ -50,7 +50,13 @@ const TrainerProfile = () => {
     <SafeAreaView style={styles.container}>
       {trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.heading}>Your Profile</Text>
+          <View style={styles.profileImagePlaceholder}>
+            <Text style={styles.profileInitials}>
+              {trainer.first_name[0]}
+              {trainer.last_name[0]}
+            </Text>
+          </View>
+          <Text style={styles.heading}>{trainer.username}'s Profile</Text>
 
           <View style={styles.card}>
             <Text style={styles.label}>Name</Text>
@@ -147,5 +153,20 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#d1d5db",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  profileInitials: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#374151",
   },
 });

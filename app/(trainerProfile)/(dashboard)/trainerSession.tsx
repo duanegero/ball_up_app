@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -9,12 +9,12 @@ import {
   Pressable,
   Alert,
   SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
 import api from "../../../utils/api";
 import ThemedTitle from "../../../components/ThemedTitle";
 import ThemedText from "../../../components/ThemedText";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import axios from "axios";
 
 const TrainerSession = () => {
   const router = useRouter();
@@ -32,22 +32,18 @@ const TrainerSession = () => {
   useEffect(() => {
     const fetchTrainerSessions = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
 
-        //if nothing returned responed error
         if (!idString) {
           console.warn("No trainer ID found.");
           return;
         }
-        //make id a number
-        const trainer_user_id = parseInt(idString, 10);
 
+        const trainer_user_id = parseInt(idString, 10);
         const response = await api.get(`trainers/sessions/${trainer_user_id}`);
 
         setSessions(response.data);
       } catch (error) {
-        //catch and log if any errors
         console.error("Error fetching trainer sessions", error);
       }
     };
@@ -124,125 +120,96 @@ const TrainerSession = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
-      <ScrollView>
-        <View style={{ backgroundColor: "#ccffe5" }}>
-          <ThemedTitle>Your Sessions</ThemedTitle>
-        </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.heading}>Your Sessions</Text>
 
-        <View style={styles.headerRow}>
-          <View style={styles.headerCell}>
-            <Text style={styles.headerText}>Session Name</Text>
-          </View>
-          <View style={styles.headerCell}>
-            <Text style={styles.headerText}>Length</Text>
-          </View>
-          <View style={styles.headerCell}>
-            <Text style={styles.headerText}>Level</Text>
-          </View>
-        </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {sessions.map((session: any) => (
+          <View key={session.session_id} style={styles.card}>
+            <Text style={styles.label}>
+              Name: <Text style={styles.value}>{session.session_name}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Length: <Text style={styles.value}>{session.length}</Text>
+            </Text>
+            <Text style={styles.label}>
+              Level: <Text style={styles.value}>{session.level}</Text>
+            </Text>
 
-        {sessions.map((session: any, index: number) => (
-          <Pressable
-            key={index}
-            onPress={() => {
-              console.log(session.session_name);
-              handlePress(session);
-            }}
-            style={[
-              styles.dataRow,
-              index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-            ]}>
-            <View
-              key={index}
-              style={[
-                styles.dataRow,
-                index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-              ]}>
-              <View style={styles.cell}>
-                <ThemedText>{session.session_name}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <ThemedText>{session.length}</ThemedText>
-              </View>
-              <View style={styles.cell}>
-                <ThemedText>{session.level}</ThemedText>
-              </View>
-            </View>
-          </Pressable>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handlePress(session)} // or call another function if you want a modal
+            >
+              <Ionicons name="create-outline" size={20} color="#fff" />
+              <Text style={styles.deleteText}>View/Edit</Text>
+            </TouchableOpacity>
+          </View>
         ))}
       </ScrollView>
-      <View style={styles.addPressContainer}>
-        <Pressable
-          onPress={() => router.push("/createSession")}
-          style={({ pressed }) => [
-            styles.addPressButton,
-            pressed && styles.addPressButtonPressed,
-          ]}>
-          <Text style={styles.addPressText}>Add New</Text>
-        </Pressable>
-      </View>
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push("/createSession")}>
+        <Text style={styles.addText}>Add New Session</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    backgroundColor: "#eee",
-    paddingVertical: 10,
-  },
-  dataRow: {
-    flexDirection: "row",
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  headerCell: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerText: {
-    fontFamily: "Avenir",
-    letterSpacing: 2,
-  },
-  cell: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  rowOdd: {
-    backgroundColor: "#ccffe5",
-  },
-  addPressContainer: {
-    alignItems: "center",
-    marginVertical: 10,
-    paddingBottom: 5,
-  },
-  addPressButton: {
-    backgroundColor: "#ffd1b3",
-    paddingVertical: 16,
-    paddingHorizontal: 52,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-  addPressButtonPressed: {
-    opacity: 0.7,
-  },
-  addPressText: {
-    fontFamily: "Avenir",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2F4F4F",
-    letterSpacing: 1.5,
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
     textAlign: "center",
-    textTransform: "uppercase",
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    backgroundColor: "#FF4C4C",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  deleteText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  value: {
+    fontWeight: "normal",
+  },
+  addButton: {
+    backgroundColor: "#007BFF",
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  addText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  scrollContainer: {
+    paddingBottom: 20,
+  },
+  card: {
+    backgroundColor: "#f2f2f2",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 12,
   },
 });
 
