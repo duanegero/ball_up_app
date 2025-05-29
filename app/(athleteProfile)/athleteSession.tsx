@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  Alert,
+  Pressable,
+} from "react-native";
 import api from "../../utils/api";
 import ThemedTitle from "../../components/ThemedTitle";
 import ThemedText from "../../components/ThemedText";
@@ -11,31 +19,47 @@ const AthleteSession = () => {
   const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
-    const fetchAthleteSessions = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("athleteId");
-        if (!idString) {
-          console.warn("No athlete ID found.");
-          return;
-        }
-
-        const athlete_user_id = parseInt(idString, 10);
-        const response = await api.get(
-          `/athletes/athlete_sessions/${athlete_user_id}`
-        );
-
-        if (response.data?.athlete_sessions) {
-          setSessions(response.data.athlete_sessions);
-        } else {
-          console.warn("No sessions found.");
-        }
-      } catch (error) {
-        console.error("Error fetching athlete sessions", error);
-      }
-    };
-
     fetchAthleteSessions();
   }, []);
+
+  const fetchAthleteSessions = async () => {
+    try {
+      const idString = await AsyncStorage.getItem("athleteId");
+      if (!idString) {
+        console.warn("No athlete ID found.");
+        return;
+      }
+
+      const athlete_user_id = parseInt(idString, 10);
+      const response = await api.get(
+        `/athletes/athlete_sessions/${athlete_user_id}`
+      );
+
+      if (response.data?.athlete_sessions) {
+        setSessions(response.data.athlete_sessions);
+      } else {
+        console.warn("No sessions found.");
+      }
+    } catch (error) {
+      console.error("Error fetching athlete sessions", error);
+    }
+  };
+
+  const handleComplete = async (
+    athlete_user_id: number,
+    session_id: number
+  ) => {
+    try {
+      await api.delete(`/athletes/session/${athlete_user_id}/${session_id}`);
+
+      Alert.alert("Session Completed", "Session has been marked as complete.");
+
+      fetchAthleteSessions();
+    } catch (error) {
+      console.error("Error completing session:", error);
+      Alert.alert("Error", "Could not mark session as complete.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -73,6 +97,13 @@ const AthleteSession = () => {
               ) : (
                 <Text style={styles.noDrills}>No drills in this session.</Text>
               )}
+              <Pressable
+                style={styles.completeButton}
+                onPress={() =>
+                  handleComplete(item.athlete_user_id, item.session_id)
+                }>
+                <Text style={styles.completeButtonText}>Mark Completed</Text>
+              </Pressable>
             </View>
           );
         })}
@@ -128,5 +159,16 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#888",
     marginTop: 10,
+  },
+  completeButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#28a745",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  completeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
