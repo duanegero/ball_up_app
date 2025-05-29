@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import api from "../../../utils/api";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const { width } = Dimensions.get("window");
 
@@ -48,11 +49,25 @@ const AthleteProfile = () => {
     fetchAthlete();
   }, []);
 
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("athleteId");
+    router.replace("/"); // or route to login screen
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {athlete ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {/* Profile Initials Placeholder */}
+          <View style={styles.topButtonRow}>
+            <Pressable onPress={() => router.push("/editProfile")} hitSlop={10}>
+              <Ionicons name="ellipsis-horizontal" size={24} color="#2563eb" />
+            </Pressable>
+
+            <Pressable onPress={handleLogout} hitSlop={10}>
+              <Ionicons name="log-out-outline" size={24} color="#6b7280" />
+            </Pressable>
+          </View>
+
           <View style={styles.profileImagePlaceholder}>
             <Text style={styles.profileInitials}>
               {athlete.first_name[0]}
@@ -78,13 +93,6 @@ const AthleteProfile = () => {
 
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{athlete.email}</Text>
-          </View>
-          <View style={styles.editButtonContainer}>
-            <Pressable
-              style={styles.editButton}
-              onPress={() => router.push("/editProfile")}>
-              <Text style={styles.editButtonText}>Edit</Text>
-            </Pressable>
           </View>
         </ScrollView>
       ) : (
@@ -213,5 +221,13 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+
+  topButtonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    marginBottom: 12,
   },
 });

@@ -8,9 +8,12 @@ import {
   Alert,
   ScrollView,
   SafeAreaView,
+  Pressable,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../utils/api"; // Axios instance with baseURL
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { router } from "expo-router";
 
 const EditProfileScreen = () => {
   const [athleteId, setAthleteId] = useState<number | null>(null);
@@ -89,6 +92,11 @@ const EditProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.container}>
+        <View>
+          <Pressable onPress={() => router.push("/athleteProfile")}>
+            <Ionicons name="chevron-back" size={24} color="#2563eb" />
+          </Pressable>
+        </View>
         <Text style={styles.title}>Edit Profile</Text>
 
         <TextInput

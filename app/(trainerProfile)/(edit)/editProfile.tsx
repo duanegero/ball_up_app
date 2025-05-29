@@ -7,9 +7,13 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  SafeAreaView,
+  Pressable,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../utils/api"; // Your configured Axios instance
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const EditTrainerProfile = () => {
   const [trainerId, setTrainerId] = useState<number | null>(null);
@@ -94,53 +98,60 @@ const EditTrainerProfile = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Edit Trainer Profile</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View>
+          <Pressable onPress={() => router.push("/trainerProfile")}>
+            <Ionicons name="chevron-back" size={24} color="#2563eb" />
+          </Pressable>
+        </View>
+        <Text style={styles.title}>Edit Trainer Profile</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={formData.username}
-        onChangeText={(text) => handleChange("username", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        value={formData.first_name}
-        onChangeText={(text) => handleChange("first_name", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        value={formData.last_name}
-        onChangeText={(text) => handleChange("last_name", text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={formData.email}
-        onChangeText={(text) => handleChange("email", text)}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Years of Experience"
-        value={formData.years_experience}
-        onChangeText={(text) => handleChange("years_experience", text)}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={[styles.input, { height: 100 }]}
-        placeholder="Bio"
-        value={formData.bio}
-        onChangeText={(text) => handleChange("bio", text)}
-        multiline
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={formData.username}
+          onChangeText={(text) => handleChange("username", text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          value={formData.first_name}
+          onChangeText={(text) => handleChange("first_name", text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          value={formData.last_name}
+          onChangeText={(text) => handleChange("last_name", text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={formData.email}
+          onChangeText={(text) => handleChange("email", text)}
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Years of Experience"
+          value={formData.years_experience}
+          onChangeText={(text) => handleChange("years_experience", text)}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={[styles.input, { height: 100 }]}
+          placeholder="Bio"
+          value={formData.bio}
+          onChangeText={(text) => handleChange("bio", text)}
+          multiline
+        />
 
-      <View style={styles.buttonContainer}>
-        <Button title="Save Changes" onPress={handleSave} color="#007AFF" />
-      </View>
-    </ScrollView>
+        <View style={styles.buttonContainer}>
+          <Button title="Save Changes" onPress={handleSave} color="#007AFF" />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

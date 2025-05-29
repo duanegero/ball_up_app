@@ -9,6 +9,8 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+
 import api from "../../../utils/api";
 
 const TrainerProfile = () => {
@@ -46,10 +48,25 @@ const TrainerProfile = () => {
     fetchTrainer();
   }, []);
 
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("trainerId");
+    router.replace("/"); // or route to login screen
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.topButtonRow}>
+            <Pressable onPress={() => router.push("/editProfile")} hitSlop={10}>
+              <Ionicons name="ellipsis-horizontal" size={24} color="#2563eb" />
+            </Pressable>
+
+            <Pressable onPress={handleLogout} hitSlop={10}>
+              <Ionicons name="log-out-outline" size={24} color="#6b7280" />
+            </Pressable>
+          </View>
+
           <View style={styles.profileImagePlaceholder}>
             <Text style={styles.profileInitials}>
               {trainer.first_name[0]}
@@ -71,14 +88,7 @@ const TrainerProfile = () => {
             <Text style={styles.value}>{trainer.bio}</Text>
 
             <Text style={styles.label}>Years of Experience</Text>
-            <Text style={styles.experience}>{trainer.years_experience}</Text>
-          </View>
-          <View style={styles.editButtonContainer}>
-            <Pressable
-              style={styles.editButton}
-              onPress={() => router.push("/editProfile")}>
-              <Text style={styles.editButtonText}>Edit</Text>
-            </Pressable>
+            <Text style={styles.value}>{trainer.years_experience}</Text>
           </View>
         </ScrollView>
       ) : (
@@ -149,11 +159,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  editButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
   profileImagePlaceholder: {
     width: 80,
     height: 80,
@@ -168,5 +173,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: "#374151",
+  },
+
+  topButtonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+
+  editButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2563eb", // blue-600
+  },
+
+  logoutButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6b7280", // gray-500
   },
 });
