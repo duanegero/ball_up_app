@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import api from "../../utils/api";
+import api from "../../../utils/api";
 
 const { width } = Dimensions.get("window");
 

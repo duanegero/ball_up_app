@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -10,12 +9,9 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import api from "../../utils/api";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedText from "../../components/ThemedText";
+import api from "../../../utils/api";
 
 const AthleteSession = () => {
-  const router = useRouter();
   const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
@@ -53,7 +49,6 @@ const AthleteSession = () => {
       await api.delete(`/athletes/session/${athlete_user_id}/${session_id}`);
 
       Alert.alert("Session Completed", "Session has been marked as complete.");
-
       fetchAthleteSessions();
     } catch (error) {
       console.error("Error completing session:", error);
@@ -63,46 +58,37 @@ const AthleteSession = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ThemedTitle style={styles.title}>Athlete Sessions</ThemedTitle>
+      <Text style={styles.heading}>My Training Sessions</Text>
       <ScrollView>
-        {sessions.map((item: any, index: number) => {
+        {sessions.map((item: any) => {
           const { session } = item;
           return (
-            <View
-              key={item.session_id}
-              style={[
-                styles.sessionContainer,
-                index % 2 === 0 ? styles.rowEven : styles.rowOdd,
-              ]}>
-              <View style={styles.sessionHeader}>
-                <ThemedText style={styles.sessionName}>
-                  {session.session_name}
-                </ThemedText>
-                <Text style={styles.sessionInfo}>
-                  Length: {session.length} mins | Level: {session.level}
-                </Text>
-              </View>
+            <View key={item.session_id} style={styles.card}>
+              <Text style={styles.sessionName}>{session.session_name}</Text>
+              <Text style={styles.detail}>
+                Length: {session.length} mins | Level: {session.level}
+              </Text>
 
               {session.Session_Drill.length > 0 ? (
                 <View style={styles.drillList}>
-                  {session.Session_Drill.map((item: any, i: number) => (
-                    <View key={i} style={styles.drillItem}>
-                      <Text style={styles.drillText}>
-                        • {item.drill.drill_type.toUpperCase()} (Lv
-                        {item.drill.level}): {item.drill.description.trim()}
-                      </Text>
-                    </View>
+                  {session.Session_Drill.map((drillItem: any, i: number) => (
+                    <Text key={i} style={styles.drillText}>
+                      • {drillItem.drill.drill_type.toUpperCase()} (Lv
+                      {drillItem.drill.level}):{" "}
+                      {drillItem.drill.description.trim()}
+                    </Text>
                   ))}
                 </View>
               ) : (
                 <Text style={styles.noDrills}>No drills in this session.</Text>
               )}
+
               <Pressable
-                style={styles.completeButton}
+                style={styles.button}
                 onPress={() =>
                   handleComplete(item.athlete_user_id, item.session_id)
                 }>
-                <Text style={styles.completeButtonText}>Mark Completed</Text>
+                <Text style={styles.buttonText}>Mark Completed</Text>
               </Pressable>
             </View>
           );
@@ -117,57 +103,52 @@ export default AthleteSession;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    backgroundColor: "#fff",
+    padding: 16,
   },
-  title: {
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
-  sessionContainer: {
-    padding: 15,
+  card: {
+    backgroundColor: "#f2f2f2",
     borderRadius: 10,
-    marginBottom: 15,
-  },
-  rowEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  rowOdd: {
-    backgroundColor: "#e8f0ff",
-  },
-  sessionHeader: {
-    marginBottom: 8,
+    padding: 16,
+    marginBottom: 12,
   },
   sessionName: {
     fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 4,
   },
-  sessionInfo: {
+  detail: {
     fontSize: 14,
     color: "#333",
+    marginBottom: 6,
   },
   drillList: {
-    marginTop: 10,
-    paddingLeft: 10,
-  },
-  drillItem: {
-    marginBottom: 5,
+    marginVertical: 6,
   },
   drillText: {
     fontSize: 14,
     color: "#444",
+    marginBottom: 4,
   },
   noDrills: {
     fontStyle: "italic",
     color: "#888",
-    marginTop: 10,
+    marginVertical: 6,
   },
-  completeButton: {
-    marginTop: 10,
-    padding: 10,
+  button: {
     backgroundColor: "#28a745",
+    padding: 10,
     borderRadius: 8,
+    marginTop: 10,
     alignItems: "center",
   },
-  completeButtonText: {
+  buttonText: {
     color: "#fff",
     fontWeight: "bold",
   },

@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  SafeAreaView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../../utils/api";
+import api from "../../../utils/api";
 
 const AthleteTrainerScreen = () => {
   interface Trainer {
@@ -65,7 +66,7 @@ const AthleteTrainerScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Available Trainers</Text>
       <FlatList
         data={trainers}
@@ -88,7 +89,7 @@ const AthleteTrainerScreen = () => {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

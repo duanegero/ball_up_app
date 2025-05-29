@@ -10,9 +10,9 @@ import {
   Alert,
   SafeAreaView,
 } from "react-native";
-import api from "../../utils/api";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedText from "../../components/ThemedText";
+import api from "../../../utils/api";
+import ThemedTitle from "../../../components/ThemedTitle";
+import ThemedText from "../../../components/ThemedText";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 
