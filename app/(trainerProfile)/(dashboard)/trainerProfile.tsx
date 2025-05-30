@@ -6,6 +6,7 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -52,8 +53,17 @@ const TrainerProfile = () => {
   }, []);
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("trainerId");
-    router.replace("/"); // or route to login screen
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.removeItem("trainerId");
+          router.replace("/");
+        },
+      },
+    ]);
   };
 
   return (

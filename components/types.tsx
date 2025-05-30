@@ -3,6 +3,8 @@ export interface Trainer {
   last_name: string;
   bio: string;
   years_experience: number;
+  trainer_user_id: number;
+  email: string;
 }
 
 export interface Athlete {

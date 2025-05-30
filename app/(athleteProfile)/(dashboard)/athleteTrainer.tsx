@@ -7,27 +7,25 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../utils/api";
+import { Trainer } from "../../../components/types";
 
 const AthleteTrainerScreen = () => {
-  interface Trainer {
-    trainer_user_id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    years_experience: number;
-    bio: string;
-  }
-
   const [athleteUserId, setAthleteUserId] = useState<number | null>(null);
   const [trainers, setTrainers] = useState<Trainer[]>([]);
+  const [selectedTrainerId, setSelectedTrainerId] = useState<number | null>(
+    null
+  );
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAthleteIdAndTrainers = async () => {
       try {
+        setLoading(true);
         const idString = await AsyncStorage.getItem("athleteId");
         if (!idString) {
           console.warn("No athlete ID found.");
@@ -42,6 +40,8 @@ const AthleteTrainerScreen = () => {
       } catch (error) {
         console.error("Error loading data:", error);
         Alert.alert("Error", "Something went wrong loading data.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -49,6 +49,8 @@ const AthleteTrainerScreen = () => {
   }, []);
 
   const assignTrainer = async (trainer_user_id: number) => {
+    setSelectedTrainerId(trainer_user_id);
+
     if (!athleteUserId) {
       Alert.alert("Missing Athlete ID", "Cannot assign without athlete ID.");
       return;
@@ -58,37 +60,57 @@ const AthleteTrainerScreen = () => {
       await api.put(`/athletes/assign_trainer/${athleteUserId}`, {
         trainer_user_id,
       });
-      Alert.alert("Success", "Trainer assigned successfully!");
+      Alert.alert("Success", "The trainer has been assigned successfully.");
     } catch (error) {
       console.error("Error assigning trainer:", error);
-      Alert.alert("Error", "Failed to assign trainer.");
+      Alert.alert("Error", "Failed to assign the trainer. Please try again.");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Available Trainers</Text>
-      <FlatList
-        data={trainers}
-        keyExtractor={(item) => item.trainer_user_id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>
-              {item.first_name} {item.last_name}
-            </Text>
-            <Text style={styles.detail}>Email: {item.email}</Text>
-            <Text style={styles.detail}>
-              Experience: {item.years_experience} years
-            </Text>
-            <Text style={styles.bio}>{item.bio}</Text>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => assignTrainer(item.trainer_user_id)}>
-              <Text style={styles.buttonText}>Select Trainer</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#007BFF"
+          style={{ marginTop: 20 }}
+        />
+      ) : (
+        <FlatList
+          initialNumToRender={5}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          data={trainers}
+          keyExtractor={(item) => item.trainer_user_id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.name}>
+                {item.first_name} {item.last_name}
+              </Text>
+              <Text style={styles.detail}>Email: {item.email}</Text>
+              <Text style={styles.detail}>
+                Experience: {item.years_experience} years
+              </Text>
+              <Text style={styles.bio}>{item.bio}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  selectedTrainerId === item.trainer_user_id &&
+                    styles.buttonDisabled,
+                ]}
+                disabled={selectedTrainerId === item.trainer_user_id}
+                onPress={() => assignTrainer(item.trainer_user_id)}>
+                <Text style={styles.buttonText}>
+                  {selectedTrainerId === item.trainer_user_id
+                    ? "Assigned"
+                    : "Select Trainer"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -140,5 +162,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  buttonDisabled: {
+    backgroundColor: "#ccc",
   },
 });

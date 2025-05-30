@@ -15,7 +15,7 @@ const Home = () => {
         <Text style={styles.title}>Ball Up</Text>
         <Image
           source={require("../assets/basketball.png")}
-          style={{ width: 100, height: 100 }}
+          style={{ width: 100, height: 100, paddingBottom: 20 }}
         />
 
         <Text style={styles.subtitle}>
