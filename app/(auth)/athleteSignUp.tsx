@@ -1,27 +1,23 @@
 import {
   StyleSheet,
   Text,
+  View,
+  TextInput,
   Alert,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import ThemedContainer from "../../components/ThemedContainer";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedButton from "../../components/ThemedButton";
-import ThemedTextInput from "../../components/ThemedTextInput";
-import ThemedLink from "../../components/ThemedLink";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import Spacer from "../../components/Spacer";
 import api from "../../utils/api";
 
 const AthleteSignUp = () => {
   const router = useRouter();
 
-  //state variables
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,20 +26,12 @@ const AthleteSignUp = () => {
   const [age, setAge] = useState("");
   const [level, setLevel] = useState("");
 
-  //helper to handle submit button
   const handleSubmit = async (): Promise<void> => {
-    //make strings a number
     const age_number = parseInt(age, 10);
     const level_number = parseInt(level, 10);
 
     try {
-      //variable to handle response from api with expected data
-      const response: {
-        data: {
-          message: string;
-          username: string;
-        };
-      } = await api.post("/athletes", {
+      const response = await api.post("/athletes", {
         email,
         username,
         password,
@@ -53,10 +41,8 @@ const AthleteSignUp = () => {
         level: level_number,
       });
 
-      //variables from response
       const { message, username: signedUpUsername } = response.data;
 
-      //alert user and navigate to login
       Alert.alert(`${message} Username: ${signedUpUsername}`, "", [
         {
           text: "OK",
@@ -64,7 +50,6 @@ const AthleteSignUp = () => {
         },
       ]);
 
-      //clear the inputs
       setEmail("");
       setUsername("");
       setPassword("");
@@ -73,7 +58,6 @@ const AthleteSignUp = () => {
       setAge("");
       setLevel("");
     } catch (error: any) {
-      //catch log and alert any errors
       console.error("Sign up error:", error);
       const message =
         error.response?.data?.message || "An error occurred during sign up.";
@@ -84,81 +68,80 @@ const AthleteSignUp = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}>
+      style={styles.wrapper}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
-          <ThemedContainer>
-            <ThemedTitle>Sign Up</ThemedTitle>
+          <Text style={styles.title}>Create Account</Text>
 
-            <Spacer height={20} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={setEmail}
+            value={email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Email"
-              onChangeText={setEmail}
-              value={email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            onChangeText={setUsername}
+            value={username}
+            autoCapitalize="none"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Username"
-              onChangeText={setUsername}
-              value={username}
-              autoCapitalize="none"
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            onChangeText={setPassword}
+            value={password}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Password"
-              onChangeText={setPassword}
-              value={password}
-              secureTextEntry
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Firstname"
+            onChangeText={setFirst_name}
+            value={first_name}
+            autoCapitalize="words"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Firstname"
-              onChangeText={setFirst_name}
-              value={first_name}
-              autoCapitalize="words"
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Lastname"
+            onChangeText={setLast_name}
+            value={last_name}
+            autoCapitalize="words"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Lastname"
-              onChangeText={setLast_name}
-              value={last_name}
-              autoCapitalize="words"
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Age"
+            onChangeText={setAge}
+            value={age}
+            keyboardType="numeric"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Age"
-              onChangeText={setAge}
-              value={age}
-              keyboardType="numeric"
-            />
+          <TextInput
+            style={styles.input}
+            placeholder="Level"
+            onChangeText={setLevel}
+            value={level}
+            keyboardType="numeric"
+            placeholderTextColor="#999"
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Level"
-              onChangeText={setLevel}
-              value={level}
-              keyboardType="numeric"
-            />
-
-            <ThemedButton onPress={handleSubmit}>
-              <Text style={{ color: "white" }}>Sign Up</Text>
-            </ThemedButton>
-
-            {/* <Link href={"/login"} style={styles.link}>
-          Login Page
-        </Link> */}
-          </ThemedContainer>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -166,4 +149,46 @@ const AthleteSignUp = () => {
 };
 
 export default AthleteSignUp;
-const styles = StyleSheet.create({});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  container: {
+    flexGrow: 1,
+    padding: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "600",
+    color: "#222",
+    marginBottom: 30,
+  },
+  input: {
+    width: "100%",
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: "#fff",
+    color: "#333",
+  },
+  button: {
+    width: "100%",
+    padding: 16,
+    backgroundColor: "#0066cc",
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+});

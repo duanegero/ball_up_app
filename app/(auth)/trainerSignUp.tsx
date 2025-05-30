@@ -1,28 +1,23 @@
 import {
   StyleSheet,
   Text,
+  View,
+  TextInput,
   Alert,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import ThemedContainer from "../../components/ThemedContainer";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedButton from "../../components/ThemedButton";
-import ThemedTextInput from "../../components/ThemedTextInput";
-import ThemedLink from "../../components/ThemedLink";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import Spacer from "../../components/Spacer";
 import api from "../../utils/api";
 
-//defining a function
 const TrainerSignUp = () => {
   const router = useRouter();
 
-  //state variables
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -31,19 +26,10 @@ const TrainerSignUp = () => {
   const [years_experience, setYears_experience] = useState("");
   const [bio, setBio] = useState("");
 
-  //helper to handle submit button
-  const handleSubmit = async (): Promise<void> => {
-    //make string a number
+  const handleSubmit = async () => {
     const years_experience_number = parseInt(years_experience, 10);
-
     try {
-      //variable to handle response from api with expected data
-      const response: {
-        data: {
-          message: string;
-          username: string;
-        };
-      } = await api.post("/trainers", {
+      const response = await api.post("/trainers", {
         email,
         username,
         password,
@@ -53,10 +39,8 @@ const TrainerSignUp = () => {
         bio,
       });
 
-      //variables from response
       const { message, username: signedUpUsername } = response.data;
 
-      //alert user and navigate to login
       Alert.alert(`${message} Username: ${signedUpUsername}`, "", [
         {
           text: "OK",
@@ -64,7 +48,6 @@ const TrainerSignUp = () => {
         },
       ]);
 
-      //clear the inputs
       setEmail("");
       setUsername("");
       setPassword("");
@@ -73,8 +56,6 @@ const TrainerSignUp = () => {
       setYears_experience("");
       setBio("");
     } catch (error: any) {
-      //catch log and alert any errors
-      console.error("Sign up error:", error);
       const message =
         error.response?.data?.message || "An error occurred during sign up.";
       Alert.alert("Sign Up Failed", message);
@@ -87,82 +68,65 @@ const TrainerSignUp = () => {
       style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
-          <ThemedContainer>
-            <ThemedTitle>Sign Up</ThemedTitle>
+          <Text style={styles.title}>Trainer Sign Up</Text>
 
-            <Spacer height={20} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={setEmail}
+            value={email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            onChangeText={setUsername}
+            value={username}
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            onChangeText={setPassword}
+            value={password}
+            secureTextEntry
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="First Name"
+            onChangeText={setFirst_name}
+            value={first_name}
+            autoCapitalize="words"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Last Name"
+            onChangeText={setLast_name}
+            value={last_name}
+            autoCapitalize="words"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Years Experience"
+            onChangeText={setYears_experience}
+            value={years_experience}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={[styles.input, styles.bioInput]}
+            placeholder="Bio"
+            onChangeText={setBio}
+            value={bio}
+            multiline
+            numberOfLines={4}
+          />
 
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Email"
-              onChangeText={setEmail}
-              value={email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Username"
-              onChangeText={setUsername}
-              value={username}
-              autoCapitalize="none"
-            />
-
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Password"
-              onChangeText={setPassword}
-              value={password}
-              secureTextEntry
-            />
-
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Firstname"
-              onChangeText={setFirst_name}
-              value={first_name}
-              autoCapitalize="words"
-            />
-
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Lastname"
-              onChangeText={setLast_name}
-              value={last_name}
-              autoCapitalize="words"
-            />
-
-            <ThemedTextInput
-              style={{ width: "80%", marginBottom: 20 }}
-              placeholder="Years Experience"
-              onChangeText={setYears_experience}
-              value={years_experience}
-              keyboardType="numeric"
-            />
-
-            <ThemedTextInput
-              style={{
-                width: "80%",
-                marginBottom: 20,
-                height: 80,
-                textAlignVertical: "top",
-              }}
-              placeholder="Bio"
-              onChangeText={setBio}
-              value={bio}
-            />
-
-            <ThemedButton onPress={handleSubmit}>
-              <Text style={{ color: "white" }}>Sign Up</Text>
-            </ThemedButton>
-
-            {/* <Link href={"/login"} style={styles.link}>
-          Login Page
-        </Link> */}
-          </ThemedContainer>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -170,4 +134,46 @@ const TrainerSignUp = () => {
 };
 
 export default TrainerSignUp;
-const styles = StyleSheet.create({});
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#f9f9f9",
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "600",
+    marginBottom: 32,
+    color: "#333",
+  },
+  input: {
+    width: "100%",
+    padding: 14,
+    marginBottom: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    fontSize: 16,
+  },
+  bioInput: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  button: {
+    width: "100%",
+    backgroundColor: "#2f80ed",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+});
