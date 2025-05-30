@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, Button, Alert, Pressable } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import api from "../../utils/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-//interfaces for typescript
 type Drill = {
   drill_id: number;
   drill_name: string;
@@ -23,95 +31,65 @@ type SessionDrill = {
 };
 
 const EditSession = () => {
-  //getting ID from params
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
 
-  //state variables to handle drills
   const [drills, setDrills] = useState<Drill[]>([]);
-  const [selectedDrill, setSelectedDrill] = useState<string>("");
   const [sessionDrills, setSessionDrills] = useState<SessionDrill[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    //asynce function
     const fetchSessionDrills = async () => {
       try {
-        //variable to handle api
         const response = await api.get(`/sessions/session_drills/${sessionId}`);
-        //set state
         setSessionDrills(response.data);
       } catch (error) {
         console.error("Error fetching session drills:", error);
       }
     };
-
     fetchSessionDrills();
   }, [sessionId]);
 
   useEffect(() => {
-    //async function to fetch
     const fetchTrainerDrills = async () => {
       try {
-        //getting the id from storage
         const idString = await AsyncStorage.getItem("trainerId");
-
-        //if nothing returned responed error
         if (!idString) {
           console.warn("No trainer ID found.");
           return;
         }
-
-        //make id a number
         const trainer_user_id = parseInt(idString, 10);
-        //variable to handle api call
         const response = await api.get(`/trainers/drills/${trainer_user_id}`);
-        //set state variable with response
         setDrills(response.data);
       } catch (error) {
-        //catch and log if any errors
         console.error("Error fetching trainer drills", error);
       }
     };
-    //call function
     fetchTrainerDrills();
   }, []);
 
-  const handleAddDrill = async () => {
-    //if no drill selected return
-    if (!selectedDrill) return;
-
-    //make the id a number
-    const drillId = parseInt(selectedDrill, 10);
-
-    // Prevent duplicates
-    const alreadyAdded = sessionDrills.some((d) => d.drill_id === drillId);
+  const handleAddDrill = async (drill: Drill) => {
+    const alreadyAdded = sessionDrills.some(
+      (d) => d.drill_id === drill.drill_id
+    );
     if (alreadyAdded) {
-      console.warn("Drill already added to session.");
       Alert.alert("Drill already added to session.");
       return;
     }
 
-    //get id of drill to add
-    const drillToAdd = drills.find((d) => d.drill_id === drillId);
-    if (!drillToAdd) return;
-
     try {
-      //post new drill
       await api.post(`/sessions/session_drills/${sessionId}`, {
-        drill_id: drillToAdd.drill_id,
+        drill_id: drill.drill_id,
       });
 
-      //set state with new add
       setSessionDrills((prev) => [
         ...prev,
         {
-          drill_id: drillToAdd.drill_id,
-          session_id: Number(sessionId), // ensure sessionId is a number
-          drill: drillToAdd,
+          drill_id: drill.drill_id,
+          session_id: Number(sessionId),
+          drill,
         },
       ]);
-
-      //rest picker
-      setSelectedDrill("");
+      setModalVisible(false);
     } catch (error) {
       console.error("Failed to add drill to session:", error);
     }
@@ -135,49 +113,63 @@ const EditSession = () => {
   };
 
   return (
-    <SafeAreaView>
-      <View style={{ position: "absolute", top: 50, left: 25, zIndex: 10 }}>
+    <SafeAreaView style={styles.container}>
+      <View>
         <Pressable onPress={() => router.push("/trainerSession")}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons name="list" size={32} color="#708090" />
-            <Text style={{ marginLeft: 8, fontSize: 16, color: "#708090" }}>
-              Sessions
-            </Text>
-          </View>
+          <Ionicons name="chevron-back" size={24} color="#2563eb" />
         </Pressable>
       </View>
 
-      <View style={{ marginTop: 70 }}>
-        <Text>Select a Drill to Add:</Text>
-        <Picker
-          selectedValue={selectedDrill}
-          onValueChange={(itemValue) => setSelectedDrill(itemValue)}>
-          <Picker.Item label="Select a drill..." value="" />
-          {drills.map((drill) => (
-            <Picker.Item
-              key={drill.drill_id}
-              label={`${drill.drill_name} (Level ${drill.level})`}
-              value={drill.drill_id.toString()}
+      <Text style={styles.title}>Edit Session Drills</Text>
+
+      <Button title="Select Drill" onPress={() => setModalVisible(true)} />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContent}>
+            <Text style={styles.label}>Tap a drill to add:</Text>
+            <FlatList
+              data={drills}
+              keyExtractor={(item) => item.drill_id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.drillButton}
+                  onPress={() => handleAddDrill(item)}>
+                  <Text style={styles.drillButtonText}>
+                    {item.drill_name} (Level {item.level})
+                  </Text>
+                </TouchableOpacity>
+              )}
             />
-          ))}
-        </Picker>
-      </View>
+            <View style={styles.modalButtons}>
+              <Button
+                title="Cancel"
+                color="gray"
+                onPress={() => setModalVisible(false)}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
 
-      <View style={{ marginVertical: 10 }}>
-        <Button title="Add Drill to Session" onPress={handleAddDrill} />
-      </View>
+      <Text style={styles.sectionTitle}>Drills in This Session</Text>
 
-      <Text style={{ fontWeight: "bold", marginTop: 20 }}>Session Drills:</Text>
       <FlatList
         data={sessionDrills}
         keyExtractor={(item, index) => `${item.drill?.drill_name}-${index}`}
         renderItem={({ item }) => (
-          <View style={{ marginVertical: 5 }}>
-            <Text>
+          <View style={styles.drillItem}>
+            <Text style={styles.drillText}>
               {item.drill?.drill_name} - Level {item.drill?.level}
             </Text>
-            <Pressable onPress={() => handleRemove(item.drill_id, sessionId)}>
-              <Text>Remove</Text>
+            <Pressable
+              style={styles.removeButton}
+              onPress={() => handleRemove(item.drill_id, sessionId)}>
+              <Text style={styles.removeText}>Remove</Text>
             </Pressable>
           </View>
         )}
@@ -187,3 +179,104 @@ const EditSession = () => {
 };
 
 export default EditSession;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#F9F9F9",
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+    color: "#111",
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  drillItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 6,
+    borderColor: "#ddd",
+    borderWidth: 1,
+  },
+  drillText: {
+    fontSize: 16,
+  },
+  removeButton: {
+    backgroundColor: "#FF6B6B",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+  },
+  removeText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+    maxHeight: "80%",
+  },
+  modalButtons: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  drillButton: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+  drillButtonText: {
+    fontSize: 16,
+  },
+  backButton: {
+    backgroundColor: "#1E40AF", // deep blue
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  backButtonPressed: {
+    opacity: 0.8,
+  },
+  backContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#fff",
+  },
+});

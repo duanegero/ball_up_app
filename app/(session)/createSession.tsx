@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -14,141 +12,138 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TextInput,
+  Modal,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import api from "../../utils/api";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedText from "../../components/ThemedText";
-import ThemedTextInput from "../../components/ThemedTextInput";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const CreateSession = () => {
-  //variable to handle router
   const router = useRouter();
 
-  //interface for typescript
-  interface Session {
-    length: number;
-    level: number;
-    session_name: string;
-    trainer_user_id: number;
-  }
-
-  //state variables to handle user data
-  const [length, setLength] = useState(0);
-  const [level, setLevel] = useState(1);
+  const [length, setLength] = useState<number | null>(null);
+  const [level, setLevel] = useState<number | null>(null);
   const [session_name, setSession_name] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
-  //function to handle submit
   const handleSubmit = async (): Promise<void> => {
-    //if all fields not filled alert
     if (!length || !level || !session_name) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
 
-    //getting the id from storage
     const idString = await AsyncStorage.getItem("trainerId");
-
-    //if nothing returned responed error
     if (!idString) {
       console.warn("No trainer ID found.");
       return;
     }
 
-    //make id a number
     const trainer_user_id = parseInt(idString, 10);
 
     try {
-      //varaible to handle api call
-      const response: {
-        data: {
-          length: number;
-          level: number;
-          session_name: string;
-          trainer_user_id: number;
-        };
-      } = await api.post("/sessions", {
+      await api.post("/sessions", {
         length,
         level,
         session_name,
         trainer_user_id,
       });
 
-      //alert the user success
       Alert.alert("New Session Created");
-
-      //clear the input field
       setSession_name("");
-
-      //route back to sessions screen
       router.push("/trainerSession");
     } catch (error: any) {
-      //catch log and alert any errors
       console.error("Create session error:", error);
       const message =
         error.response?.data?.message ||
-        "An error occurred during creating new session.";
+        "An error occurred while creating a session.";
       Alert.alert("Create Session Failed", message);
     }
   };
+
+  const lengthOptions = [30, 45, 60, 90];
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={{ backgroundColor: "#ccffe5", flex: 1 }}>
-          <ScrollView>
-            <ThemedTitle>Create Session</ThemedTitle>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.inner}>
             <View>
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <ThemedText style={{ textAlign: "center" }}>
-                  Session Name:
-                </ThemedText>
-                <ThemedTextInput
-                  onChangeText={setSession_name}
-                  value={session_name}></ThemedTextInput>
-              </View>
+              <Pressable onPress={() => router.push("/trainerSession")}>
+                <Ionicons name="chevron-back" size={24} color="#2563eb" />
+              </Pressable>
+            </View>
+            <Text style={styles.title}>Create Session</Text>
 
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <Picker
-                  selectedValue={length}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setLength(itemValue)
-                  }>
-                  <Picker.Item label="Select length..." value="" />
-                  <Picker.Item label="30 minutes" value={30} />
-                  <Picker.Item label="45 minutes" value={45} />
-                  <Picker.Item label="1 hour" value={60} />
-                  <Picker.Item label="1 hour 30 minutes" value={90} />
-                </Picker>
-              </View>
+            <Text style={styles.label}>Session Name</Text>
+            <TextInput
+              placeholder="Enter session name"
+              value={session_name}
+              onChangeText={setSession_name}
+              style={[styles.input, styles.centeredBox]}
+            />
 
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <Picker
-                  selectedValue={level}
-                  onValueChange={(itemValue, itemIndex) => setLevel(itemValue)}>
-                  <Picker.Item label="Select level..." value="" />
+            <Text style={styles.label}>Session Length</Text>
+            <Pressable
+              style={[styles.selector, styles.centeredBox]}
+              onPress={() => setShowModal(true)}>
+              <Text style={styles.selectorText}>
+                {length ? `${length} mins` : "Choose length"}
+              </Text>
+            </Pressable>
 
-                  <Picker.Item label="1" value={1} />
-                  <Picker.Item label="2" value={2} />
-                  <Picker.Item label="3" value={3} />
-                  <Picker.Item label="4" value={4} />
-                  <Picker.Item label="5" value={5} />
-                </Picker>
+            <Text style={styles.label}>Level</Text>
+            <View style={[styles.levelContainer, styles.centeredBox]}>
+              {[1, 2, 3, 4, 5].map((lvl) => (
+                <Pressable
+                  key={lvl}
+                  onPress={() => setLevel(lvl)}
+                  style={[
+                    styles.levelButton,
+                    level === lvl && styles.levelButtonSelected,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.levelText,
+                      level === lvl && styles.levelTextSelected,
+                    ]}>
+                    {lvl}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              style={[styles.submitButton, styles.centeredBox]}
+              onPress={handleSubmit}>
+              <Text style={styles.submitText}>Create Session</Text>
+            </Pressable>
+          </ScrollView>
+
+          {/* Modal */}
+          <Modal transparent visible={showModal} animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Select Session Length</Text>
+                {lengthOptions.map((option) => (
+                  <Pressable
+                    key={option}
+                    onPress={() => {
+                      setLength(option);
+                      setShowModal(false);
+                    }}
+                    style={styles.modalOption}>
+                    <Text style={styles.modalOptionText}>{option} minutes</Text>
+                  </Pressable>
+                ))}
+                <Pressable onPress={() => setShowModal(false)}>
+                  <Text style={styles.modalCancel}>Cancel</Text>
+                </Pressable>
               </View>
             </View>
-          </ScrollView>
-          <View style={styles.addPressContainer}>
-            <Pressable
-              onPress={handleSubmit}
-              style={({ pressed }) => [
-                styles.addPressButton,
-                pressed && styles.addPressButtonPressed,
-              ]}>
-              <Text style={styles.addPressText}>Add New</Text>
-            </Pressable>
-          </View>
+          </Modal>
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -158,40 +153,111 @@ const CreateSession = () => {
 export default CreateSession;
 
 const styles = StyleSheet.create({
-  input: {
-    backgroundColor: "white",
-    color: "black",
-    padding: 20,
-    borderRadius: 2,
-    height: 120,
-    textAlignVertical: "top",
-    textAlign: "left",
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 20,
   },
-  addPressContainer: {
-    alignItems: "center",
-    marginVertical: 10,
-    paddingBottom: 5,
+  inner: {
+    paddingTop: 40,
+    paddingBottom: 20,
   },
-  addPressButton: {
-    backgroundColor: "#ffd1b3",
-    paddingVertical: 16,
-    paddingHorizontal: 52,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+  centeredBox: {
+    width: "90%",
+    alignSelf: "center",
   },
-  addPressButtonPressed: {
-    opacity: 0.7,
-  },
-  addPressText: {
-    fontFamily: "Avenir",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2F4F4F",
-    letterSpacing: 1.5,
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
     textAlign: "center",
-    textTransform: "uppercase",
+    marginBottom: 30,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 6,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#f2f2f2",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  selector: {
+    backgroundColor: "#f2f2f2",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  selectorText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  levelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 30,
+  },
+  levelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#e6e6e6",
+  },
+  levelButtonSelected: {
+    backgroundColor: "#007AFF",
+  },
+  levelText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  levelTextSelected: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  submitText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  modalOption: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    textAlign: "center",
+  },
+  modalCancel: {
+    marginTop: 16,
+    fontSize: 16,
+    textAlign: "center",
+    color: "#FF3B30",
   },
 });
