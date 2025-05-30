@@ -94,11 +94,11 @@ const TrainerProfile = () => {
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{trainer.email}</Text>
 
-            <Text style={styles.label}>Bio</Text>
-            <Text style={styles.value}>{trainer.bio}</Text>
-
             <Text style={styles.label}>Years of Experience</Text>
             <Text style={styles.value}>{trainer.years_experience}</Text>
+
+            <Text style={styles.label}>Bio</Text>
+            <Text style={styles.value}>{trainer.bio}</Text>
           </View>
         </ScrollView>
       ) : (

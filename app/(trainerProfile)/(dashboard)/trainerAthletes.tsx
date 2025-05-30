@@ -170,23 +170,17 @@ const TrainerAthletes = () => {
       <ScrollView>
         <Text style={styles.title}>My Athletes</Text>
 
-        <View style={styles.headerRow}>
-          <Text style={styles.headerCell}>Name</Text>
-          <Text style={styles.headerCell}>Age</Text>
-          <Text style={styles.headerCell}>Level</Text>
-        </View>
-
-        {athletes.map((athlete, index) => (
+        {athletes.map((athlete) => (
           <Pressable
             key={athlete.athlete_user_id}
             onPress={() => handlePress(athlete)}
-            style={[
-              styles.dataRow,
-              { backgroundColor: index % 2 === 0 ? "#f1f1f1" : "#ffffff" },
-            ]}>
-            <Text style={styles.cell}>{athlete.first_name}</Text>
-            <Text style={styles.cell}>{athlete.age}</Text>
-            <Text style={styles.cell}>{athlete.level}</Text>
+            style={styles.card}>
+            <Text style={styles.cardName}>
+              {athlete.first_name} {athlete.last_name}
+            </Text>
+            <Text style={styles.cardDetail}>Age: {athlete.age}</Text>
+            <Text style={styles.cardDetail}>Level: {athlete.level}</Text>
+            <Text style={styles.cardDetail}>Email: {athlete.email}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -208,32 +202,27 @@ const styles = StyleSheet.create({
     color: "#333",
     textAlign: "center",
   },
-  headerRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingBottom: 8,
+  card: {
+    backgroundColor: "#f9f9f9",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardName: {
+    fontSize: 20,
+    fontWeight: "700",
     marginBottom: 8,
-  },
-  headerCell: {
-    flex: 1,
-    fontWeight: "600",
-    fontSize: 26,
-    color: "#555",
-    textAlign: "center",
-  },
-  dataRow: {
-    flexDirection: "row",
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ddd",
-  },
-  cell: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 24,
     color: "#333",
+  },
+  cardDetail: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 4,
   },
 });
 

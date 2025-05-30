@@ -108,10 +108,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
     padding: 16,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   name: {
     fontSize: 18,

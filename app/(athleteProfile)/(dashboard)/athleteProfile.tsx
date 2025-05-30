@@ -11,6 +11,8 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -39,23 +41,27 @@ const AthleteProfile = () => {
 
   const [athlete, setAthlete] = useState<Athlete | null>(null);
 
-  useEffect(() => {
-    const fetchAthlete = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("athleteId");
-        if (!idString) {
-          console.warn("No athlete ID found.");
-          return;
+  // Replace useEffect with useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAthlete = async () => {
+        try {
+          const idString = await AsyncStorage.getItem("athleteId");
+          if (!idString) {
+            console.warn("No athlete ID found.");
+            return;
+          }
+          const athlete_user_id = parseInt(idString, 10);
+          const response = await api.get(`/athletes/${athlete_user_id}`);
+          setAthlete(response.data);
+        } catch (error) {
+          console.error("Error fetching athlete:", error);
         }
-        const athlete_user_id = parseInt(idString, 10);
-        const response = await api.get(`/athletes/${athlete_user_id}`);
-        setAthlete(response.data);
-      } catch (error) {
-        console.error("Error fetching athlete:", error);
-      }
-    };
-    fetchAthlete();
-  }, []);
+      };
+
+      fetchAthlete();
+    }, [])
+  );
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("athleteId");
