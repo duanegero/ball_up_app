@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { useState } from "react";
@@ -18,8 +20,14 @@ const AthleteLogin = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async () => {
+    if (!username || !password) {
+      setErrorMessage("Both fields are required.");
+      return;
+    }
+
     try {
       const response = await api.post("/athlete_login", {
         username,
@@ -40,16 +48,22 @@ const AthleteLogin = () => {
 
       setUsername("");
       setPassword("");
+      setErrorMessage("");
     } catch (error: any) {
       console.error("Login error:", error);
       const message =
         error.response?.data?.message || "An error occurred during login.";
+
+      setErrorMessage(message);
       Alert.alert("Login Failed", message);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}>
+      {" "}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <Text style={styles.title}>Athlete Login</Text>
@@ -61,20 +75,33 @@ const AthleteLogin = () => {
             style={styles.input}
             placeholder="Username"
             placeholderTextColor="#6b7280"
-            onChangeText={setUsername}
+            onChangeText={(text) => {
+              setUsername(text);
+              setErrorMessage("");
+            }}
             value={username}
             autoCapitalize="none"
+            accessibilityLabel="Username input"
+            accessible={true}
           />
 
           <TextInput
             style={styles.input}
             placeholder="Password"
             placeholderTextColor="#6b7280"
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setErrorMessage("");
+            }}
             value={password}
             secureTextEntry
+            accessibilityLabel="Password input"
+            accessible={true}
           />
 
+          {errorMessage !== "" && (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          )}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonText}>Login</Text>
@@ -89,7 +116,7 @@ const AthleteLogin = () => {
           </Text>
         </View>
       </TouchableWithoutFeedback>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -109,7 +136,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 40,
     fontWeight: "800",
-    color: "#111827", // almost black
+    color: "#111827",
     marginBottom: 12,
   },
   subtitle: {
@@ -163,5 +190,11 @@ const styles = StyleSheet.create({
   link: {
     color: "#2563eb",
     fontWeight: "600",
+  },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: "center",
   },
 });
