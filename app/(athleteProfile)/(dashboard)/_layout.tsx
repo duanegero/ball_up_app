@@ -44,7 +44,7 @@ const DashboardLayout = () => {
       <Tabs.Screen
         name="athleteTrainer"
         options={{
-          title: "Trainer",
+          title: "Trainers",
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? "body" : "body-outline"}
