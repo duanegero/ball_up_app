@@ -61,8 +61,8 @@ const TrainerProfile = () => {
       {trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
-            <Pressable onPress={handleLogout} hitSlop={10}>
-              <Ionicons name="log-out-outline" size={24} color="#6b7280" />
+            <Pressable onPress={handleLogout} style={styles.iconButton}>
+              <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             </Pressable>
           </View>
 
@@ -86,6 +86,7 @@ const TrainerProfile = () => {
                 />
               </Pressable>
             </View>
+            <Text style={styles.sectionTitle}>Trainer Details</Text>
             <Text style={styles.label}>Name</Text>
             <Text style={styles.value}>
               {trainer.first_name} {trainer.last_name}
@@ -188,27 +189,30 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-
   profileImagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#d1d5db",
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#3b82f6",
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
     marginBottom: 16,
+    shadowColor: "#3b82f6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   profileInitials: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#374151",
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#ffffff",
   },
-
   topButtonRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    paddingHorizontal: 20,
+    paddingHorizontal: 2,
     marginBottom: 12,
   },
   cardTopRight: {
@@ -217,16 +221,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 1,
   },
-
   editButtonText: {
     fontSize: 14,
     fontWeight: "600",
     color: "#2563eb", // blue-600
   },
-
   logoutButtonText: {
     fontSize: 14,
     fontWeight: "600",
     color: "#6b7280", // gray-500
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 10,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fee2e2",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

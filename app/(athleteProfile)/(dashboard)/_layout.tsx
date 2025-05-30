@@ -11,7 +11,7 @@ const DashboardLayout = () => {
           paddingTop: 10,
           height: 90,
         },
-        tabBarActiveTintColor: "#708090",
+        tabBarActiveTintColor: "#3B82F6",
         tabBarInactiveTintColor: "black",
       }}>
       <Tabs.Screen

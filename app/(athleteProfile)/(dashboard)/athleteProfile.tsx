@@ -7,6 +7,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Pressable,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,32 +17,16 @@ import { useCallback } from "react";
 import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+import { Trainer, Athlete } from "../../../components/types";
+
 const { width } = Dimensions.get("window");
 
 const AthleteProfile = () => {
   const router = useRouter();
 
-  interface Trainer {
-    first_name: string;
-    last_name: string;
-    bio: string;
-    years_experience: number;
-  }
-
-  interface Athlete {
-    athlete_user_id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    age: number;
-    level: number;
-    trainer?: Trainer;
-  }
-
   const [athlete, setAthlete] = useState<Athlete | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Replace useEffect with useFocusEffect
   useFocusEffect(
     useCallback(() => {
       const fetchAthlete = async () => {
@@ -56,6 +41,7 @@ const AthleteProfile = () => {
           setAthlete(response.data);
         } catch (error) {
           console.error("Error fetching athlete:", error);
+          setError("Failed to load profile. Please try again later.");
         }
       };
 
@@ -64,17 +50,30 @@ const AthleteProfile = () => {
   );
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("athleteId");
-    router.replace("/"); // or route to login screen
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.removeItem("athleteId");
+          router.replace("/");
+        },
+      },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {athlete ? (
+      {error ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loading}>{error}</Text>
+        </View>
+      ) : athlete ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
-            <Pressable onPress={handleLogout} hitSlop={10}>
-              <Ionicons name="log-out-outline" size={24} color="#6b7280" />
+            <Pressable onPress={handleLogout} style={styles.iconButton}>
+              <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             </Pressable>
           </View>
 
@@ -85,7 +84,7 @@ const AthleteProfile = () => {
             </Text>
           </View>
 
-          <Text style={styles.title}>{athlete.username}'s Proflie</Text>
+          <Text style={styles.title}>{athlete.username}'s Profile</Text>
 
           <View style={styles.card}>
             <View style={styles.cardTopRight}>
@@ -99,6 +98,8 @@ const AthleteProfile = () => {
                 />
               </Pressable>
             </View>
+
+            <Text style={styles.sectionTitle}>Athlete Details</Text>
 
             <Text style={styles.label}>Full Name</Text>
             <Text style={styles.value}>
@@ -114,9 +115,11 @@ const AthleteProfile = () => {
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{athlete.email}</Text>
           </View>
+
           <View style={styles.card}>
             {athlete.trainer ? (
               <>
+                <Text style={styles.sectionTitle}>Trainer Details</Text>
                 <Text style={styles.label}>Trainer</Text>
                 <Text style={styles.value}>
                   {athlete.trainer.first_name} {athlete.trainer.last_name}
@@ -167,20 +170,26 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   profileImagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#d1d5db",
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#3b82f6",
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
     marginBottom: 16,
+    shadowColor: "#3b82f6",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   profileInitials: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#374151",
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#ffffff",
   },
+
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 16,
@@ -218,7 +227,7 @@ const styles = StyleSheet.create({
   topButtonRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    paddingHorizontal: 20,
+    paddingHorizontal: 2,
     marginBottom: 12,
   },
   cardTopRight: {
@@ -226,5 +235,19 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 10,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fee2e2",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
