@@ -14,66 +14,48 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TextInput,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import api from "../../utils/api";
-import ThemedText from "../../components/ThemedText";
-import ThemedTitle from "../../components/ThemedTitle";
-import ThemedTextInput from "../../components/ThemedTextInput";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+const DRILL_TYPES = [
+  { label: "Warm-Up", value: "warmup" },
+  { label: "Shooting", value: "shoot" },
+  { label: "Passing", value: "pass" },
+  { label: "Dribbling", value: "dribble" },
+  { label: "Rebound/Defence", value: "reb_defence" },
+];
+
+const LEVELS = [1, 2, 3, 4, 5];
 
 const CreateDrill = () => {
-  //variable to handle router
   const router = useRouter();
 
-  //typescript interface
-  interface Drill {
-    drill_type: string;
-    description: string;
-    level: number;
-    trainer_user_id: number;
-  }
-
-  //state variables
   const [drill_type, setDrill_type] = useState("");
-  const [level, setLevel] = useState(1);
+  const [showTypeModal, setShowTypeModal] = useState(false);
+  const [level, setLevel] = useState<number | null>(null);
   const [description, setDescription] = useState("");
   const [drill_name, setDrill_name] = useState("");
 
-  //function to handle submit
   const handleSubmit = async (): Promise<void> => {
     if (!drill_type || !description || !level || !drill_name) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
 
-    //getting the id from storage
     const idString = await AsyncStorage.getItem("trainerId");
 
-    //if nothing returned responed error
     if (!idString) {
       console.warn("No trainer ID found.");
       return;
     }
 
-    //make id a number
     const trainer_user_id = parseInt(idString, 10);
 
     try {
-      //variable to handle api call
-      const response: {
-        data: {
-          message: string;
-          newDrill: {
-            drill_id: number;
-            drill_type: string;
-            description: string;
-            level: number;
-            trainer_user_id: number;
-            created_at: string;
-            drill_name: string;
-          };
-        };
-      } = await api.post("/drills", {
+      const response = await api.post("/drills", {
         drill_type,
         level,
         description,
@@ -81,19 +63,14 @@ const CreateDrill = () => {
         drill_name,
       });
 
-      //alert the user success
       Alert.alert(
         "New Drill Created",
         `Type: ${response.data.newDrill.drill_type}`
       );
 
-      //clear the input
       setDescription("");
-
-      //route back to drills list
       router.push("/trainerDrills");
     } catch (error: any) {
-      //catch log and alert any errors
       console.error("Create drill error:", error);
       const message =
         error.response?.data?.message ||
@@ -105,71 +82,93 @@ const CreateDrill = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}>
+      style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={{ backgroundColor: "#FFF0F5", flex: 1 }}>
-          <ScrollView>
-            <ThemedTitle>Create Drill</ThemedTitle>
-            <View style={styles.drillCard}>
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <TextInput
-                  style={styles.inputTwo}
-                  onChangeText={setDrill_name}
-                  value={drill_name}
-                  placeholder="Drill Name"></TextInput>
-              </View>
-
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <Picker
-                  selectedValue={drill_type}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setDrill_type(itemValue)
-                  }>
-                  <Picker.Item label="Select type..." value="" />
-                  <Picker.Item label="Warm-Up" value="warmup" />
-                  <Picker.Item label="Shooting" value="shoot" />
-                  <Picker.Item label="Passing" value="pass" />
-                  <Picker.Item label="Dribbling" value="dribble" />
-                  <Picker.Item label="Rebound/Defence" value="reb_defence" />
-                </Picker>
-              </View>
-
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <ThemedText style={{ textAlign: "center" }}>
-                  Description:
-                </ThemedText>
-                <TextInput
-                  style={styles.input}
-                  multiline={true}
-                  onChangeText={setDescription}
-                  value={description}></TextInput>
-              </View>
-
-              <View style={{ width: "80%", alignSelf: "center" }}>
-                <Picker
-                  selectedValue={level}
-                  onValueChange={(itemValue, itemIndex) => setLevel(itemValue)}>
-                  <Picker.Item label="Select level..." value="" />
-
-                  <Picker.Item label="1" value={1} />
-                  <Picker.Item label="2" value={2} />
-                  <Picker.Item label="3" value={3} />
-                  <Picker.Item label="4" value={4} />
-                  <Picker.Item label="5" value={5} />
-                </Picker>
-              </View>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View>
+              <Pressable onPress={() => router.push("/trainerDrills")}>
+                <Ionicons name="chevron-back" size={24} color="#2563eb" />
+              </Pressable>
             </View>
-          </ScrollView>
-          <View style={styles.addPressContainer}>
+            <Text style={styles.title}>Create Drill</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Drill Name"
+              value={drill_name}
+              onChangeText={setDrill_name}
+            />
+
+            <Text style={styles.label}>Drill Type</Text>
+            <Pressable
+              onPress={() => setShowTypeModal(true)}
+              style={styles.modalSelector}>
+              <Text style={{ color: drill_type ? "#000" : "#aaa" }}>
+                {drill_type
+                  ? DRILL_TYPES.find((d) => d.value === drill_type)?.label
+                  : "Select type..."}
+              </Text>
+            </Pressable>
+
+            <Modal visible={showTypeModal} transparent animationType="slide">
+              <TouchableWithoutFeedback onPress={() => setShowTypeModal(false)}>
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    {DRILL_TYPES.map((type) => (
+                      <TouchableOpacity
+                        key={type.value}
+                        onPress={() => {
+                          setDrill_type(type.value);
+                          setShowTypeModal(false);
+                        }}
+                        style={styles.modalOption}>
+                        <Text>{type.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Description"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
+
+            <Text style={styles.label}>Level</Text>
+            <View style={styles.segmentContainer}>
+              {LEVELS.map((lvl) => (
+                <Pressable
+                  key={lvl}
+                  onPress={() => setLevel(lvl)}
+                  style={[
+                    styles.segmentButton,
+                    level === lvl && styles.segmentSelected,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      level === lvl && styles.segmentTextSelected,
+                    ]}>
+                    {lvl}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
             <Pressable
               onPress={handleSubmit}
               style={({ pressed }) => [
-                styles.addPressButton,
-                pressed && styles.addPressButtonPressed,
+                styles.button,
+                pressed && { opacity: 0.7 },
               ]}>
-              <Text style={styles.addPressText}>Submit</Text>
+              <Text style={styles.buttonText}>Submit</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -179,65 +178,97 @@ const CreateDrill = () => {
 export default CreateDrill;
 
 const styles = StyleSheet.create({
-  drillCard: {
-    alignItems: "center",
-    backgroundColor: "#FFF0F5",
-    borderRadius: 12,
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollContainer: {
     padding: 20,
-    marginHorizontal: 14,
-    marginBottom: 20,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4.84,
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+    color: "#111",
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 6,
+    marginTop: 10,
+    color: "#333",
   },
   input: {
-    backgroundColor: "white",
-    color: "black",
-    padding: 20,
-    borderRadius: 2,
+    backgroundColor: "#F1F1F1",
+    borderRadius: 8,
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  textArea: {
     height: 120,
     textAlignVertical: "top",
-    textAlign: "left",
   },
-  inputTwo: {
-    backgroundColor: "white",
-    color: "black",
-    padding: 6,
-    borderRadius: 2,
-    height: 60,
-    textAlignVertical: "top",
-    textAlign: "left",
+  modalSelector: {
+    backgroundColor: "#F1F1F1",
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  addPressContainer: {
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    paddingHorizontal: 40,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  modalOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomColor: "#eee",
+    borderBottomWidth: 1,
+  },
+  segmentContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  segmentButton: {
+    flex: 1,
+    backgroundColor: "#E0E0E0",
+    marginHorizontal: 4,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: "center",
-    marginVertical: 10,
-    paddingBottom: 5,
   },
-
-  addPressButton: {
-    backgroundColor: "#D6EAF8",
+  segmentSelected: {
+    backgroundColor: "#3D7BF7",
+  },
+  segmentText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  segmentTextSelected: {
+    color: "#fff",
+  },
+  button: {
+    backgroundColor: "#3D7BF7",
     paddingVertical: 16,
-    paddingHorizontal: 52,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 12,
   },
-
-  addPressButtonPressed: {
-    opacity: 0.7,
-  },
-
-  addPressText: {
-    fontFamily: "Avenir",
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2F4F4F",
-    letterSpacing: 1.5,
-    textAlign: "center",
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
     textTransform: "uppercase",
   },
 });
