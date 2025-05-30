@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   ScrollView,
   Pressable,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,6 +13,8 @@ import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 import api from "../../../utils/api";
+
+const { width } = Dimensions.get("window");
 
 const TrainerProfile = () => {
   const router = useRouter();
@@ -54,14 +57,10 @@ const TrainerProfile = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       {trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
-            <Pressable onPress={() => router.push("/editProfile")} hitSlop={10}>
-              <Ionicons name="ellipsis-horizontal" size={24} color="#2563eb" />
-            </Pressable>
-
             <Pressable onPress={handleLogout} hitSlop={10}>
               <Ionicons name="log-out-outline" size={24} color="#6b7280" />
             </Pressable>
@@ -73,9 +72,20 @@ const TrainerProfile = () => {
               {trainer.last_name[0]}
             </Text>
           </View>
-          <Text style={styles.heading}>{trainer.username}'s Profile</Text>
+          <Text style={styles.title}>{trainer.username}'s Profile</Text>
 
           <View style={styles.card}>
+            <View style={styles.cardTopRight}>
+              <Pressable
+                onPress={() => router.push("/editProfile")}
+                hitSlop={10}>
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={24}
+                  color="#2563eb"
+                />
+              </Pressable>
+            </View>
             <Text style={styles.label}>Name</Text>
             <Text style={styles.value}>
               {trainer.first_name} {trainer.last_name}
@@ -101,15 +111,27 @@ const TrainerProfile = () => {
 export default TrainerProfile;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f2f4f7",
+  },
+  scrollContainer: {
+    padding: 20,
+    flexGrow: 1,
+  },
+  title: {
+    fontSize: width * 0.07,
+    fontWeight: "700",
+    color: "#1f2937",
+    textAlign: "center",
+    marginBottom: 30,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 16,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingVertical: 24,
-  },
+
   heading: {
     fontSize: 22,
     fontWeight: "bold",
@@ -117,18 +139,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 4,
   },
   label: {
     fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 10,
+    fontWeight: "600",
+    color: "#6b7280",
+    marginTop: 12,
   },
   value: {
     fontSize: 16,
+    fontWeight: "500",
+    color: "#111827",
     marginTop: 4,
   },
   experience: {
@@ -177,10 +207,15 @@ const styles = StyleSheet.create({
 
   topButtonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
+    justifyContent: "flex-end",
+    paddingHorizontal: 20,
     marginBottom: 12,
+  },
+  cardTopRight: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: 1,
   },
 
   editButtonText: {

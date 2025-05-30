@@ -19,6 +19,13 @@ const { width } = Dimensions.get("window");
 const AthleteProfile = () => {
   const router = useRouter();
 
+  interface Trainer {
+    first_name: string;
+    last_name: string;
+    bio: string;
+    years_experience: number;
+  }
+
   interface Athlete {
     athlete_user_id: number;
     username: string;
@@ -27,6 +34,7 @@ const AthleteProfile = () => {
     last_name: string;
     age: number;
     level: number;
+    trainer?: Trainer;
   }
 
   const [athlete, setAthlete] = useState<Athlete | null>(null);
@@ -59,10 +67,6 @@ const AthleteProfile = () => {
       {athlete ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
-            <Pressable onPress={() => router.push("/editProfile")} hitSlop={10}>
-              <Ionicons name="ellipsis-horizontal" size={24} color="#2563eb" />
-            </Pressable>
-
             <Pressable onPress={handleLogout} hitSlop={10}>
               <Ionicons name="log-out-outline" size={24} color="#6b7280" />
             </Pressable>
@@ -75,11 +79,21 @@ const AthleteProfile = () => {
             </Text>
           </View>
 
-          {/* Username as title */}
           <Text style={styles.title}>{athlete.username}'s Proflie</Text>
 
-          {/* Profile info card */}
           <View style={styles.card}>
+            <View style={styles.cardTopRight}>
+              <Pressable
+                onPress={() => router.push("(athleteProfile)/editProfile")}
+                hitSlop={10}>
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={24}
+                  color="#2563eb"
+                />
+              </Pressable>
+            </View>
+
             <Text style={styles.label}>Full Name</Text>
             <Text style={styles.value}>
               {athlete.first_name} {athlete.last_name}
@@ -93,6 +107,29 @@ const AthleteProfile = () => {
 
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{athlete.email}</Text>
+          </View>
+          <View style={styles.card}>
+            {athlete.trainer ? (
+              <>
+                <Text style={styles.label}>Trainer</Text>
+                <Text style={styles.value}>
+                  {athlete.trainer.first_name} {athlete.trainer.last_name}
+                </Text>
+
+                <Text style={styles.label}>Experience</Text>
+                <Text style={styles.value}>
+                  {athlete.trainer.years_experience} years
+                </Text>
+
+                <Text style={styles.label}>Trainer Bio</Text>
+                <Text style={styles.value}>{athlete.trainer.bio}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.label}>Trainer</Text>
+                <Text style={styles.value}>No trainer assigned</Text>
+              </>
+            )}
           </View>
         </ScrollView>
       ) : (
@@ -161,34 +198,6 @@ const styles = StyleSheet.create({
     color: "#111827",
     marginTop: 4,
   },
-  levelContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-  levelLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginBottom: 16,
-  },
-  levelCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#2563eb",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#2563eb",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  levelValue: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#ffffff",
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -200,34 +209,16 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginTop: 20,
   },
-  editButtonContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  editButton: {
-    backgroundColor: "#2563eb",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-
-  editButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-
   topButtonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
+    justifyContent: "flex-end",
+    paddingHorizontal: 20,
     marginBottom: 12,
+  },
+  cardTopRight: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: 1,
   },
 });
