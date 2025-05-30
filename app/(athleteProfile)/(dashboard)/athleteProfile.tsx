@@ -84,7 +84,7 @@ const AthleteProfile = () => {
             </Text>
           </View>
 
-          <Text style={styles.title}>{athlete.username}'s Profile</Text>
+          <Text style={styles.title}>{athlete.first_name}'s Profile</Text>
 
           <View style={styles.card}>
             <View style={styles.cardTopRight}>

@@ -9,6 +9,9 @@ import {
   ScrollView,
   SafeAreaView,
   Pressable,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../utils/api"; // Axios instance with baseURL
@@ -79,7 +82,9 @@ const EditProfileScreen = () => {
 
       const res = await api.put(`/athletes/${athleteId}`, filteredData);
       if (res.status === 200) {
-        Alert.alert("Success", "Profile updated successfully!");
+        Alert.alert("Success", "Profile updated successfully!", [
+          { text: "OK", onPress: () => router.push("/athleteProfile") },
+        ]);
       } else {
         Alert.alert("Update failed", "Unexpected server response.");
       }
@@ -90,53 +95,82 @@ const EditProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View>
-          <Pressable onPress={() => router.push("/athleteProfile")}>
-            <Ionicons name="chevron-back" size={24} color="#2563eb" />
-          </Pressable>
-        </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}>
+      <View style={styles.backIconContainer}>
+        <Pressable onPress={() => router.push("/athleteProfile")}>
+          <Ionicons name="chevron-back" size={24} color="#2563eb" />
+        </Pressable>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Edit Profile</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="First Name"
-          value={formData.first_name}
-          onChangeText={(value) => handleChange("first_name", value)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          value={formData.last_name}
-          onChangeText={(value) => handleChange("last_name", value)}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={formData.email}
-          onChangeText={(value) => handleChange("email", value)}
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Age"
-          value={formData.age}
-          onChangeText={(value) => handleChange("age", value)}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Level"
-          value={formData.level}
-          onChangeText={(value) => handleChange("level", value)}
-        />
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>First Name</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.first_name}
+            onChangeText={(value) => handleChange("first_name", value)}
+            placeholder="First Name"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.last_name}
+            onChangeText={(value) => handleChange("last_name", value)}
+            placeholder="Last Name"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.email}
+            onChangeText={(value) => handleChange("email", value)}
+            placeholder="Email"
+            keyboardType="email-address"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Age</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.age}
+            onChangeText={(value) => handleChange("age", value)}
+            placeholder="Age"
+            keyboardType="numeric"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Level</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.level}
+            onChangeText={(value) => {
+              // Allow only numbers 1 to 5
+              if (/^[1-5]$/.test(value) || value === "") {
+                handleChange("level", value);
+              }
+            }}
+            placeholder="Level (1–5)"
+            keyboardType="numeric"
+          />
+        </View>
 
         <View style={styles.buttonContainer}>
-          <Button title="Save Changes" onPress={handleSubmit} color="#007AFF" />
+          <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -165,5 +199,35 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
+  },
+  backIconContainer: {
+    marginTop: Platform.OS === "ios" ? 50 : 20,
+    marginBottom: 10,
+  },
+  saveButton: {
+    backgroundColor: "#007AFF",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+
+  label: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+  scrollContainer: {
+    padding: 20,
+    flexGrow: 1,
   },
 });
