@@ -15,3 +15,26 @@ export interface Athlete {
   level: number;
   trainer?: Trainer;
 }
+
+export interface Drill {
+  drill_type: string;
+  level: number;
+  description: string;
+}
+
+export interface SessionDrill {
+  drill: Drill;
+}
+
+export interface Session {
+  session_name: string;
+  length: number;
+  level: string;
+  Session_Drill: SessionDrill[];
+}
+
+export interface AthleteSessionItem {
+  session_id: number;
+  athlete_user_id: number;
+  session: Session;
+}

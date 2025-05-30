@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -8,18 +8,19 @@ import {
   SafeAreaView,
   Alert,
   Pressable,
+  FlatList,
 } from "react-native";
 import api from "../../../utils/api";
+import { AthleteSessionItem } from "../../../components/types";
 
 const AthleteSession = () => {
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState<AthleteSessionItem[]>([]);
 
-  useEffect(() => {
-    fetchAthleteSessions();
-  }, []);
+  const [loading, setLoading] = useState(true);
 
-  const fetchAthleteSessions = async () => {
+  const fetchAthleteSessions = useCallback(async () => {
     try {
+      setLoading(true);
       const idString = await AsyncStorage.getItem("athleteId");
       if (!idString) {
         console.warn("No athlete ID found.");
@@ -37,9 +38,16 @@ const AthleteSession = () => {
         console.warn("No sessions found.");
       }
     } catch (error) {
-      console.error("Error fetching athlete sessions", error);
+      console.error("[AthleteSession] Error fetching sessions", error);
+      Alert.alert("Error", "Could not load your sessions. Try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAthleteSessions();
+  }, [fetchAthleteSessions]);
 
   const handleComplete = async (
     athlete_user_id: number,
@@ -56,44 +64,64 @@ const AthleteSession = () => {
     }
   };
 
+  const handlePress = (athleteId: number, sessionId: number) => () => {
+    handleComplete(athleteId, sessionId);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>My Training Sessions</Text>
-      <ScrollView>
-        {sessions.map((item: any) => {
-          const { session } = item;
-          return (
-            <View key={item.session_id} style={styles.card}>
-              <Text style={styles.sessionName}>{session.session_name}</Text>
-              <Text style={styles.detail}>
-                Length: {session.length} mins | Level: {session.level}
-              </Text>
 
-              {session.Session_Drill.length > 0 ? (
-                <View style={styles.drillList}>
-                  {session.Session_Drill.map((drillItem: any, i: number) => (
-                    <Text key={i} style={styles.drillText}>
-                      • {drillItem.drill.drill_type.toUpperCase()} (Lv
-                      {drillItem.drill.level}):{" "}
-                      {drillItem.drill.description.trim()}
-                    </Text>
-                  ))}
-                </View>
-              ) : (
-                <Text style={styles.noDrills}>No drills in this session.</Text>
-              )}
+      {loading ? (
+        <Text style={{ textAlign: "center", marginTop: 20 }}>
+          Loading sessions...
+        </Text>
+      ) : sessions.length === 0 ? (
+        <Text style={{ textAlign: "center", marginTop: 20 }}>
+          No training sessions available.
+        </Text>
+      ) : (
+        <FlatList
+          data={sessions}
+          keyExtractor={(item) => item.session_id.toString()}
+          renderItem={({ item }) => {
+            const { session } = item;
 
-              <Pressable
-                style={styles.button}
-                onPress={() =>
-                  handleComplete(item.athlete_user_id, item.session_id)
-                }>
-                <Text style={styles.buttonText}>Mark Completed</Text>
-              </Pressable>
-            </View>
-          );
-        })}
-      </ScrollView>
+            return (
+              <View style={styles.card}>
+                <Text style={styles.sessionName}>{session.session_name}</Text>
+                <Text style={styles.detail}>
+                  Length: {session.length} mins | Level: {session.level}
+                </Text>
+
+                {session.Session_Drill.length > 0 ? (
+                  <View style={styles.drillList}>
+                    {session.Session_Drill.map((drillItem, i) => (
+                      <Text key={i} style={styles.drillText}>
+                        • {drillItem.drill.drill_type.toUpperCase()} (Lv
+                        {drillItem.drill.level}):{" "}
+                        {drillItem.drill.description.trim()}
+                      </Text>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={styles.noDrills}>
+                    No drills in this session.
+                  </Text>
+                )}
+
+                <Pressable
+                  style={styles.button}
+                  onPress={handlePress(item.athlete_user_id, item.session_id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Mark ${session.session_name} as completed`}>
+                  <Text style={styles.buttonText}>Mark Completed</Text>
+                </Pressable>
+              </View>
+            );
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 };
