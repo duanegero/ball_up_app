@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { useState } from "react";
@@ -18,8 +20,14 @@ const TrainerLogin = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (): Promise<void> => {
+    if (!username || !password) {
+      setErrorMessage("Both fields are required.");
+      return;
+    }
+
     try {
       const response = await api.post("/trainer_login", {
         username,
@@ -40,55 +48,72 @@ const TrainerLogin = () => {
 
       setUsername("");
       setPassword("");
+      setErrorMessage("");
     } catch (error: any) {
       console.error("Login error:", error);
       const message =
         error.response?.data?.message || "An error occurred during login.";
+
+      setErrorMessage(message);
       Alert.alert("Login Failed", message);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Trainer Access Portal</Text>
-          <Text style={styles.subtitle}>
-            Log in to manage and monitor athletes
-          </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.container}>
+            <Text style={styles.title}>Trainer Access Portal</Text>
+            <Text style={styles.subtitle}>
+              Log in to manage and monitor athletes
+            </Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            placeholderTextColor="#6b7280"
-            onChangeText={setUsername}
-            value={username}
-            autoCapitalize="none"
-          />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor="#6b7280"
+              onChangeText={(text) => {
+                setUsername(text);
+                setErrorMessage("");
+              }}
+              value={username}
+              autoCapitalize="none"
+            />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#6b7280"
-            onChangeText={setPassword}
-            value={password}
-            secureTextEntry
-          />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#6b7280"
+              onChangeText={(text) => {
+                setPassword(text);
+                setErrorMessage("");
+              }}
+              value={password}
+              secureTextEntry
+            />
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
+            {errorMessage !== "" && (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            )}
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                <Text style={styles.buttonText}>Login</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.linkText}>
+              Don’t have an account?{" "}
+              <Link href="/trainerSignUp" style={styles.link}>
+                Sign Up
+              </Link>
+            </Text>
           </View>
-
-          <Text style={styles.linkText}>
-            Don’t have an account?{" "}
-            <Link href="/trainerSignUp" style={styles.link}>
-              Sign Up
-            </Link>
-          </Text>
-        </View>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -151,7 +176,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
+    width: "100%",
   },
+
   buttonText: {
     color: "#ffffff",
     fontSize: 16,
@@ -164,5 +191,11 @@ const styles = StyleSheet.create({
   link: {
     color: "#2563eb",
     fontWeight: "600",
+  },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: "center",
   },
 });
