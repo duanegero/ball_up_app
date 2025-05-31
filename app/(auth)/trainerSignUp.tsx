@@ -28,6 +28,29 @@ const TrainerSignUp = () => {
 
   const handleSubmit = async () => {
     const years_experience_number = parseInt(years_experience, 10);
+
+    if (
+      !email ||
+      !username ||
+      !password ||
+      !first_name ||
+      !last_name ||
+      !years_experience ||
+      !bio
+    ) {
+      Alert.alert("All fields are required.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      Alert.alert("Invalid email format.");
+      return;
+    }
+
+    if (isNaN(years_experience_number)) {
+      Alert.alert("Years of experience must be numbers.");
+      return;
+    }
     try {
       const response = await api.post("/trainers", {
         email,
@@ -56,6 +79,7 @@ const TrainerSignUp = () => {
       setYears_experience("");
       setBio("");
     } catch (error: any) {
+      console.error("Sign up error:", error);
       const message =
         error.response?.data?.message || "An error occurred during sign up.";
       Alert.alert("Sign Up Failed", message);
@@ -75,7 +99,7 @@ const TrainerSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            onChangeText={setEmail}
+            onChangeText={(text) => setEmail(text.trim())}
             value={email}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -83,28 +107,28 @@ const TrainerSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Username"
-            onChangeText={setUsername}
+            onChangeText={(text) => setUsername(text.trim())}
             value={username}
             autoCapitalize="none"
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
-            onChangeText={setPassword}
+            onChangeText={(text) => setPassword(text.trim())}
             value={password}
             secureTextEntry
           />
           <TextInput
             style={styles.input}
             placeholder="First Name"
-            onChangeText={setFirst_name}
+            onChangeText={(text) => setFirst_name(text.trim())}
             value={first_name}
             autoCapitalize="words"
           />
           <TextInput
             style={styles.input}
             placeholder="Last Name"
-            onChangeText={setLast_name}
+            onChangeText={(text) => setLast_name(text.trim())}
             value={last_name}
             autoCapitalize="words"
           />
