@@ -30,6 +30,27 @@ const AthleteSignUp = () => {
     const age_number = parseInt(age, 10);
     const level_number = parseInt(level, 10);
 
+    if (
+      !email ||
+      !username ||
+      !password ||
+      !first_name ||
+      !last_name ||
+      !age ||
+      !level
+    ) {
+      Alert.alert("All fields are required.");
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      Alert.alert("Invalid email format.");
+      return;
+    }
+    if (isNaN(age_number) || isNaN(level_number)) {
+      Alert.alert("Age and Level must be numbers.");
+      return;
+    }
+
     try {
       const response = await api.post("/athletes", {
         email,
@@ -78,7 +99,7 @@ const AthleteSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Email"
-            onChangeText={setEmail}
+            onChangeText={(text) => setEmail(text.trim())}
             value={email}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -88,7 +109,7 @@ const AthleteSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Username"
-            onChangeText={setUsername}
+            onChangeText={(text) => setUsername(text.trim())}
             value={username}
             autoCapitalize="none"
             placeholderTextColor="#999"
@@ -97,7 +118,7 @@ const AthleteSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Password"
-            onChangeText={setPassword}
+            onChangeText={(text) => setPassword(text.trim())}
             value={password}
             secureTextEntry
             placeholderTextColor="#999"
@@ -105,8 +126,8 @@ const AthleteSignUp = () => {
 
           <TextInput
             style={styles.input}
-            placeholder="Firstname"
-            onChangeText={setFirst_name}
+            placeholder="First Name"
+            onChangeText={(text) => setFirst_name(text.trim())}
             value={first_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
@@ -114,8 +135,8 @@ const AthleteSignUp = () => {
 
           <TextInput
             style={styles.input}
-            placeholder="Lastname"
-            onChangeText={setLast_name}
+            placeholder="Last Name"
+            onChangeText={(text) => setLast_name(text.trim())}
             value={last_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
@@ -141,6 +162,11 @@ const AthleteSignUp = () => {
 
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/athleteLogin")}>
+            <Text style={{ color: "#0066cc", marginTop: 20 }}>
+              Already have an account? Login
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>

@@ -63,7 +63,6 @@ const AthleteLogin = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}>
-      {" "}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <Text style={styles.title}>Athlete Login</Text>
@@ -110,8 +109,8 @@ const AthleteLogin = () => {
 
           <Text style={styles.linkText}>
             Don’t have an account?{" "}
-            <Link href="/athleteSignUp" style={styles.link}>
-              Sign Up
+            <Link href="/athleteSignUp" asChild>
+              <Text style={styles.link}>Sign Up</Text>
             </Link>
           </Text>
         </View>
