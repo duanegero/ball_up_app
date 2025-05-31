@@ -20,6 +20,19 @@ import {
 import api from "../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+type DrillResponse = {
+  message: string;
+  newDrill: {
+    drill_id: number;
+    drill_name: string;
+    drill_type: string;
+    description: string;
+    level: number;
+    trainer_user_id: number;
+    created_at: string; // or `Date` if you want to parse it
+  };
+};
+
 const DRILL_TYPES = [
   { label: "Warm-Up", value: "warmup" },
   { label: "Shooting", value: "shoot" },
@@ -30,7 +43,7 @@ const DRILL_TYPES = [
 
 const LEVELS = [1, 2, 3, 4, 5];
 
-const CreateDrill = () => {
+const CreateDrill: React.FC = () => {
   const router = useRouter();
 
   const [drill_type, setDrill_type] = useState("");
@@ -55,7 +68,7 @@ const CreateDrill = () => {
     const trainer_user_id = parseInt(idString, 10);
 
     try {
-      const response = await api.post("/drills", {
+      const response = await api.post<DrillResponse>("/drills", {
         drill_type,
         level,
         description,
@@ -69,9 +82,15 @@ const CreateDrill = () => {
       );
 
       setDescription("");
+      setDrill_type("");
+      setLevel(null);
+      setDrill_name("");
       router.push("/trainerDrills");
     } catch (error: any) {
-      console.error("Create drill error:", error);
+      console.error(
+        "Create drill error:",
+        error?.response?.data || error.message
+      );
       const message =
         error.response?.data?.message ||
         "An error occurred during creating new drill.";
@@ -93,6 +112,7 @@ const CreateDrill = () => {
             </View>
             <Text style={styles.title}>Create Drill</Text>
 
+            <Text style={styles.label}>Drill Name</Text>
             <TextInput
               style={styles.input}
               placeholder="Drill Name"
@@ -106,34 +126,40 @@ const CreateDrill = () => {
               style={styles.modalSelector}>
               <Text style={{ color: drill_type ? "#000" : "#aaa" }}>
                 {drill_type
-                  ? DRILL_TYPES.find((d) => d.value === drill_type)?.label
-                  : "Select type..."}
+                  ? `Drill Type: ${
+                      DRILL_TYPES.find((d) => d.value === drill_type)?.label
+                    }`
+                  : "Select Drill Type..."}
               </Text>
             </Pressable>
 
             <Modal visible={showTypeModal} transparent animationType="slide">
-              <TouchableWithoutFeedback onPress={() => setShowTypeModal(false)}>
-                <View style={styles.modalOverlay}>
-                  <View style={styles.modalContent}>
-                    {DRILL_TYPES.map((type) => (
-                      <TouchableOpacity
-                        key={type.value}
-                        onPress={() => {
-                          setDrill_type(type.value);
-                          setShowTypeModal(false);
-                        }}
-                        style={styles.modalOption}>
-                        <Text>{type.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback
+                  onPress={() => setShowTypeModal(false)}>
+                  <View style={{ flex: 1 }} />
+                </TouchableWithoutFeedback>
+
+                <View style={styles.modalContent}>
+                  {DRILL_TYPES.map((type) => (
+                    <TouchableOpacity
+                      key={type.value}
+                      onPress={() => {
+                        setDrill_type(type.value);
+                        setShowTypeModal(false);
+                      }}
+                      style={styles.modalOption}>
+                      <Text>{type.label}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              </TouchableWithoutFeedback>
+              </View>
             </Modal>
 
+            <Text style={styles.label}>Description</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Description"
+              placeholder="A short description of the drill"
               value={description}
               onChangeText={setDescription}
               multiline
