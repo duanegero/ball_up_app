@@ -15,7 +15,7 @@ const Home = () => {
         <Text style={styles.title}>Ball Up</Text>
         <Image
           source={require("../assets/basketball.png")}
-          style={{ width: 100, height: 100, paddingBottom: 20 }}
+          style={styles.image}
         />
 
         <Text style={styles.subtitle}>
@@ -54,13 +54,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 40,
+    fontSize: 44,
     fontWeight: "800",
     color: "#1f2937", // dark gray
     marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 24,
+    fontStyle: "italic",
     fontWeight: "500",
     color: "#6b7280", // gray-500
     textAlign: "center",
@@ -69,6 +71,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
+    paddingHorizontal: 16,
     gap: 20,
   },
   button: {
@@ -81,10 +84,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
+    width: "100%",
+    maxWidth: 300,
+    alignSelf: "center",
   },
   buttonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
   },
 });
