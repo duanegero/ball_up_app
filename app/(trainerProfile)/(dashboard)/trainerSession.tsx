@@ -5,114 +5,120 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Pressable,
   Alert,
   SafeAreaView,
   TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
 import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { Session } from "../../../components/types";
+import { SessionDrill } from "../../../components/types";
 
 const TrainerSession = () => {
   const router = useRouter();
 
-  interface Session {
-    session_id: number;
-    session_name: string;
-    length: number;
-    level: number;
-    trainer_user_id: number;
-  }
-
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchTrainerSessions = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-
-        const trainer_user_id = parseInt(idString, 10);
-        const response = await api.get(`trainers/sessions/${trainer_user_id}`);
-
-        setSessions(response.data);
-      } catch (error) {
-        console.error("Error fetching trainer sessions", error);
-      }
-    };
     fetchTrainerSessions();
   }, []);
 
-  const handlePress = async (session: any) => {
+  const fetchTrainerSessions = async () => {
     try {
-      const response = await api.get(
-        `sessions/session_drills/${session.session_id}`
-      );
-      const drills = response.data;
+      setLoading(true);
+      const idString = await AsyncStorage.getItem("trainerId");
 
-      const drillNames = drills
-        .map((d: any) => `• ${d.drill.drill_name}`)
-        .join("\n");
+      if (!idString) {
+        console.warn("No trainer ID found.");
+        return;
+      }
 
-      Alert.alert(
-        `${session.session_name}`,
-        `Drills:\n\n${drillNames}`,
-        [
-          {
-            text: "Edit",
-            onPress: () =>
-              router.push({
-                pathname: "/editSession",
-                params: { sessionId: session.session_id },
-              }),
-          },
-          {
-            text: "Delete",
-            onPress: () => {
-              Alert.alert(
-                "Confirm Delete",
-                `Are you sure you want to delete "${session.session_name}"?`,
-                [
-                  {
-                    text: "Yes, Delete",
-                    onPress: async () => {
-                      try {
-                        await api.delete(`sessions/${session.session_id}`);
-                        setSessions((prev) =>
-                          prev.filter(
-                            (s) => s.session_id !== session.session_id
-                          )
-                        );
-                      } catch (error) {
-                        console.error("Failed to delete session", error);
-                      }
-                    },
-                    style: "destructive",
-                  },
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                  },
-                ],
-                { cancelable: true }
-              );
-            },
-            style: "destructive",
-          },
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-        ],
-        { cancelable: true }
-      );
+      const trainer_user_id = parseInt(idString, 10);
+      const response = await api.get(`trainers/sessions/${trainer_user_id}`);
+
+      setSessions(response.data);
+    } catch (error) {
+      console.error("Failed to fetch trainer sessions", error);
+      Alert.alert("Error", "Unable to load sessions. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDrills = async (sessionId: number): Promise<SessionDrill[]> => {
+    try {
+      const response = await api.get(`sessions/session_drills/${sessionId}`);
+      return response.data;
     } catch (error) {
       console.error("Failed to fetch drills", error);
+      throw new Error("Could not fetch drills");
+    }
+  };
+
+  const formatDrillNames = (drills: SessionDrill[]) => {
+    return drills.map((d) => `• ${d.drill.drill_name}`).join("\n");
+  };
+
+  const showSessionOptions = (session: Session, drillNames: string) => {
+    Alert.alert(
+      `${session.session_name}`,
+      `Drills:\n\n${drillNames}`,
+      [
+        {
+          text: "Edit",
+          onPress: () =>
+            router.push({
+              pathname: "/editSession",
+              params: { sessionId: session.session_id },
+            }),
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            Alert.alert(
+              "Confirm Delete",
+              `Are you sure you want to delete "${session.session_name}"?`,
+              [
+                {
+                  text: "Yes, Delete",
+                  onPress: async () => {
+                    try {
+                      await api.delete(`sessions/${session.session_id}`);
+                      setSessions((prev) =>
+                        prev.filter((s) => s.session_id !== session.session_id)
+                      );
+                    } catch (error) {
+                      console.error("Failed to delete session", error);
+                      Alert.alert(
+                        "Error",
+                        "Could not delete session. Please try again."
+                      );
+                    }
+                  },
+                  style: "destructive",
+                },
+                { text: "Cancel", style: "cancel" },
+              ],
+              { cancelable: true }
+            );
+          },
+          style: "destructive",
+        },
+        { text: "Cancel", style: "cancel" },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handlePress = async (session: Session) => {
+    try {
+      const drills = await fetchDrills(session.session_id);
+      const drillNames = formatDrillNames(drills);
+      showSessionOptions(session, drillNames);
+    } catch (error) {
       Alert.alert("Error", "Could not fetch drills for this session.");
     }
   };
@@ -121,35 +127,52 @@ const TrainerSession = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Your Sessions</Text>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {sessions.map((session: any) => (
-          <View key={session.session_id} style={styles.card}>
-            <Text style={styles.label}>
-              Name: <Text style={styles.value}>{session.session_name}</Text>
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#007BFF"
+          style={{ marginTop: 20 }}
+        />
+      ) : (
+        <FlatList
+          data={sessions}
+          keyExtractor={(item) => item.session_id.toString()}
+          contentContainerStyle={styles.scrollContainer}
+          ListEmptyComponent={
+            <Text style={styles.noSessionsText}>
+              No sessions found. Tap below to create one.
             </Text>
-            <Text style={styles.label}>
-              Length: <Text style={styles.value}>{session.length}</Text>
-            </Text>
-            <Text style={styles.label}>
-              Level: <Text style={styles.value}>{session.level}</Text>
-            </Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.label}>
+                Name: <Text style={styles.value}>{item.session_name}</Text>
+              </Text>
+              <Text style={styles.label}>
+                Length: <Text style={styles.value}>{item.length}</Text>
+              </Text>
+              <Text style={styles.label}>
+                Level: <Text style={styles.value}>{item.level}</Text>
+              </Text>
 
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handlePress(session)} // or call another function if you want a modal
-            >
-              <Ionicons name="create-outline" size={20} color="#fff" />
-              <Text style={styles.deleteText}>View/Edit</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => handlePress(item)}>
+                <Ionicons name="create-outline" size={20} color="#fff" />
+                <Text style={styles.actionText}>View/Edit</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => router.push("/createSession")}>
-        <Text style={styles.addText}>Add New Session</Text>
-      </TouchableOpacity>
+      {!loading && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push("/createSession")}>
+          <Text style={styles.addText}>Add New Session</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -171,7 +194,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
   },
-  deleteButton: {
+  actionButton: {
     flexDirection: "row",
     backgroundColor: "#FF4C4C",
     padding: 8,
@@ -179,11 +202,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
   },
-  deleteText: {
+  actionText: {
     color: "#fff",
     fontWeight: "bold",
+    marginLeft: 6,
   },
   value: {
     fontWeight: "normal",
@@ -213,6 +236,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  noSessionsText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#888",
   },
 });
 
