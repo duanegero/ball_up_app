@@ -12,19 +12,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import api from "../../../utils/api";
 import { useRouter } from "expo-router";
+import { Drill } from "../../../components/types";
 
 const TrainerDrills = () => {
   const router = useRouter();
 
-  interface Drill {
-    drill_id: number;
-    drill_type: string;
-    description: string;
-    level: string;
-    trainer_user_id: number;
-  }
-
   const [drills, setDrills] = useState<Drill[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTrainerDrills = async () => {
@@ -35,12 +29,18 @@ const TrainerDrills = () => {
           return;
         }
 
-        const trainer_user_id = parseInt(idString, 10);
+        const trainer_user_id = Number(idString);
+        if (isNaN(trainer_user_id)) {
+          console.warn("Invalid trainer ID.");
+          return;
+        }
         const response = await api.get(`/trainers/drills/${trainer_user_id}`);
         setDrills(response.data);
       } catch (error) {
         console.error("Error fetching trainer drills", error);
         Alert.alert("Error", "Could not load drills.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -72,26 +72,35 @@ const TrainerDrills = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>My Drills</Text>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {drills.map((drill) => (
-          <View key={drill.drill_id} style={styles.card}>
-            <Text style={styles.label}>
-              Type: <Text style={styles.value}>{drill.drill_type}</Text>
-            </Text>
-            <Text style={styles.label}>
-              Description: <Text style={styles.value}>{drill.description}</Text>
-            </Text>
-            <Text style={styles.label}>
-              Level: <Text style={styles.value}>{drill.level}</Text>
-            </Text>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDelete(drill.drill_id)}>
-              <Ionicons name="trash" size={20} color="#fff" />
-              <Text style={styles.deleteText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+        {loading ? (
+          <Text style={styles.loadingText}>Loading drills...</Text>
+        ) : drills.length === 0 ? (
+          <Text style={styles.noDrillsText}>No drills found.</Text>
+        ) : (
+          drills.map((drill) => (
+            <View key={drill.drill_id} style={styles.card}>
+              <Text style={styles.label}>Type:</Text>
+              <Text style={styles.value}>{drill.drill_type}</Text>
+
+              <Text style={styles.label}>Description:</Text>
+              <Text style={styles.value}>{drill.description}</Text>
+
+              <Text style={styles.label}>Level:</Text>
+              <Text style={styles.value}>{drill.level}</Text>
+
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDelete(drill.drill_id)}
+                accessibilityLabel={`Delete drill ${drill.drill_type}`}
+                accessibilityRole="button">
+                <Ionicons name="trash" size={20} color="#fff" />
+                <Text style={styles.deleteText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
       </ScrollView>
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push("/createDrill")}>
@@ -135,8 +144,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   value: {
-    fontWeight: "normal",
+    fontSize: 14,
+    marginBottom: 4,
   },
+
   deleteButton: {
     flexDirection: "row",
     backgroundColor: "#FF4C4C",
@@ -162,5 +173,17 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#666",
+  },
+  noDrillsText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "#999",
   },
 });

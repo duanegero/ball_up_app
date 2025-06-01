@@ -19,9 +19,11 @@ export interface Athlete {
 }
 
 export interface Drill {
+  drill_id: number;
   drill_type: string;
-  level: number;
   description: string;
+  level: string;
+  trainer_user_id: number;
 }
 
 export interface SessionDrill {
