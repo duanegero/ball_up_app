@@ -26,9 +26,12 @@ const CreateSession = () => {
   const [level, setLevel] = useState<number | null>(null);
   const [session_name, setSession_name] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (): Promise<void> => {
-    if (!length || !level || !session_name) {
+    const trimmedName = session_name.trim();
+
+    if (length === null || level === null || !trimmedName) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
@@ -41,11 +44,13 @@ const CreateSession = () => {
 
     const trainer_user_id = parseInt(idString, 10);
 
+    setLoading(true);
+
     try {
       await api.post("/sessions", {
         length,
         level,
-        session_name,
+        session_name: trimmedName,
         trainer_user_id,
       });
 
@@ -58,6 +63,8 @@ const CreateSession = () => {
         error.response?.data?.message ||
         "An error occurred while creating a session.";
       Alert.alert("Create Session Failed", message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,7 +88,7 @@ const CreateSession = () => {
             <TextInput
               placeholder="Enter session name"
               value={session_name}
-              onChangeText={setSession_name}
+              onChangeText={(text) => setSession_name(text.trimStart())}
               style={[styles.input, styles.centeredBox]}
             />
 
@@ -131,6 +138,7 @@ const CreateSession = () => {
                   <Pressable
                     key={option}
                     onPress={() => {
+                      Keyboard.dismiss();
                       setLength(option);
                       setShowModal(false);
                     }}
