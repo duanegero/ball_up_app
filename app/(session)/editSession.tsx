@@ -72,7 +72,11 @@ const EditSession = () => {
       (d) => d.drill_id === drill.drill_id
     );
     if (alreadyAdded) {
-      Alert.alert("Drill already added to session.");
+      Alert.alert(
+        "Duplicate Drill",
+        "This drill is already part of the session."
+      );
+
       return;
     }
 
@@ -156,11 +160,17 @@ const EditSession = () => {
         </View>
       </Modal>
 
-      <Text style={styles.sectionTitle}>Drills in This Session</Text>
+      <Text style={styles.sectionTitle}>Drills </Text>
+
+      {sessionDrills.length === 0 && (
+        <Text style={styles.emptyText}>
+          No drills added to this session yet.
+        </Text>
+      )}
 
       <FlatList
         data={sessionDrills}
-        keyExtractor={(item, index) => `${item.drill?.drill_name}-${index}`}
+        keyExtractor={(item) => `${item.drill_id}`}
         renderItem={({ item }) => (
           <View style={styles.drillItem}>
             <Text style={styles.drillText}>
@@ -252,31 +262,10 @@ const styles = StyleSheet.create({
   drillButtonText: {
     fontSize: 16,
   },
-  backButton: {
-    backgroundColor: "#1E40AF", // deep blue
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  backButtonPressed: {
-    opacity: 0.8,
-  },
-  backContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  backText: {
-    marginLeft: 8,
+  emptyText: {
     fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
+    color: "#555",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
