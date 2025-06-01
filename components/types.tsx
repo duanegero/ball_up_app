@@ -29,10 +29,12 @@ export interface SessionDrill {
 }
 
 export interface Session {
+  session_id: number;
   session_name: string;
   length: number;
   level: string;
   Session_Drill: SessionDrill[];
+  trainer_user_id: number;
 }
 
 export interface AthleteSessionItem {

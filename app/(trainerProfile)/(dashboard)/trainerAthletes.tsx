@@ -11,57 +11,38 @@ import {
 } from "react-native";
 import api from "../../../utils/api";
 
+import { Session, Athlete } from "../../../components/types";
+
 const TrainerAthletes = () => {
-  interface Session {
-    session_id: number;
-    session_name: string;
-    length: number;
-    level: number;
-    trainer_user_id: number;
-  }
-
-  interface Athlete {
-    athlete_user_id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-    age: number;
-    level: number;
-  }
-
   const [trainerId, setTrainerId] = useState<number | null>(null);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
 
   useEffect(() => {
-    const fetchTrainerSessions = async () => {
+    const fetchTrainerData = async () => {
       try {
         const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) return console.warn("No trainer ID found.");
-        const trainer_user_id = parseInt(idString, 10);
-        const response = await api.get(`trainers/sessions/${trainer_user_id}`);
-        setSessions(response.data);
-      } catch (error) {
-        console.error("Error fetching trainer sessions", error);
-      }
-    };
-    fetchTrainerSessions();
-  }, []);
+        if (!idString) {
+          console.warn("No trainer ID found.");
+          return;
+        }
 
-  useEffect(() => {
-    const fetchTrainerAthletes = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) return console.warn("No trainer ID found.");
         const trainer_user_id = parseInt(idString, 10);
         setTrainerId(trainer_user_id);
-        const response = await api.get(`/trainers/athletes/${trainer_user_id}`);
-        setAthletes(response.data);
+
+        const [sessionsRes, athletesRes] = await Promise.all([
+          api.get(`/trainers/sessions/${trainer_user_id}`),
+          api.get(`/trainers/athletes/${trainer_user_id}`),
+        ]);
+
+        setSessions(sessionsRes.data);
+        setAthletes(athletesRes.data);
       } catch (error) {
-        console.error("Error fetching trainer athletes", error);
+        console.error("Error fetching trainer data", error);
       }
     };
-    fetchTrainerAthletes();
+
+    fetchTrainerData();
   }, []);
 
   const handlePress = async (athlete: Athlete) => {
@@ -83,78 +64,12 @@ const TrainerAthletes = () => {
           { text: "Cancel", style: "cancel" },
           {
             text: "Add Session",
-            onPress: () => {
-              if (sessions.length === 0) {
-                Alert.alert("No sessions found for this trainer.");
-                return;
-              }
-
-              Alert.alert(
-                "Select a Session",
-                "Assign a session to this athlete:",
-                sessions.map((session) => ({
-                  text: session.session_name,
-                  onPress: async () => {
-                    try {
-                      await api.post(
-                        `/athletes/athlete_sessions/${session.session_id}`,
-                        {
-                          athlete_user_id: athlete.athlete_user_id,
-                        }
-                      );
-                      Alert.alert("Success", "Session assigned to athlete.");
-                    } catch (error) {
-                      console.error("Error assigning session:", error);
-                      Alert.alert("Error", "Failed to assign session.");
-                    }
-                  },
-                }))
-              );
-            },
+            onPress: () => showSessionPicker(athlete),
           },
           {
             text: "Remove",
             style: "destructive",
-            onPress: () => {
-              Alert.alert(
-                "Confirm Delete",
-                `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Yes, Remove",
-                    style: "destructive",
-                    onPress: async () => {
-                      try {
-                        const idString =
-                          await AsyncStorage.getItem("trainerId");
-                        const trainerId = idString
-                          ? parseInt(idString, 10)
-                          : null;
-
-                        await api.delete(
-                          `/trainers/athlete/${athlete.athlete_user_id}`,
-                          {
-                            data: { trainer_user_id: trainerId },
-                          }
-                        );
-
-                        setAthletes((prev) =>
-                          prev.filter(
-                            (a) => a.athlete_user_id !== athlete.athlete_user_id
-                          )
-                        );
-
-                        Alert.alert("Success", "Athlete removed successfully.");
-                      } catch (error) {
-                        console.error("Failed to remove athlete", error);
-                        Alert.alert("Error", "Failed to remove athlete.");
-                      }
-                    },
-                  },
-                ]
-              );
-            },
+            onPress: () => confirmRemoveAthlete(athlete),
           },
         ],
         { cancelable: true }
@@ -162,6 +77,69 @@ const TrainerAthletes = () => {
     } catch (error) {
       console.error("Failed to fetch athlete sessions:", error);
       Alert.alert("Error", "Could not retrieve athlete sessions.");
+    }
+  };
+
+  const confirmRemoveAthlete = (athlete: Athlete) => {
+    Alert.alert(
+      "Confirm Delete",
+      `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Remove",
+          style: "destructive",
+          onPress: () => removeAthlete(athlete),
+        },
+      ]
+    );
+  };
+
+  const assignSessionToAthlete = async (session: Session, athlete: Athlete) => {
+    try {
+      await api.post(`/athletes/athlete_sessions/${session.session_id}`, {
+        athlete_user_id: athlete.athlete_user_id,
+      });
+      Alert.alert("Success", "Session assigned to athlete.");
+    } catch (error) {
+      console.error("Error assigning session:", error);
+      Alert.alert("Error", "Failed to assign session.");
+    }
+  };
+
+  const showSessionPicker = (athlete: Athlete) => {
+    if (sessions.length === 0) {
+      Alert.alert("No sessions found for this trainer.");
+      return;
+    }
+
+    Alert.alert(
+      "Select a Session",
+      "Assign a session to this athlete:",
+      sessions.map((session) => ({
+        text: session.session_name,
+        onPress: () => assignSessionToAthlete(session, athlete),
+      }))
+    );
+  };
+
+  const removeAthlete = async (athlete: Athlete) => {
+    try {
+      const idString = await AsyncStorage.getItem("trainerId");
+      const trainer_user_id = idString ? parseInt(idString, 10) : null;
+
+      await api.delete(`/trainers/athlete/${athlete.athlete_user_id}`, {
+        data: { trainer_user_id },
+      });
+
+      setAthletes((prev) =>
+        prev.filter((a) => a.athlete_user_id !== athlete.athlete_user_id)
+      );
+
+      Alert.alert("Success", "Athlete removed successfully.");
+    } catch (error) {
+      console.error("Failed to remove athlete", error);
+      Alert.alert("Error", "Failed to remove athlete.");
     }
   };
 
