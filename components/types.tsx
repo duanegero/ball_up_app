@@ -1,10 +1,11 @@
 export interface Trainer {
+  trainer_user_id: number;
+  username: string;
+  email: string;
   first_name: string;
   last_name: string;
-  bio: string;
   years_experience: number;
-  trainer_user_id: number;
-  email: string;
+  bio: string;
 }
 
 export interface Athlete {

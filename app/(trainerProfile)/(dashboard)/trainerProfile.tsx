@@ -15,40 +15,44 @@ import { Ionicons } from "@expo/vector-icons";
 
 import api from "../../../utils/api";
 
+import { Trainer } from "../../../components/types";
+
 const { width } = Dimensions.get("window");
 
 const TrainerProfile = () => {
   const router = useRouter();
 
-  interface Trainer {
-    trainer_user_id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    years_experience: number;
-    bio: string;
-  }
-
   const [trainer, setTrainer] = useState<Trainer | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTrainer = async () => {
+    try {
+      setError(null);
+      const idString = await AsyncStorage.getItem("trainerId");
+
+      if (!idString) {
+        console.warn("No trainer ID found.");
+        setError("Trainer ID not found. Please log in again.");
+        return;
+      }
+
+      const trainer_user_id = parseInt(idString, 10);
+
+      if (isNaN(trainer_user_id)) {
+        console.error("Invalid trainer ID:", idString);
+        setError("Invalid trainer ID found. Please log in again.");
+        return;
+      }
+
+      const response = await api.get(`/trainers/${trainer_user_id}`);
+      setTrainer(response.data);
+    } catch (error) {
+      console.error("Error fetching trainer:", error);
+      setError("Failed to load trainer profile. Please try again later.");
+    }
+  };
 
   useEffect(() => {
-    const fetchTrainer = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-
-        const trainer_user_id = parseInt(idString, 10);
-        const response = await api.get(`/trainers/${trainer_user_id}`);
-        setTrainer(response.data);
-      } catch (error) {
-        console.error("Error fetching trainer:", error);
-      }
-    };
-
     fetchTrainer();
   }, []);
 
@@ -68,7 +72,11 @@ const TrainerProfile = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {trainer ? (
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
             <Pressable onPress={handleLogout} style={styles.iconButton}>
@@ -78,8 +86,8 @@ const TrainerProfile = () => {
 
           <View style={styles.profileImagePlaceholder}>
             <Text style={styles.profileInitials}>
-              {trainer.first_name[0]}
-              {trainer.last_name[0]}
+              {trainer?.first_name?.[0] ?? ""}
+              {trainer?.last_name?.[0] ?? ""}
             </Text>
           </View>
           <Text style={styles.title}>{trainer.username}'s Profile</Text>
@@ -109,7 +117,9 @@ const TrainerProfile = () => {
             <Text style={styles.value}>{trainer.years_experience}</Text>
 
             <Text style={styles.label}>Bio</Text>
-            <Text style={styles.value}>{trainer.bio}</Text>
+            <Text style={styles.value}>
+              {trainer.bio || "No bio provided."}
+            </Text>
           </View>
         </ScrollView>
       ) : (
@@ -137,18 +147,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 30,
   },
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-  },
-
-  heading: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 16,
@@ -172,32 +170,9 @@ const styles = StyleSheet.create({
     color: "#111827",
     marginTop: 4,
   },
-  experience: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#007BFF",
-    textAlign: "center",
-    marginTop: 10,
-  },
   loading: {
     marginTop: 20,
     textAlign: "center",
-  },
-  editButtonContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  editButton: {
-    backgroundColor: "#2563eb",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
   },
   profileImagePlaceholder: {
     width: 100,
@@ -231,16 +206,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 1,
   },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2563eb", // blue-600
-  },
-  logoutButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280", // gray-500
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -254,5 +219,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fee2e2",
     justifyContent: "center",
     alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
