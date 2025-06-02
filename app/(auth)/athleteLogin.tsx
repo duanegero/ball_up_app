@@ -16,6 +16,8 @@ import { useState } from "react";
 import api from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { loginAthlete } from "../../utils/apiServices";
+
 const AthleteLogin = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -29,20 +31,7 @@ const AthleteLogin = () => {
     }
 
     try {
-      const response = await api.post("/athlete_login", {
-        username,
-        password,
-      });
-
-      const {
-        token,
-        username: loggedInUsername,
-        athlete_user_id,
-      } = response.data;
-
-      await AsyncStorage.setItem("athleteToken", token);
-      await AsyncStorage.setItem("athleteId", athlete_user_id.toString());
-
+      const { loggedInUsername } = await loginAthlete(username, password);
       Alert.alert("Login Successful", `Welcome ${loggedInUsername}!`);
       router.push("/athleteProfile");
 
@@ -50,12 +39,8 @@ const AthleteLogin = () => {
       setPassword("");
       setErrorMessage("");
     } catch (error: any) {
-      console.error("Login error:", error);
-      const message =
-        error.response?.data?.message || "An error occurred during login.";
-
-      setErrorMessage(message);
-      Alert.alert("Login Failed", message);
+      setErrorMessage(error.message);
+      Alert.alert("Login Failed", error.message);
     }
   };
 

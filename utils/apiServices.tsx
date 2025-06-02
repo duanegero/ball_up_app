@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
-import { Athlete } from "../components/types";
+import { Athlete, Trainer } from "../components/types";
 
+//function to fetch athlete from api/db
 export const fetchAthlete = async (): Promise<Athlete | null> => {
   try {
     const idString = await AsyncStorage.getItem("athleteId");
@@ -19,6 +20,7 @@ export const fetchAthlete = async (): Promise<Athlete | null> => {
   }
 };
 
+//function to fetch athlete sessions from api/db
 export const fetchAthleteSessions = async () => {
   const idString = await AsyncStorage.getItem("athleteId");
   if (!idString) {
@@ -37,6 +39,7 @@ export const fetchAthleteSessions = async () => {
   }
 };
 
+//function to fetch trainer from api/db
 export const fetchTrainers = async (): Promise<Trainer[]> => {
   try {
     const response = await api.get("/trainers");
@@ -44,5 +47,52 @@ export const fetchTrainers = async (): Promise<Trainer[]> => {
   } catch (error) {
     console.error("Error fetching trainers:", error);
     throw error;
+  }
+};
+
+//function to assign trainer to an athlete in api/db
+export const assignTrainerToAthlete = async (
+  trainer_user_id: number
+): Promise<void> => {
+  try {
+    const idString = await AsyncStorage.getItem("athleteId");
+    if (!idString) {
+      throw new Error("Missing Athlete ID.");
+    }
+
+    const athlete_user_id = parseInt(idString, 10);
+
+    await api.put(`/athletes/assign_trainer/${athlete_user_id}`, {
+      trainer_user_id,
+    });
+  } catch (error) {
+    console.error("Error assigning trainer:", error);
+    throw error;
+  }
+};
+
+// Athlete login
+export const loginAthlete = async (username: string, password: string) => {
+  try {
+    const response = await api.post("/athlete_login", {
+      username,
+      password,
+    });
+
+    const {
+      token,
+      username: loggedInUsername,
+      athlete_user_id,
+    } = response.data;
+
+    await AsyncStorage.setItem("athleteToken", token);
+    await AsyncStorage.setItem("athleteId", athlete_user_id.toString());
+
+    return { loggedInUsername };
+  } catch (error: any) {
+    console.error("Login error:", error);
+    const message =
+      error.response?.data?.message || "An error occurred during login.";
+    throw new Error(message);
   }
 };
