@@ -36,3 +36,13 @@ export const fetchAthleteSessions = async () => {
     return [];
   }
 };
+
+export const fetchTrainers = async (): Promise<Trainer[]> => {
+  try {
+    const response = await api.get("/trainers");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching trainers:", error);
+    throw error;
+  }
+};

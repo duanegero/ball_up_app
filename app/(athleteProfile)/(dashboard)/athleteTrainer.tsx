@@ -12,6 +12,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../utils/api";
 import { Trainer } from "../../../components/types";
+import {
+  fetchAthlete,
+  fetchTrainers,
+  assignTrainerToAthlete,
+} from "../../../utils/apiServices";
 
 const AthleteTrainerScreen = () => {
   const [athleteUserId, setAthleteUserId] = useState<number | null>(null);
@@ -23,46 +28,46 @@ const AthleteTrainerScreen = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAthleteIdAndTrainers = async () => {
+    const loadTrainers = async () => {
       try {
         setLoading(true);
-        const idString = await AsyncStorage.getItem("athleteId");
-        if (!idString) {
-          console.warn("No athlete ID found.");
-          return;
-        }
-
-        const parsedId = parseInt(idString, 10);
-        setAthleteUserId(parsedId);
-
-        const response = await api.get("/trainers");
-        setTrainers(response.data);
+        const trainersData = await fetchTrainers();
+        setTrainers(trainersData);
       } catch (error) {
-        console.error("Error loading data:", error);
-        Alert.alert("Error", "Something went wrong loading data.");
+        console.error("Error loading trainers:", error);
+        Alert.alert("Error", "Something went wrong loading trainers.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAthleteIdAndTrainers();
+    loadTrainers();
+  }, []);
+
+  useEffect(() => {
+    const loadAthlete = async () => {
+      try {
+        const athlete = await fetchAthlete();
+        if (athlete && athlete.athlete_user_id) {
+          setAthleteUserId(athlete.athlete_user_id);
+        } else {
+          console.warn("Athlete data not found.");
+        }
+      } catch (error) {
+        console.error("Error loading athlete:", error);
+      }
+    };
+
+    loadAthlete();
   }, []);
 
   const assignTrainer = async (trainer_user_id: number) => {
     setSelectedTrainerId(trainer_user_id);
 
-    if (!athleteUserId) {
-      Alert.alert("Missing Athlete ID", "Cannot assign without athlete ID.");
-      return;
-    }
-
     try {
-      await api.put(`/athletes/assign_trainer/${athleteUserId}`, {
-        trainer_user_id,
-      });
+      await assignTrainerToAthlete(trainer_user_id);
       Alert.alert("Success", "The trainer has been assigned successfully.");
     } catch (error) {
-      console.error("Error assigning trainer:", error);
       Alert.alert("Error", "Failed to assign the trainer. Please try again.");
     }
   };
