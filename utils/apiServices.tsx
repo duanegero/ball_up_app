@@ -19,10 +19,20 @@ export const fetchAthlete = async (): Promise<Athlete | null> => {
   }
 };
 
-export const logoutAthlete = async (): Promise<void> => {
-  try {
-    await AsyncStorage.removeItem("athleteId");
-  } catch (error) {
-    console.error("Error logging out:", error);
+export const fetchAthleteSessions = async () => {
+  const idString = await AsyncStorage.getItem("athleteId");
+  if (!idString) {
+    throw new Error("No athlete ID found.");
+  }
+
+  const athlete_user_id = parseInt(idString, 10);
+  const response = await api.get(
+    `/athletes/athlete_sessions/${athlete_user_id}`
+  );
+
+  if (response.data?.athlete_sessions) {
+    return response.data.athlete_sessions;
+  } else {
+    return [];
   }
 };

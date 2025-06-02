@@ -13,30 +13,18 @@ import {
 import api from "../../../utils/api";
 import { AthleteSessionItem } from "../../../components/types";
 
+import { fetchAthleteSessions } from "../../../utils/apiServices";
+
 const AthleteSession = () => {
   const [sessions, setSessions] = useState<AthleteSessionItem[]>([]);
 
   const [loading, setLoading] = useState(true);
 
-  const fetchAthleteSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       setLoading(true);
-      const idString = await AsyncStorage.getItem("athleteId");
-      if (!idString) {
-        console.warn("No athlete ID found.");
-        return;
-      }
-
-      const athlete_user_id = parseInt(idString, 10);
-      const response = await api.get(
-        `/athletes/athlete_sessions/${athlete_user_id}`
-      );
-
-      if (response.data?.athlete_sessions) {
-        setSessions(response.data.athlete_sessions);
-      } else {
-        console.warn("No sessions found.");
-      }
+      const sessions = await fetchAthleteSessions();
+      setSessions(sessions);
     } catch (error) {
       console.error("[AthleteSession] Error fetching sessions", error);
       Alert.alert("Error", "Could not load your sessions. Try again.");
@@ -46,8 +34,8 @@ const AthleteSession = () => {
   }, []);
 
   useEffect(() => {
-    fetchAthleteSessions();
-  }, [fetchAthleteSessions]);
+    fetchSessions();
+  }, [fetchSessions]);
 
   const handleComplete = async (
     athlete_user_id: number,
@@ -57,7 +45,7 @@ const AthleteSession = () => {
       await api.delete(`/athletes/session/${athlete_user_id}/${session_id}`);
 
       Alert.alert("Session Completed", "Session has been marked as complete.");
-      fetchAthleteSessions();
+      fetchSessions();
     } catch (error) {
       console.error("Error completing session:", error);
       Alert.alert("Error", "Could not mark session as complete.");
