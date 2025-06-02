@@ -20,6 +20,7 @@ export interface Athlete {
 }
 
 export interface Drill {
+  drill_name: any;
   drill_id: number;
   drill_type: string;
   description: string;

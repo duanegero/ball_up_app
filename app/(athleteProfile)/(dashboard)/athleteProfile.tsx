@@ -19,6 +19,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { Trainer, Athlete } from "../../../components/types";
 
+import { fetchAthlete } from "../../../utils/apiServices";
+
 const { width } = Dimensions.get("window");
 
 const AthleteProfile = () => {
@@ -29,23 +31,16 @@ const AthleteProfile = () => {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchAthlete = async () => {
-        try {
-          const idString = await AsyncStorage.getItem("athleteId");
-          if (!idString) {
-            console.warn("No athlete ID found.");
-            return;
-          }
-          const athlete_user_id = parseInt(idString, 10);
-          const response = await api.get(`/athletes/${athlete_user_id}`);
-          setAthlete(response.data);
-        } catch (error) {
-          console.error("Error fetching athlete:", error);
+      const loadAthlete = async () => {
+        const data = await fetchAthlete();
+        if (data) {
+          setAthlete(data);
+        } else {
           setError("Failed to load profile. Please try again later.");
         }
       };
 
-      fetchAthlete();
+      loadAthlete();
     }, [])
   );
 
