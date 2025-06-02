@@ -96,3 +96,24 @@ export const loginAthlete = async (username: string, password: string) => {
     throw new Error(message);
   }
 };
+
+// Athlete sign up
+export const signUpAthlete = async (athleteData: {
+  email: string;
+  username: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  age: number;
+  level: number;
+}) => {
+  try {
+    const response = await api.post("/athletes", athleteData);
+    return response.data;
+  } catch (error: any) {
+    console.error("Sign up error:", error);
+    const message =
+      error.response?.data?.message || "An error occurred during sign up.";
+    throw new Error(message);
+  }
+};
