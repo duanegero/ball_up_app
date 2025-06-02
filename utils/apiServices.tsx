@@ -117,3 +117,32 @@ export const signUpAthlete = async (athleteData: {
     throw new Error(message);
   }
 };
+
+// Trainer login
+export const loginTrainer = async (
+  username: string,
+  password: string
+): Promise<{ loggedInUsername: string }> => {
+  try {
+    const response = await api.post("/trainer_login", {
+      username,
+      password,
+    });
+
+    const {
+      token,
+      username: loggedInUsername,
+      trainer_user_id,
+    } = response.data;
+
+    await AsyncStorage.setItem("trainerToken", token);
+    await AsyncStorage.setItem("trainerId", trainer_user_id.toString());
+
+    return { loggedInUsername };
+  } catch (error: any) {
+    console.error("Login error:", error);
+    const message =
+      error.response?.data?.message || "An error occurred during login.";
+    throw new Error(message);
+  }
+};
