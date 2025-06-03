@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
-import { Athlete, Trainer } from "../components/types";
+import { Athlete, Trainer, DrillResponse } from "../components/types";
 
 //function to fetch athlete from api/db
 export const fetchAthlete = async (): Promise<Athlete | null> => {
@@ -39,7 +39,7 @@ export const fetchAthleteSessions = async () => {
   }
 };
 
-// Mark a session as complete for the athlete
+// Function to mark session as complete for the athlete
 export const completeAthleteSession = async (
   athlete_user_id: number,
   session_id: number
@@ -84,7 +84,7 @@ export const assignTrainerToAthlete = async (
   }
 };
 
-// Athlete login
+// function to check athlete login
 export const loginAthlete = async (username: string, password: string) => {
   try {
     const response = await api.post("/athlete_login", {
@@ -110,7 +110,7 @@ export const loginAthlete = async (username: string, password: string) => {
   }
 };
 
-// Athlete sign up
+// function to try athlete sign up
 export const signUpAthlete = async (athleteData: {
   email: string;
   username: string;
@@ -131,7 +131,7 @@ export const signUpAthlete = async (athleteData: {
   }
 };
 
-// Trainer login
+//function to check trainer login
 export const loginTrainer = async (
   username: string,
   password: string
@@ -160,7 +160,7 @@ export const loginTrainer = async (
   }
 };
 
-// Trainer sign up
+// function to try trainer sign up
 export const signUpTrainer = async (trainerData: {
   email: string;
   username: string;
@@ -179,4 +179,34 @@ export const signUpTrainer = async (trainerData: {
       error.response?.data?.message || "An error occurred during sign up.";
     throw new Error(message);
   }
+};
+
+//function to create a new drill
+export const createDrill = async ({
+  drill_type,
+  level,
+  description,
+  drill_name,
+}: {
+  drill_type: string;
+  level: number;
+  description: string;
+  drill_name: string;
+}): Promise<DrillResponse> => {
+  const idString = await AsyncStorage.getItem("trainerId");
+  if (!idString) {
+    throw new Error("No trainer ID found.");
+  }
+
+  const trainer_user_id = parseInt(idString, 10);
+
+  const response = await api.post<DrillResponse>("/drills", {
+    drill_type,
+    level,
+    description,
+    trainer_user_id,
+    drill_name,
+  });
+
+  return response.data;
 };

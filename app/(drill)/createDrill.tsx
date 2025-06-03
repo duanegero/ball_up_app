@@ -19,19 +19,7 @@ import {
 } from "react-native";
 import api from "../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
-type DrillResponse = {
-  message: string;
-  newDrill: {
-    drill_id: number;
-    drill_name: string;
-    drill_type: string;
-    description: string;
-    level: number;
-    trainer_user_id: number;
-    created_at: string; // or `Date` if you want to parse it
-  };
-};
+import { createDrill } from "../../utils/apiServices";
 
 const DRILL_TYPES = [
   { label: "Warm-Up", value: "warmup" },
@@ -58,28 +46,15 @@ const CreateDrill: React.FC = () => {
       return;
     }
 
-    const idString = await AsyncStorage.getItem("trainerId");
-
-    if (!idString) {
-      console.warn("No trainer ID found.");
-      return;
-    }
-
-    const trainer_user_id = parseInt(idString, 10);
-
     try {
-      const response = await api.post<DrillResponse>("/drills", {
+      const result = await createDrill({
         drill_type,
         level,
         description,
-        trainer_user_id,
         drill_name,
       });
 
-      Alert.alert(
-        "New Drill Created",
-        `Type: ${response.data.newDrill.drill_type}`
-      );
+      Alert.alert("New Drill Created", `Type: ${result.newDrill.drill_type}`);
 
       setDescription("");
       setDrill_type("");
@@ -93,6 +68,7 @@ const CreateDrill: React.FC = () => {
       );
       const message =
         error.response?.data?.message ||
+        error.message ||
         "An error occurred during creating new drill.";
       Alert.alert("Create Drill Failed", message);
     }

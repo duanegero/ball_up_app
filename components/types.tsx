@@ -46,3 +46,16 @@ export interface AthleteSessionItem {
   athlete_user_id: number;
   session: Session;
 }
+
+export type DrillResponse = {
+  message: string;
+  newDrill: {
+    drill_id: number;
+    drill_name: string;
+    drill_type: string;
+    description: string;
+    level: number;
+    trainer_user_id: number;
+    created_at: string;
+  };
+};
