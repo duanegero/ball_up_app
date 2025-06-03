@@ -1,7 +1,6 @@
 import {
   StyleSheet,
   Text,
-  View,
   TextInput,
   Alert,
   TouchableOpacity,

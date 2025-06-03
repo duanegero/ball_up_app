@@ -8,9 +8,7 @@ import {
   Alert,
   SafeAreaView,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import api from "../../../utils/api";
 import { useRouter } from "expo-router";
 import { Drill } from "../../../components/types";
 import { deleteDrillById, getTrainerDrills } from "../../../utils/apiServices";

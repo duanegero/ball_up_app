@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   View,
   Text,
@@ -14,9 +13,9 @@ import {
   TextInput,
   Modal,
 } from "react-native";
+import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import api from "../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createSession } from "../../utils/apiServices";
 

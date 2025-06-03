@@ -1,25 +1,21 @@
 import React, { useCallback, useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   SafeAreaView,
   Alert,
   Pressable,
   FlatList,
 } from "react-native";
-import api from "../../../utils/api";
 import { AthleteSessionItem } from "../../../components/types";
-
 import {
   fetchAthleteSessions,
   completeAthleteSession,
 } from "../../../utils/apiServices";
 
 const AthleteSession = () => {
-  //useSta
+  //useStates
   const [sessions, setSessions] = useState<AthleteSessionItem[]>([]);
   const [loading, setLoading] = useState(true);
 

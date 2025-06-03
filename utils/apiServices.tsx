@@ -440,6 +440,7 @@ export const getTrainerSessions = async () => {
   }
 };
 
+//function to get sessio n drills
 export const getSessionDrills = async (
   sessionId: number
 ): Promise<SessionDrill[]> => {
@@ -452,6 +453,7 @@ export const getSessionDrills = async (
   }
 };
 
+//function to delete trainer session
 export const deleteTrainerSession = async (
   sessionId: number
 ): Promise<void> => {

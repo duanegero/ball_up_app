@@ -1,7 +1,6 @@
 import {
   StyleSheet,
   Text,
-  View,
   TextInput,
   Alert,
   TouchableOpacity,
@@ -13,7 +12,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import api from "../../utils/api";
 import { signUpAthlete } from "../../utils/apiServices";
 
 const AthleteSignUp = () => {

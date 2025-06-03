@@ -9,8 +9,6 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../../../utils/api";
 import { Trainer } from "../../../components/types";
 import {
   fetchAthlete,
@@ -24,40 +22,39 @@ const AthleteTrainerScreen = () => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<number | null>(
     null
   );
-
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadTrainers = async () => {
-      try {
-        setLoading(true);
-        const trainersData = await fetchTrainers();
-        setTrainers(trainersData);
-      } catch (error) {
-        console.error("Error loading trainers:", error);
-        Alert.alert("Error", "Something went wrong loading trainers.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadTrainers = async () => {
+    try {
+      setLoading(true);
+      const trainersData = await fetchTrainers();
+      setTrainers(trainersData);
+    } catch (error) {
+      console.error("Error loading trainers:", error);
+      Alert.alert("Error", "Something went wrong loading trainers.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const loadAthlete = async () => {
+    try {
+      const athlete = await fetchAthlete();
+      if (athlete && athlete.athlete_user_id) {
+        setAthleteUserId(athlete.athlete_user_id);
+      } else {
+        console.warn("Athlete data not found.");
+      }
+    } catch (error) {
+      console.error("Error loading athlete:", error);
+    }
+  };
+
+  useEffect(() => {
     loadTrainers();
   }, []);
 
   useEffect(() => {
-    const loadAthlete = async () => {
-      try {
-        const athlete = await fetchAthlete();
-        if (athlete && athlete.athlete_user_id) {
-          setAthleteUserId(athlete.athlete_user_id);
-        } else {
-          console.warn("Athlete data not found.");
-        }
-      } catch (error) {
-        console.error("Error loading athlete:", error);
-      }
-    };
-
     loadAthlete();
   }, []);
 

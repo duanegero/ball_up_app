@@ -7,14 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { useState } from "react";
-import api from "../../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { loginAthlete } from "../../utils/apiServices";
 

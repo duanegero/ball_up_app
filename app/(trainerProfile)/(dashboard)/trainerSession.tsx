@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import {
   View,
@@ -11,7 +10,6 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
-import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Session } from "../../../components/types";
 import { SessionDrill } from "../../../components/types";
@@ -27,10 +25,6 @@ const TrainerSession = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    fetchTrainerSessions();
-  }, []);
-
   const fetchTrainerSessions = async () => {
     try {
       setLoading(true);
@@ -44,8 +38,18 @@ const TrainerSession = () => {
     }
   };
 
-  const formatDrillNames = (drills: SessionDrill[]) => {
-    return drills.map((d) => `• ${d.drill.drill_name}`).join("\n");
+  useEffect(() => {
+    fetchTrainerSessions();
+  }, []);
+
+  const handlePress = async (session: Session) => {
+    try {
+      const drills = await getSessionDrills(session.session_id);
+      const drillNames = formatDrillNames(drills);
+      showSessionOptions(session, drillNames);
+    } catch (error) {
+      Alert.alert("Error", "Could not fetch drills for this session.");
+    }
   };
 
   const showSessionOptions = (session: Session, drillNames: string) => {
@@ -99,14 +103,8 @@ const TrainerSession = () => {
     );
   };
 
-  const handlePress = async (session: Session) => {
-    try {
-      const drills = await getSessionDrills(session.session_id);
-      const drillNames = formatDrillNames(drills);
-      showSessionOptions(session, drillNames);
-    } catch (error) {
-      Alert.alert("Error", "Could not fetch drills for this session.");
-    }
+  const formatDrillNames = (drills: SessionDrill[]) => {
+    return drills.map((d) => `• ${d.drill.drill_name}`).join("\n");
   };
 
   return (

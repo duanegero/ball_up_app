@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { useState } from "react";
-import api from "../../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { loginTrainer } from "../../utils/apiServices";
 

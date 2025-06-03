@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -17,7 +14,8 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
-import api from "../../utils/api";
+import React, { useState } from "react";
+import { useRouter } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createDrill } from "../../utils/apiServices";
 

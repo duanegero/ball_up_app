@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
 import {
-  View,
   Text,
   StyleSheet,
   ScrollView,
@@ -8,7 +6,7 @@ import {
   Alert,
   SafeAreaView,
 } from "react-native";
-
+import React, { useState, useEffect } from "react";
 import { Session, Athlete } from "../../../components/types";
 import {
   fetchTrainerData,
@@ -70,21 +68,6 @@ const TrainerAthletes = () => {
     }
   };
 
-  const confirmRemoveAthlete = (athlete: Athlete) => {
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Remove",
-          style: "destructive",
-          onPress: () => removeAthlete(athlete),
-        },
-      ]
-    );
-  };
-
   const assignSessionToAthlete = async (session: Session, athlete: Athlete) => {
     try {
       await putSessionToAthlete(session.session_id, athlete.athlete_user_id);
@@ -107,6 +90,21 @@ const TrainerAthletes = () => {
         text: session.session_name,
         onPress: () => assignSessionToAthlete(session, athlete),
       }))
+    );
+  };
+
+  const confirmRemoveAthlete = (athlete: Athlete) => {
+    Alert.alert(
+      "Confirm Delete",
+      `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Remove",
+          style: "destructive",
+          onPress: () => removeAthlete(athlete),
+        },
+      ]
     );
   };
 
