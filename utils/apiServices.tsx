@@ -351,3 +351,32 @@ export const removeAthleteFromTrainer = async (athleteUserId: number) => {
     throw error;
   }
 };
+
+export const getTrainerDrills = async () => {
+  try {
+    const idString = await AsyncStorage.getItem("trainerId");
+    if (!idString) {
+      throw new Error("No trainer ID found.");
+    }
+
+    const trainer_user_id = Number(idString);
+    if (isNaN(trainer_user_id)) {
+      throw new Error("Invalid trainer ID.");
+    }
+
+    const response = await api.get(`/trainers/drills/${trainer_user_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("API error fetching trainer drills:", error);
+    throw error;
+  }
+};
+
+export const deleteDrillById = async (drill_id: number) => {
+  try {
+    await api.delete(`/drills/${drill_id}`);
+  } catch (error) {
+    console.error("API error deleting drill:", error);
+    throw error;
+  }
+};

@@ -13,6 +13,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import api from "../../../utils/api";
 import { useRouter } from "expo-router";
 import { Drill } from "../../../components/types";
+import { deleteDrillById, getTrainerDrills } from "../../../utils/apiServices";
 
 const TrainerDrills = () => {
   const router = useRouter();
@@ -20,30 +21,18 @@ const TrainerDrills = () => {
   const [drills, setDrills] = useState<Drill[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchTrainerDrills = async () => {
+    try {
+      const data = await getTrainerDrills();
+      setDrills(data);
+    } catch (error) {
+      Alert.alert("Error", "Could not load drills.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTrainerDrills = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-
-        const trainer_user_id = Number(idString);
-        if (isNaN(trainer_user_id)) {
-          console.warn("Invalid trainer ID.");
-          return;
-        }
-        const response = await api.get(`/trainers/drills/${trainer_user_id}`);
-        setDrills(response.data);
-      } catch (error) {
-        console.error("Error fetching trainer drills", error);
-        Alert.alert("Error", "Could not load drills.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTrainerDrills();
   }, []);
 
@@ -55,12 +44,11 @@ const TrainerDrills = () => {
         style: "destructive",
         onPress: async () => {
           try {
-            await api.delete(`/drills/${drill_id}`);
+            await deleteDrillById(drill_id);
             setDrills((prevDrills) =>
               prevDrills.filter((d) => d.drill_id !== drill_id)
             );
           } catch (error) {
-            console.error("Error deleting drill", error);
             Alert.alert("Error", "Failed to delete drill.");
           }
         },
