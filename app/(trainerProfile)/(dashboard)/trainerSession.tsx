@@ -15,6 +15,11 @@ import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Session } from "../../../components/types";
 import { SessionDrill } from "../../../components/types";
+import {
+  deleteTrainerSession,
+  getSessionDrills,
+  getTrainerSessions,
+} from "../../../utils/apiServices";
 
 const TrainerSession = () => {
   const router = useRouter();
@@ -29,32 +34,13 @@ const TrainerSession = () => {
   const fetchTrainerSessions = async () => {
     try {
       setLoading(true);
-      const idString = await AsyncStorage.getItem("trainerId");
-
-      if (!idString) {
-        console.warn("No trainer ID found.");
-        return;
-      }
-
-      const trainer_user_id = parseInt(idString, 10);
-      const response = await api.get(`trainers/sessions/${trainer_user_id}`);
-
-      setSessions(response.data);
+      const sessions = await getTrainerSessions();
+      setSessions(sessions);
     } catch (error) {
       console.error("Failed to fetch trainer sessions", error);
       Alert.alert("Error", "Unable to load sessions. Please try again later.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchDrills = async (sessionId: number): Promise<SessionDrill[]> => {
-    try {
-      const response = await api.get(`sessions/session_drills/${sessionId}`);
-      return response.data;
-    } catch (error) {
-      console.error("Failed to fetch drills", error);
-      throw new Error("Could not fetch drills");
     }
   };
 
@@ -86,7 +72,7 @@ const TrainerSession = () => {
                   text: "Yes, Delete",
                   onPress: async () => {
                     try {
-                      await api.delete(`sessions/${session.session_id}`);
+                      await deleteTrainerSession(session.session_id);
                       setSessions((prev) =>
                         prev.filter((s) => s.session_id !== session.session_id)
                       );
@@ -115,7 +101,7 @@ const TrainerSession = () => {
 
   const handlePress = async (session: Session) => {
     try {
-      const drills = await fetchDrills(session.session_id);
+      const drills = await getSessionDrills(session.session_id);
       const drillNames = formatDrillNames(drills);
       showSessionOptions(session, drillNames);
     } catch (error) {

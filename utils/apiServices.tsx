@@ -1,6 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
-import { Athlete, Trainer, DrillResponse, Session } from "../components/types";
+import {
+  Athlete,
+  Trainer,
+  DrillResponse,
+  Session,
+  SessionDrill,
+} from "../components/types";
 
 //function to fetch athlete from api/db
 export const fetchAthlete = async (): Promise<Athlete | null> => {
@@ -39,7 +45,7 @@ export const fetchAthleteSessions = async () => {
   }
 };
 
-// Function to mark session as complete for the athlete
+//function to mark session as complete for the athlete
 export const completeAthleteSession = async (
   athlete_user_id: number,
   session_id: number
@@ -211,6 +217,7 @@ export const createDrill = async ({
   return response.data;
 };
 
+//function to create new session
 export const createSession = async ({
   length,
   level,
@@ -230,6 +237,7 @@ export const createSession = async ({
   });
 };
 
+//function to fetch session drills
 export const fetchSessionDrills = async (sessionId: string) => {
   try {
     const response = await api.get(`/sessions/session_drills/${sessionId}`);
@@ -240,6 +248,7 @@ export const fetchSessionDrills = async (sessionId: string) => {
   }
 };
 
+//function to fetch trainer drills
 export const fetchTrainerDrills = async (trainerId: number) => {
   try {
     const response = await api.get(`/trainers/drills/${trainerId}`);
@@ -250,7 +259,7 @@ export const fetchTrainerDrills = async (trainerId: number) => {
   }
 };
 
-// Add a drill to a session
+//function to add a drill to a session
 export const addDrillToSession = async (sessionId: string, drillId: number) => {
   try {
     await api.post(`/sessions/session_drills/${sessionId}`, {
@@ -262,7 +271,7 @@ export const addDrillToSession = async (sessionId: string, drillId: number) => {
   }
 };
 
-// Remove a drill from a session
+//function to remove a drill from a session
 export const removeDrillFromSession = async (
   sessionId: string,
   drillId: number
@@ -277,6 +286,7 @@ export const removeDrillFromSession = async (
   }
 };
 
+//function to fetch trainer data
 export const fetchTrainerData = async (): Promise<{
   trainer_user_id: number;
   sessions: any[];
@@ -307,6 +317,7 @@ export const fetchTrainerData = async (): Promise<{
   }
 };
 
+//function to get athlete session
 export const getAthleteSessions = async (athleteId: number) => {
   try {
     const response = await api.get(`/athletes/athlete_sessions/${athleteId}`);
@@ -317,6 +328,7 @@ export const getAthleteSessions = async (athleteId: number) => {
   }
 };
 
+//function to assign session to athlete
 export const putSessionToAthlete = async (
   sessionId: number,
   athleteUserId: number
@@ -332,6 +344,7 @@ export const putSessionToAthlete = async (
   }
 };
 
+//function to remove athlete from trainer
 export const removeAthleteFromTrainer = async (athleteUserId: number) => {
   try {
     const idString = await AsyncStorage.getItem("trainerId");
@@ -352,6 +365,7 @@ export const removeAthleteFromTrainer = async (athleteUserId: number) => {
   }
 };
 
+//function to get trainer drills
 export const getTrainerDrills = async () => {
   try {
     const idString = await AsyncStorage.getItem("trainerId");
@@ -372,6 +386,7 @@ export const getTrainerDrills = async () => {
   }
 };
 
+//function to delete a drill
 export const deleteDrillById = async (drill_id: number) => {
   try {
     await api.delete(`/drills/${drill_id}`);
@@ -381,6 +396,7 @@ export const deleteDrillById = async (drill_id: number) => {
   }
 };
 
+//function to get trainer
 export const getTrainerById = async () => {
   try {
     const idString = await AsyncStorage.getItem("trainerId");
@@ -399,5 +415,50 @@ export const getTrainerById = async () => {
   } catch (error) {
     console.error("API error fetching trainer:", error);
     throw error;
+  }
+};
+
+//function to get all trainer session
+export const getTrainerSessions = async () => {
+  try {
+    const idString = await AsyncStorage.getItem("trainerId");
+
+    if (!idString) {
+      throw new Error("Trainer ID not found.");
+    }
+
+    const trainer_user_id = parseInt(idString, 10);
+    if (isNaN(trainer_user_id)) {
+      throw new Error("Invalid trainer ID.");
+    }
+
+    const response = await api.get(`/trainers/sessions/${trainer_user_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("API error fetching trainer sessions:", error);
+    throw error;
+  }
+};
+
+export const getSessionDrills = async (
+  sessionId: number
+): Promise<SessionDrill[]> => {
+  try {
+    const response = await api.get(`/sessions/session_drills/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("API error fetching session drills:", error);
+    throw new Error("Could not fetch drills");
+  }
+};
+
+export const deleteTrainerSession = async (
+  sessionId: number
+): Promise<void> => {
+  try {
+    await api.delete(`/sessions/${sessionId}`);
+  } catch (error) {
+    console.error("API error deleting session:", error);
+    throw new Error("Could not delete session");
   }
 };
