@@ -15,6 +15,8 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import api from "../../utils/api";
 
+import { signUpTrainer } from "../../utils/apiServices";
+
 const TrainerSignUp = () => {
   const router = useRouter();
 
@@ -52,7 +54,7 @@ const TrainerSignUp = () => {
       return;
     }
     try {
-      const response = await api.post("/trainers", {
+      const response = await signUpTrainer({
         email,
         username,
         password,
@@ -62,7 +64,7 @@ const TrainerSignUp = () => {
         bio,
       });
 
-      const { message, username: signedUpUsername } = response.data;
+      const { message, username: signedUpUsername } = response;
 
       Alert.alert(`${message} Username: ${signedUpUsername}`, "", [
         {
@@ -79,10 +81,7 @@ const TrainerSignUp = () => {
       setYears_experience("");
       setBio("");
     } catch (error: any) {
-      console.error("Sign up error:", error);
-      const message =
-        error.response?.data?.message || "An error occurred during sign up.";
-      Alert.alert("Sign Up Failed", message);
+      Alert.alert("Sign Up Failed", error.message);
     }
   };
 

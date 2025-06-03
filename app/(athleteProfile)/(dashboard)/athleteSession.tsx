@@ -13,11 +13,14 @@ import {
 import api from "../../../utils/api";
 import { AthleteSessionItem } from "../../../components/types";
 
-import { fetchAthleteSessions } from "../../../utils/apiServices";
+import {
+  fetchAthleteSessions,
+  completeAthleteSession,
+} from "../../../utils/apiServices";
 
 const AthleteSession = () => {
+  //useSta
   const [sessions, setSessions] = useState<AthleteSessionItem[]>([]);
-
   const [loading, setLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
@@ -42,12 +45,10 @@ const AthleteSession = () => {
     session_id: number
   ) => {
     try {
-      await api.delete(`/athletes/session/${athlete_user_id}/${session_id}`);
-
+      await completeAthleteSession(athlete_user_id, session_id);
       Alert.alert("Session Completed", "Session has been marked as complete.");
       fetchSessions();
     } catch (error) {
-      console.error("Error completing session:", error);
       Alert.alert("Error", "Could not mark session as complete.");
     }
   };

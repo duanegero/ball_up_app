@@ -1,3 +1,4 @@
+//imports to use in app
 import {
   StyleSheet,
   Text,
@@ -11,26 +12,27 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-import api from "../../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
-import { Trainer, Athlete } from "../../../components/types";
-
+import { Athlete } from "../../../components/types";
 import { fetchAthlete } from "../../../utils/apiServices";
 
+//variable to handle width of window
 const { width } = Dimensions.get("window");
 
 const AthleteProfile = () => {
+  //variable to handle router
   const router = useRouter();
 
+  //useState varaibles
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
+      //async function to load athletes
       const loadAthlete = async () => {
         const data = await fetchAthlete();
         if (data) {
