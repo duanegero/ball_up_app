@@ -52,7 +52,7 @@ export const completeAthleteSession = async (
   }
 };
 
-//function to fetch trainer from api/db
+//function to fetch all trainers from api/db
 export const fetchTrainers = async (): Promise<Trainer[]> => {
   try {
     const response = await api.get("/trainers");
@@ -273,6 +273,81 @@ export const removeDrillFromSession = async (
     });
   } catch (error) {
     console.error("Failed to delete session drill:", error);
+    throw error;
+  }
+};
+
+export const fetchTrainerData = async (): Promise<{
+  trainer_user_id: number;
+  sessions: any[];
+  athletes: any[];
+} | null> => {
+  try {
+    const idString = await AsyncStorage.getItem("trainerId");
+    if (!idString) {
+      console.warn("No trainer ID found.");
+      return null;
+    }
+
+    const trainer_user_id = parseInt(idString, 10);
+
+    const [sessionsRes, athletesRes] = await Promise.all([
+      api.get(`/trainers/sessions/${trainer_user_id}`),
+      api.get(`/trainers/athletes/${trainer_user_id}`),
+    ]);
+
+    return {
+      trainer_user_id,
+      sessions: sessionsRes.data,
+      athletes: athletesRes.data,
+    };
+  } catch (error) {
+    console.error("Error fetching trainer data", error);
+    throw error;
+  }
+};
+
+export const getAthleteSessions = async (athleteId: number) => {
+  try {
+    const response = await api.get(`/athletes/athlete_sessions/${athleteId}`);
+    return response.data.athlete_sessions; // return just the array
+  } catch (error) {
+    console.error("Error fetching athlete sessions", error);
+    throw error;
+  }
+};
+
+export const putSessionToAthlete = async (
+  sessionId: number,
+  athleteUserId: number
+) => {
+  try {
+    const response = await api.post(`/athletes/athlete_sessions/${sessionId}`, {
+      athlete_user_id: athleteUserId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error assigning session to athlete:", error);
+    throw error;
+  }
+};
+
+export const removeAthleteFromTrainer = async (athleteUserId: number) => {
+  try {
+    const idString = await AsyncStorage.getItem("trainerId");
+    const trainer_user_id = idString ? parseInt(idString, 10) : null;
+
+    if (!trainer_user_id) {
+      throw new Error("Trainer ID not found in storage.");
+    }
+
+    const response = await api.delete(`/trainers/athlete/${athleteUserId}`, {
+      data: { trainer_user_id },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("API error removing athlete:", error);
     throw error;
   }
 };

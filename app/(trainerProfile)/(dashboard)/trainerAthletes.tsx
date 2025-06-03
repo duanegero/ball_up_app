@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -9,48 +8,40 @@ import {
   Alert,
   SafeAreaView,
 } from "react-native";
-import api from "../../../utils/api";
 
 import { Session, Athlete } from "../../../components/types";
+import {
+  fetchTrainerData,
+  getAthleteSessions,
+  putSessionToAthlete,
+  removeAthleteFromTrainer,
+} from "../../../utils/apiServices";
 
 const TrainerAthletes = () => {
   const [trainerId, setTrainerId] = useState<number | null>(null);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
 
-  useEffect(() => {
-    const fetchTrainerData = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-
-        const trainer_user_id = parseInt(idString, 10);
-        setTrainerId(trainer_user_id);
-
-        const [sessionsRes, athletesRes] = await Promise.all([
-          api.get(`/trainers/sessions/${trainer_user_id}`),
-          api.get(`/trainers/athletes/${trainer_user_id}`),
-        ]);
-
-        setSessions(sessionsRes.data);
-        setAthletes(athletesRes.data);
-      } catch (error) {
-        console.error("Error fetching trainer data", error);
+  const loadTrainerData = async () => {
+    try {
+      const data = await fetchTrainerData();
+      if (data) {
+        setTrainerId(data.trainer_user_id);
+        setSessions(data.sessions);
+        setAthletes(data.athletes);
       }
-    };
+    } catch (error) {
+      console.error("Failed to load trainer data:", error);
+    }
+  };
 
-    fetchTrainerData();
+  useEffect(() => {
+    loadTrainerData();
   }, []);
 
   const handlePress = async (athlete: Athlete) => {
     try {
-      const sessionRes = await api.get(
-        `/athletes/athlete_sessions/${athlete.athlete_user_id}`
-      );
-      const athleteSessions = sessionRes.data.athlete_sessions;
+      const athleteSessions = await getAthleteSessions(athlete.athlete_user_id);
 
       const sessionNames =
         athleteSessions.length > 0
@@ -75,7 +66,6 @@ const TrainerAthletes = () => {
         { cancelable: true }
       );
     } catch (error) {
-      console.error("Failed to fetch athlete sessions:", error);
       Alert.alert("Error", "Could not retrieve athlete sessions.");
     }
   };
@@ -97,12 +87,9 @@ const TrainerAthletes = () => {
 
   const assignSessionToAthlete = async (session: Session, athlete: Athlete) => {
     try {
-      await api.post(`/athletes/athlete_sessions/${session.session_id}`, {
-        athlete_user_id: athlete.athlete_user_id,
-      });
+      await putSessionToAthlete(session.session_id, athlete.athlete_user_id);
       Alert.alert("Success", "Session assigned to athlete.");
     } catch (error) {
-      console.error("Error assigning session:", error);
       Alert.alert("Error", "Failed to assign session.");
     }
   };
@@ -125,12 +112,7 @@ const TrainerAthletes = () => {
 
   const removeAthlete = async (athlete: Athlete) => {
     try {
-      const idString = await AsyncStorage.getItem("trainerId");
-      const trainer_user_id = idString ? parseInt(idString, 10) : null;
-
-      await api.delete(`/trainers/athlete/${athlete.athlete_user_id}`, {
-        data: { trainer_user_id },
-      });
+      await removeAthleteFromTrainer(athlete.athlete_user_id);
 
       setAthletes((prev) =>
         prev.filter((a) => a.athlete_user_id !== athlete.athlete_user_id)
@@ -138,7 +120,6 @@ const TrainerAthletes = () => {
 
       Alert.alert("Success", "Athlete removed successfully.");
     } catch (error) {
-      console.error("Failed to remove athlete", error);
       Alert.alert("Error", "Failed to remove athlete.");
     }
   };
