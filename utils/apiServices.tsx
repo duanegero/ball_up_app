@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
-import { Athlete, Trainer, DrillResponse } from "../components/types";
+import { Athlete, Trainer, DrillResponse, Session } from "../components/types";
 
 //function to fetch athlete from api/db
 export const fetchAthlete = async (): Promise<Athlete | null> => {
@@ -209,4 +209,23 @@ export const createDrill = async ({
   });
 
   return response.data;
+};
+
+export const createSession = async ({
+  length,
+  level,
+  session_name,
+  trainer_user_id,
+}: {
+  length: number;
+  level: number;
+  session_name: string;
+  trainer_user_id: number;
+}) => {
+  return await api.post("/sessions", {
+    length,
+    level,
+    session_name,
+    trainer_user_id,
+  });
 };

@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import api from "../../utils/api";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { createSession } from "../../utils/apiServices";
 
 const CreateSession = () => {
   const router = useRouter();
@@ -47,7 +48,7 @@ const CreateSession = () => {
     setLoading(true);
 
     try {
-      await api.post("/sessions", {
+      await createSession({
         length,
         level,
         session_name: trimmedName,
