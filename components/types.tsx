@@ -28,9 +28,11 @@ export interface Drill {
   trainer_user_id: number;
 }
 
-export interface SessionDrill {
+export type SessionDrill = {
+  drill_id: number;
+  session_id: number;
   drill: Drill;
-}
+};
 
 export interface Session {
   session_id: number;

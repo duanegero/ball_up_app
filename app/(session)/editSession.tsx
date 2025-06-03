@@ -10,25 +10,18 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
-import api from "../../utils/api";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import {
+  addDrillToSession,
+  fetchSessionDrills,
+  fetchTrainerDrills,
+  removeDrillFromSession,
+} from "../../utils/apiServices";
 
-type Drill = {
-  drill_id: number;
-  drill_name: string;
-  drill_type: string;
-  description: string;
-  level: number;
-};
-
-type SessionDrill = {
-  drill_id: number;
-  session_id: number;
-  drill: Drill;
-};
+import { Drill, SessionDrill } from "../../components/types";
 
 const EditSession = () => {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -37,34 +30,40 @@ const EditSession = () => {
   const [sessionDrills, setSessionDrills] = useState<SessionDrill[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchSessionDrills = async () => {
-      try {
-        const response = await api.get(`/sessions/session_drills/${sessionId}`);
-        setSessionDrills(response.data);
-      } catch (error) {
-        console.error("Error fetching session drills:", error);
+  const getDrills = async () => {
+    try {
+      if (!sessionId) {
+        console.warn("No sessionId found.");
+        return;
       }
-    };
-    fetchSessionDrills();
+      const data = await fetchSessionDrills(sessionId);
+      setSessionDrills(data);
+    } catch (error) {
+      console.error("Failed to load session drills in EditSession", error);
+    }
+  };
+
+  const loadTrainerDrills = async () => {
+    try {
+      const idString = await AsyncStorage.getItem("trainerId");
+      if (!idString) {
+        console.warn("No trainer ID found.");
+        return;
+      }
+      const trainerId = parseInt(idString, 10);
+      const drillsData = await fetchTrainerDrills(trainerId);
+      setDrills(drillsData);
+    } catch (error) {
+      console.error("Failed to load trainer drills:", error);
+    }
+  };
+
+  useEffect(() => {
+    getDrills();
   }, [sessionId]);
 
   useEffect(() => {
-    const fetchTrainerDrills = async () => {
-      try {
-        const idString = await AsyncStorage.getItem("trainerId");
-        if (!idString) {
-          console.warn("No trainer ID found.");
-          return;
-        }
-        const trainer_user_id = parseInt(idString, 10);
-        const response = await api.get(`/trainers/drills/${trainer_user_id}`);
-        setDrills(response.data);
-      } catch (error) {
-        console.error("Error fetching trainer drills", error);
-      }
-    };
-    fetchTrainerDrills();
+    loadTrainerDrills();
   }, []);
 
   const handleAddDrill = async (drill: Drill) => {
@@ -76,14 +75,11 @@ const EditSession = () => {
         "Duplicate Drill",
         "This drill is already part of the session."
       );
-
       return;
     }
 
     try {
-      await api.post(`/sessions/session_drills/${sessionId}`, {
-        drill_id: drill.drill_id,
-      });
+      await addDrillToSession(sessionId, drill.drill_id);
 
       setSessionDrills((prev) => [
         ...prev,
@@ -99,16 +95,20 @@ const EditSession = () => {
     }
   };
 
-  const handleRemove = async (drill_id: number, session_id_str: string) => {
-    const session_id = Number(session_id_str);
+  const handleRemove = async (drill_id: number, session_id_str?: string) => {
+    if (!session_id_str) {
+      console.warn("No session ID for drill removal.");
+      return;
+    }
     try {
-      await api.delete(`/sessions/session_drills/${drill_id}`, {
-        data: { session_id },
-      });
+      await removeDrillFromSession(session_id_str, drill_id);
 
       setSessionDrills((prevDrills) =>
         prevDrills.filter(
-          (d) => !(d.drill_id === drill_id && d.session_id === session_id)
+          (d) =>
+            !(
+              d.drill_id === drill_id && d.session_id === Number(session_id_str)
+            )
         )
       );
     } catch (error) {
@@ -126,7 +126,9 @@ const EditSession = () => {
 
       <Text style={styles.title}>Edit Session Drills</Text>
 
-      <Button title="Select Drill" onPress={() => setModalVisible(true)} />
+      <View style={{ marginVertical: 10 }}>
+        <Button title="Select Drill" onPress={() => setModalVisible(true)} />
+      </View>
 
       <Modal
         animationType="slide"
@@ -170,7 +172,7 @@ const EditSession = () => {
 
       <FlatList
         data={sessionDrills}
-        keyExtractor={(item) => `${item.drill_id}`}
+        keyExtractor={(item) => `${item.session_id}-${item.drill_id}`}
         renderItem={({ item }) => (
           <View style={styles.drillItem}>
             <Text style={styles.drillText}>
@@ -178,7 +180,11 @@ const EditSession = () => {
             </Text>
             <Pressable
               style={styles.removeButton}
-              onPress={() => handleRemove(item.drill_id, sessionId)}>
+              onPress={() => {
+                if (sessionId) {
+                  handleRemove(item.drill_id, sessionId);
+                }
+              }}>
               <Text style={styles.removeText}>Remove</Text>
             </Pressable>
           </View>

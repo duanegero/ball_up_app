@@ -229,3 +229,50 @@ export const createSession = async ({
     trainer_user_id,
   });
 };
+
+export const fetchSessionDrills = async (sessionId: string) => {
+  try {
+    const response = await api.get(`/sessions/session_drills/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching session drills:", error);
+    throw error;
+  }
+};
+
+export const fetchTrainerDrills = async (trainerId: number) => {
+  try {
+    const response = await api.get(`/trainers/drills/${trainerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching trainer drills:", error);
+    throw error;
+  }
+};
+
+// Add a drill to a session
+export const addDrillToSession = async (sessionId: string, drillId: number) => {
+  try {
+    await api.post(`/sessions/session_drills/${sessionId}`, {
+      drill_id: drillId,
+    });
+  } catch (error) {
+    console.error("Failed to add drill to session:", error);
+    throw error;
+  }
+};
+
+// Remove a drill from a session
+export const removeDrillFromSession = async (
+  sessionId: string,
+  drillId: number
+) => {
+  try {
+    await api.delete(`/sessions/session_drills/${drillId}`, {
+      data: { session_id: Number(sessionId) },
+    });
+  } catch (error) {
+    console.error("Failed to delete session drill:", error);
+    throw error;
+  }
+};
