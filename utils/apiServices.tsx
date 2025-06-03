@@ -380,3 +380,24 @@ export const deleteDrillById = async (drill_id: number) => {
     throw error;
   }
 };
+
+export const getTrainerById = async () => {
+  try {
+    const idString = await AsyncStorage.getItem("trainerId");
+
+    if (!idString) {
+      throw new Error("Trainer ID not found.");
+    }
+
+    const trainer_user_id = parseInt(idString, 10);
+    if (isNaN(trainer_user_id)) {
+      throw new Error("Invalid trainer ID.");
+    }
+
+    const response = await api.get(`/trainers/${trainer_user_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("API error fetching trainer:", error);
+    throw error;
+  }
+};

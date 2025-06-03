@@ -12,10 +12,8 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
-import api from "../../../utils/api";
-
 import { Trainer } from "../../../components/types";
+import { getTrainerById } from "../../../utils/apiServices";
 
 const { width } = Dimensions.get("window");
 
@@ -28,27 +26,13 @@ const TrainerProfile = () => {
   const fetchTrainer = async () => {
     try {
       setError(null);
-      const idString = await AsyncStorage.getItem("trainerId");
-
-      if (!idString) {
-        console.warn("No trainer ID found.");
-        setError("Trainer ID not found. Please log in again.");
-        return;
-      }
-
-      const trainer_user_id = parseInt(idString, 10);
-
-      if (isNaN(trainer_user_id)) {
-        console.error("Invalid trainer ID:", idString);
-        setError("Invalid trainer ID found. Please log in again.");
-        return;
-      }
-
-      const response = await api.get(`/trainers/${trainer_user_id}`);
-      setTrainer(response.data);
-    } catch (error) {
-      console.error("Error fetching trainer:", error);
-      setError("Failed to load trainer profile. Please try again later.");
+      const trainerData = await getTrainerById();
+      setTrainer(trainerData);
+    } catch (error: any) {
+      setError(
+        error.message ||
+          "Failed to load trainer profile. Please try again later."
+      );
     }
   };
 
