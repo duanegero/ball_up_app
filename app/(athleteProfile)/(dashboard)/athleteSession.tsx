@@ -8,10 +8,12 @@ import {
   Pressable,
   FlatList,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { AthleteSessionItem } from "../../../components/types";
 import {
   fetchAthleteSessions,
   completeAthleteSession,
+  deleteAthleteSession,
 } from "../../../utils/apiServices";
 
 const AthleteSession = () => {
@@ -23,7 +25,14 @@ const AthleteSession = () => {
     try {
       setLoading(true);
       const sessions = await fetchAthleteSessions();
-      setSessions(sessions);
+
+      const sortedSessions = sessions.sort(
+        (a: { completed: any }, b: { completed: any }) => {
+          return Number(a.completed) - Number(b.completed);
+        }
+      );
+
+      setSessions(sortedSessions);
     } catch (error) {
       console.error("[AthleteSession] Error fetching sessions", error);
       Alert.alert("Error", "Could not load your sessions. Try again.");
@@ -46,6 +55,16 @@ const AthleteSession = () => {
       fetchSessions();
     } catch (error) {
       Alert.alert("Error", "Could not mark session as complete.");
+    }
+  };
+
+  const handleDelete = async (athlete_user_id: number, session_id: number) => {
+    try {
+      await deleteAthleteSession(athlete_user_id, session_id);
+      Alert.alert("Session Deleted", "Session has been deleted from list.");
+      fetchSessions();
+    } catch (error) {
+      Alert.alert("Error", "Could not detele session.");
     }
   };
 
@@ -74,7 +93,16 @@ const AthleteSession = () => {
 
             return (
               <View style={styles.card}>
-                <Text style={styles.sessionName}>{session.session_name}</Text>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.sessionName}>{session.session_name}</Text>
+                  <Pressable
+                    onPress={() =>
+                      handleDelete(item.athlete_user_id, item.session_id)
+                    }>
+                    <Ionicons name="trash-outline" size={20} color="#d11a2a" />
+                  </Pressable>
+                </View>
+
                 <Text style={styles.detail}>
                   Length: {session.length} mins | Level: {session.level}
                 </Text>
@@ -95,13 +123,20 @@ const AthleteSession = () => {
                   </Text>
                 )}
 
-                <Pressable
-                  style={styles.button}
-                  onPress={handlePress(item.athlete_user_id, item.session_id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Mark ${session.session_name} as completed`}>
-                  <Text style={styles.buttonText}>Mark Completed</Text>
-                </Pressable>
+                {item.completed ? (
+                  <View style={[styles.button, styles.buttonDisabled]}>
+                    <Text style={styles.buttonText}>✔ Completed</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={styles.button}
+                    onPress={handlePress(
+                      item.athlete_user_id,
+                      item.session_id
+                    )}>
+                    <Text style={styles.buttonText}>Mark Completed</Text>
+                  </Pressable>
+                )}
               </View>
             );
           }}
@@ -169,5 +204,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  buttonDisabled: {
+    backgroundColor: "#ccc",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
   },
 });

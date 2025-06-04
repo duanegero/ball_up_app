@@ -45,13 +45,18 @@ export const fetchAthleteSessions = async () => {
   }
 };
 
-//function to mark session as complete for the athlete
+// function to mark session as complete for the athlete
 export const completeAthleteSession = async (
   athlete_user_id: number,
   session_id: number
 ): Promise<void> => {
   try {
-    await api.delete(`/athletes/session/${athlete_user_id}/${session_id}`);
+    await api.put(
+      `/athletes/athlete_sessions/${athlete_user_id}/${session_id}`,
+      {
+        completed: true,
+      }
+    );
   } catch (error) {
     console.error("Error completing session:", error);
     throw error;
@@ -459,6 +464,21 @@ export const deleteTrainerSession = async (
 ): Promise<void> => {
   try {
     await api.delete(`/sessions/${sessionId}`);
+  } catch (error) {
+    console.error("API error deleting session:", error);
+    throw new Error("Could not delete session");
+  }
+};
+
+//function to delete athlete session
+export const deleteAthleteSession = async (
+  athlete_user_id: number,
+  session_id: number
+): Promise<void> => {
+  try {
+    console.log("Deleting session with:", athlete_user_id, session_id);
+
+    await api.delete(`athletes/session/${athlete_user_id}/${session_id}`);
   } catch (error) {
     console.error("API error deleting session:", error);
     throw new Error("Could not delete session");

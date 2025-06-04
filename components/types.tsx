@@ -44,9 +44,21 @@ export interface Session {
 }
 
 export interface AthleteSessionItem {
-  session_id: number;
   athlete_user_id: number;
-  session: Session;
+  session_id: number;
+  completed: boolean;
+  session: {
+    level: number;
+    length: number;
+    session_name: string;
+    Session_Drill: {
+      drill: {
+        level: number;
+        drill_type: string;
+        description: string;
+      };
+    }[];
+  };
 }
 
 export type DrillResponse = {
