@@ -1,3 +1,4 @@
+//imports to use in app
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -17,6 +18,7 @@ import {
 } from "../../../utils/apiServices";
 
 const AthleteTrainerScreen = () => {
+  //useState varibles
   const [athleteUserId, setAthleteUserId] = useState<number | null>(null);
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [selectedTrainerId, setSelectedTrainerId] = useState<number | null>(
@@ -24,6 +26,7 @@ const AthleteTrainerScreen = () => {
   );
   const [loading, setLoading] = useState(true);
 
+  //function to load all trainers
   const loadTrainers = async () => {
     try {
       setLoading(true);
@@ -37,6 +40,7 @@ const AthleteTrainerScreen = () => {
     }
   };
 
+  //function to load signle athlete
   const loadAthlete = async () => {
     try {
       const athlete = await fetchAthlete();
@@ -50,6 +54,7 @@ const AthleteTrainerScreen = () => {
     }
   };
 
+  //useeffect calling above functions
   useEffect(() => {
     loadTrainers();
   }, []);
@@ -58,6 +63,7 @@ const AthleteTrainerScreen = () => {
     loadAthlete();
   }, []);
 
+  //async function to assign a trainer
   const assignTrainer = async (trainer_user_id: number) => {
     setSelectedTrainerId(trainer_user_id);
 

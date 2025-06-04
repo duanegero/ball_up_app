@@ -4,7 +4,6 @@ import {
   Athlete,
   Trainer,
   DrillResponse,
-  Session,
   SessionDrill,
 } from "../components/types";
 
@@ -24,6 +23,19 @@ export const fetchAthlete = async (): Promise<Athlete | null> => {
     console.error("Error fetching athlete:", error);
     return null;
   }
+};
+
+export const fetchAthleteProfile = async (athlete_user_id: number) => {
+  const response = await api.get(`/athletes/${athlete_user_id}`);
+  return response.data;
+};
+
+export const updateAthleteProfile = async (
+  athlete_user_id: number,
+  data: { [key: string]: string | number }
+) => {
+  const res = await api.put(`/athletes/${athlete_user_id}`, data);
+  return res;
 };
 
 //function to fetch athlete sessions from api/db

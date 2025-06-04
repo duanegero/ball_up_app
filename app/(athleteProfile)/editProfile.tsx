@@ -1,3 +1,4 @@
+//imports to use in app
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -12,11 +13,16 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../../utils/api"; // Axios instance with baseURL
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { router } from "expo-router";
+
+import {
+  fetchAthleteProfile,
+  updateAthleteProfile,
+} from "../../utils/apiServices";
 
 const EditProfileScreen = () => {
   const [athleteId, setAthleteId] = useState<number | null>(null);
@@ -27,8 +33,11 @@ const EditProfileScreen = () => {
     age: "",
     level: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchProfile = async () => {
+    setLoading(true);
     try {
       const idString = await AsyncStorage.getItem("athleteId");
       if (!idString) {
@@ -36,35 +45,28 @@ const EditProfileScreen = () => {
         return;
       }
 
-      const id = parseInt(idString, 10);
-      setAthleteId(id);
+      const athlete_user_id = parseInt(idString, 10);
+      setAthleteId(athlete_user_id);
 
-      const res = await api.get(`/athletes/${id}`);
-      if (res.data) {
-        const { first_name, last_name, email, age, level } = res.data;
-        setFormData({
-          first_name: first_name || "",
-          last_name: last_name || "",
-          email: email || "",
-          age: age?.toString() || "",
-          level: level || "",
-        });
-      }
+      const data = await fetchAthleteProfile(athlete_user_id);
+      const { first_name, last_name, email, age, level } = data;
+      setFormData({
+        first_name: first_name || "",
+        last_name: last_name || "",
+        email: email || "",
+        age: age?.toString() || "",
+        level: level || "",
+      });
     } catch (error) {
       console.error("Error fetching profile", error);
       Alert.alert("Error", "Could not fetch profile.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleSubmit = async () => {
+    setSubmitting(true);
     try {
       if (!athleteId) return;
 
@@ -80,7 +82,7 @@ const EditProfileScreen = () => {
         }
       }
 
-      const res = await api.put(`/athletes/${athleteId}`, filteredData);
+      const res = await updateAthleteProfile(athleteId, filteredData);
       if (res.status === 200) {
         Alert.alert("Success", "Profile updated successfully!", [
           { text: "OK", onPress: () => router.push("/athleteProfile") },
@@ -91,8 +93,26 @@ const EditProfileScreen = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Could not update profile.");
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -165,8 +185,16 @@ const EditProfileScreen = () => {
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              submitting && { backgroundColor: "#ccc" },
+            ]}
+            onPress={handleSubmit}
+            disabled={submitting}>
+            <Text style={styles.saveButtonText}>
+              {submitting ? "Saving..." : "Save Changes"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -180,7 +208,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#fff",
-    flexGrow: 1,
+    flex: 1,
   },
   title: {
     fontSize: 24,
@@ -229,5 +257,11 @@ const styles = StyleSheet.create({
   scrollContainer: {
     padding: 20,
     flexGrow: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });

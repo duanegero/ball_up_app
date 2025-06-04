@@ -1,3 +1,4 @@
+//imports to use in app
 import React, { useCallback, useState, useEffect } from "react";
 import {
   View,
@@ -17,15 +18,17 @@ import {
 } from "../../../utils/apiServices";
 
 const AthleteSession = () => {
-  //useStates
+  //useState variables
   const [sessions, setSessions] = useState<AthleteSessionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  //callback function to memoize
   const fetchSessions = useCallback(async () => {
     try {
       setLoading(true);
       const sessions = await fetchAthleteSessions();
 
+      //sorting the session
       const sortedSessions = sessions.sort(
         (a: { completed: any }, b: { completed: any }) => {
           return Number(a.completed) - Number(b.completed);
@@ -45,6 +48,7 @@ const AthleteSession = () => {
     fetchSessions();
   }, [fetchSessions]);
 
+  //async function to handle complete press click
   const handleComplete = async (
     athlete_user_id: number,
     session_id: number
@@ -58,6 +62,7 @@ const AthleteSession = () => {
     }
   };
 
+  //async function to handle delete press click
   const handleDelete = async (athlete_user_id: number, session_id: number) => {
     try {
       await deleteAthleteSession(athlete_user_id, session_id);
@@ -66,10 +71,6 @@ const AthleteSession = () => {
     } catch (error) {
       Alert.alert("Error", "Could not detele session.");
     }
-  };
-
-  const handlePress = (athleteId: number, sessionId: number) => () => {
-    handleComplete(athleteId, sessionId);
   };
 
   return (
@@ -130,10 +131,9 @@ const AthleteSession = () => {
                 ) : (
                   <Pressable
                     style={styles.button}
-                    onPress={handlePress(
-                      item.athlete_user_id,
-                      item.session_id
-                    )}>
+                    onPress={() =>
+                      handleComplete(item.athlete_user_id, item.session_id)
+                    }>
                     <Text style={styles.buttonText}>Mark Completed</Text>
                   </Pressable>
                 )}

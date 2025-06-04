@@ -65,14 +65,16 @@ const TrainerDrills = () => {
         ) : (
           drills.map((drill) => (
             <View key={drill.drill_id} style={styles.card}>
+              <Text style={styles.drillName}>{drill.drill_name}</Text>
+
               <Text style={styles.label}>Type:</Text>
               <Text style={styles.value}>{drill.drill_type}</Text>
 
-              <Text style={styles.label}>Description:</Text>
-              <Text style={styles.value}>{drill.description}</Text>
-
               <Text style={styles.label}>Level:</Text>
               <Text style={styles.value}>{drill.level}</Text>
+
+              <Text style={styles.label}>Description:</Text>
+              <Text style={styles.value}>{drill.description}</Text>
 
               <TouchableOpacity
                 style={styles.deleteButton}
@@ -171,5 +173,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "#999",
+  },
+  drillName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
   },
 });

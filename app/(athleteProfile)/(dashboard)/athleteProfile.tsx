@@ -26,10 +26,11 @@ const AthleteProfile = () => {
   //variable to handle router
   const router = useRouter();
 
-  //useState varaibles
+  //useState varibles
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  //useFocusEffect runs everytime screen comes into focus
   useFocusEffect(
     useCallback(() => {
       //async function to load athletes
@@ -46,6 +47,7 @@ const AthleteProfile = () => {
     }, [])
   );
 
+  //function to handle logout press click
   const handleLogout = async () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
