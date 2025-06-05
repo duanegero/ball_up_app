@@ -16,6 +16,7 @@ import {
   fetchTrainers,
   assignTrainerToAthlete,
 } from "../../../utils/apiServices";
+import { styles } from "../../../styles/athleteTrainer.styles";
 
 const AthleteTrainerScreen = () => {
   //useState varibles
@@ -25,6 +26,7 @@ const AthleteTrainerScreen = () => {
     null
   );
   const [loading, setLoading] = useState(true);
+  const [assigning, setAssigning] = useState(false);
 
   //function to load all trainers
   const loadTrainers = async () => {
@@ -65,13 +67,16 @@ const AthleteTrainerScreen = () => {
 
   //async function to assign a trainer
   const assignTrainer = async (trainer_user_id: number) => {
+    if (assigning) return;
+    setAssigning(true);
     setSelectedTrainerId(trainer_user_id);
-
     try {
       await assignTrainerToAthlete(trainer_user_id);
       Alert.alert("Success", "The trainer has been assigned successfully.");
     } catch (error) {
       Alert.alert("Error", "Failed to assign the trainer. Please try again.");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -104,15 +109,20 @@ const AthleteTrainerScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.button,
-                  selectedTrainerId === item.trainer_user_id &&
-                    styles.buttonDisabled,
+                  selectedTrainerId === item.trainer_user_id || assigning
+                    ? styles.buttonDisabled
+                    : null,
                 ]}
-                disabled={selectedTrainerId === item.trainer_user_id}
+                disabled={
+                  assigning && selectedTrainerId === item.trainer_user_id
+                }
                 onPress={() => assignTrainer(item.trainer_user_id)}>
                 <Text style={styles.buttonText}>
                   {selectedTrainerId === item.trainer_user_id
                     ? "Assigned"
-                    : "Select Trainer"}
+                    : assigning
+                      ? "Assigning..."
+                      : "Select Trainer"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -124,54 +134,3 @@ const AthleteTrainerScreen = () => {
 };
 
 export default AthleteTrainerScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 16,
-  },
-  heading: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  detail: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
-  bio: {
-    fontStyle: "italic",
-    marginTop: 6,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
-  },
-});
