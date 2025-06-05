@@ -5,7 +5,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   SafeAreaView,
   ActivityIndicator,

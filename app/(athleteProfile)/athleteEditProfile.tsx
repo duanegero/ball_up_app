@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   Alert,
   ScrollView,
   Pressable,
@@ -16,11 +15,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { router } from "expo-router";
-
 import {
   fetchAthleteProfile,
   updateAthleteProfile,
 } from "../../utils/apiServices";
+import { styles } from "../../styles/athleteEditProfile.styles";
 
 const EditProfileScreen = () => {
   //useState varibles
@@ -29,8 +28,8 @@ const EditProfileScreen = () => {
     first_name: "",
     last_name: "",
     email: "",
-    age: "",
-    level: "",
+    age: null as number | null,
+    level: null as number | null,
   });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -54,8 +53,8 @@ const EditProfileScreen = () => {
         first_name: first_name || "",
         last_name: last_name || "",
         email: email || "",
-        age: age?.toString() || "",
-        level: level || "",
+        age: typeof age === "number" ? age : parseInt(age, 10) || null,
+        level: typeof level === "number" ? level : parseInt(level, 10) || null,
       });
     } catch (error) {
       console.error("Error fetching profile", error);
@@ -65,25 +64,52 @@ const EditProfileScreen = () => {
     }
   };
 
+  //useEffect to call function
   useEffect(() => {
     fetchProfile();
   }, []);
 
+  //async function to handle submit pressable
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
       if (!athleteId) return;
 
-      const filteredData: { [key: string]: string | number } =
-        Object.fromEntries(
-          Object.entries(formData).filter(([_, value]) => value !== "")
-        );
+      //convert the formData object into an array of key-value pairs, then filter out entries
+      const filteredData = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) => {
+          return (
+            value !== null &&
+            value !== undefined &&
+            !(typeof value === "string" && value.trim() === "")
+          );
+        })
+      ) as { [key: string]: string | number };
 
-      if (filteredData.age) {
-        const parsedAge = parseInt(filteredData.age as string, 10);
-        if (!isNaN(parsedAge)) {
-          filteredData.age = parsedAge;
+      if (Object.keys(filteredData).length === 0) {
+        Alert.alert("No Changes", "Please update at least one field.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (filteredData.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(filteredData.email as string)) {
+          Alert.alert("Invalid Email", "Please enter a valid email address.");
+          setSubmitting(false);
+          return;
         }
+      }
+
+      if (
+        typeof formData.age !== "number" ||
+        isNaN(formData.age) ||
+        formData.age <= 0 ||
+        formData.age > 120
+      ) {
+        Alert.alert("Invalid Age", "Please enter a valid age.");
+        setSubmitting(false);
+        return;
       }
 
       const res = await updateAthleteProfile(athleteId, filteredData);
@@ -102,7 +128,8 @@ const EditProfileScreen = () => {
     }
   };
 
-  const handleChange = (field: string, value: string) => {
+  //function to handle change in form
+  const handleChange = (field: string, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -119,11 +146,13 @@ const EditProfileScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}>
       <View style={styles.backIconContainer}>
-        <Pressable onPress={() => router.push("/athleteProfile")}>
+        <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="#2563eb" />
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Edit Profile</Text>
 
         <View style={styles.inputGroup}>
@@ -161,8 +190,11 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Age</Text>
           <TextInput
             style={styles.input}
-            value={formData.age}
-            onChangeText={(value) => handleChange("age", value)}
+            value={formData.age?.toString() || ""}
+            onChangeText={(value) => {
+              const num = parseInt(value, 10);
+              handleChange("age", isNaN(num) ? null : num);
+            }}
             placeholder="Age"
             keyboardType="numeric"
           />
@@ -172,11 +204,13 @@ const EditProfileScreen = () => {
           <Text style={styles.label}>Level</Text>
           <TextInput
             style={styles.input}
-            value={formData.level}
+            value={formData.level?.toString() || ""}
             onChangeText={(value) => {
-              // Allow only numbers 1 to 5
-              if (/^[1-5]$/.test(value) || value === "") {
-                handleChange("level", value);
+              const num = parseInt(value, 10);
+              if (/^[1-5]$/.test(value)) {
+                handleChange("level", num);
+              } else if (value === "") {
+                handleChange("level", null);
               }
             }}
             placeholder="Level (1–5)"
@@ -203,65 +237,3 @@ const EditProfileScreen = () => {
 };
 
 export default EditProfileScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    alignSelf: "center",
-  },
-  input: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 15,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-  },
-  buttonContainer: {
-    marginTop: 10,
-  },
-  backIconContainer: {
-    marginTop: Platform.OS === "ios" ? 50 : 20,
-    marginBottom: 10,
-  },
-  saveButton: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  inputGroup: {
-    marginBottom: 15,
-  },
-
-  label: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 5,
-    fontWeight: "500",
-  },
-  scrollContainer: {
-    padding: 20,
-    flexGrow: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-});

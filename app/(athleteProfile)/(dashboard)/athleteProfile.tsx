@@ -107,7 +107,9 @@ const AthleteProfile = () => {
           <View style={styles.card}>
             <View style={styles.cardTopRight}>
               <Pressable
-                onPress={() => router.push("(athleteProfile)/editProfile")}
+                onPress={() =>
+                  router.push("(athleteProfile)/athleteEditProfile")
+                }
                 hitSlop={10}>
                 <Ionicons
                   name="ellipsis-horizontal"
