@@ -1,11 +1,9 @@
 //imports to use in app
 import {
-  StyleSheet,
   Text,
   View,
   SafeAreaView,
   ScrollView,
-  Dimensions,
   ActivityIndicator,
   Pressable,
   Alert,
@@ -18,7 +16,7 @@ import { useCallback } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Athlete } from "../../../components/types";
 import { fetchAthlete } from "../../../utils/apiServices";
-import { styles } from "../../styles/athleteProfile.styles";
+import { styles } from "../../../styles/athleteProfile.styles";
 
 const AthleteProfile = () => {
   //variable to handle router

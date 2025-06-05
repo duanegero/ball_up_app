@@ -53,6 +53,7 @@ export interface AthleteSessionItem {
     session_name: string;
     Session_Drill: {
       drill: {
+        drill_id: any;
         level: number;
         drill_type: string;
         description: string;
