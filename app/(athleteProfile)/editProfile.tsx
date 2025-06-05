@@ -4,11 +4,9 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   Alert,
   ScrollView,
-  SafeAreaView,
   Pressable,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -25,6 +23,7 @@ import {
 } from "../../utils/apiServices";
 
 const EditProfileScreen = () => {
+  //useState varibles
   const [athleteId, setAthleteId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     first_name: "",
@@ -36,6 +35,7 @@ const EditProfileScreen = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  //async function to fetch profile
   const fetchProfile = async () => {
     setLoading(true);
     try {
@@ -64,6 +64,10 @@ const EditProfileScreen = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -97,10 +101,6 @@ const EditProfileScreen = () => {
       setSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

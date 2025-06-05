@@ -18,9 +18,7 @@ import { useCallback } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Athlete } from "../../../components/types";
 import { fetchAthlete } from "../../../utils/apiServices";
-
-//variable to handle width of window
-const { width } = Dimensions.get("window");
+import { styles } from "../../styles/athleteProfile.styles";
 
 const AthleteProfile = () => {
   //variable to handle router
@@ -29,20 +27,31 @@ const AthleteProfile = () => {
   //useState varibles
   const [athlete, setAthlete] = useState<Athlete | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  //async function to fetch and load athlete
+  const loadAthlete = useCallback(async () => {
+    setIsRetrying(true);
+    try {
+      const data = await fetchAthlete();
+      if (data) {
+        setAthlete(data);
+        setError(null);
+      } else {
+        setError("Failed to load profile. Please try again later.");
+        console.error("fetchAthlete returned null or undefined");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again later.");
+      console.error("Error loading athlete profile:", err);
+    } finally {
+      setIsRetrying(false);
+    }
+  }, []);
 
   //useFocusEffect runs everytime screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      //async function to load athletes
-      const loadAthlete = async () => {
-        const data = await fetchAthlete();
-        if (data) {
-          setAthlete(data);
-        } else {
-          setError("Failed to load profile. Please try again later.");
-        }
-      };
-
       loadAthlete();
     }, [])
   );
@@ -67,19 +76,31 @@ const AthleteProfile = () => {
       {error ? (
         <View style={styles.loadingContainer}>
           <Text style={styles.loading}>{error}</Text>
+          <Pressable
+            onPress={loadAthlete}
+            style={[styles.retryButton, isRetrying && { opacity: 0.5 }]}
+            disabled={isRetrying}>
+            <Text style={styles.retryText}>
+              {isRetrying ? "Retrying..." : "Retry"}
+            </Text>
+          </Pressable>
         </View>
       ) : athlete ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.topButtonRow}>
-            <Pressable onPress={handleLogout} style={styles.iconButton}>
+            <Pressable
+              accessible={true}
+              accessibilityLabel="Log out"
+              onPress={handleLogout}
+              style={styles.iconButton}>
               <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             </Pressable>
           </View>
 
           <View style={styles.profileImagePlaceholder}>
             <Text style={styles.profileInitials}>
-              {athlete.first_name[0]}
-              {athlete.last_name[0]}
+              {athlete.first_name?.[0] ?? "?"}
+              {athlete.last_name?.[0] ?? "?"}
             </Text>
           </View>
 
@@ -102,17 +123,17 @@ const AthleteProfile = () => {
 
             <Text style={styles.label}>Full Name</Text>
             <Text style={styles.value}>
-              {athlete.first_name} {athlete.last_name}
+              {athlete.first_name ?? "N/A"} {athlete.last_name ?? "N/A"}
             </Text>
 
             <Text style={styles.label}>Age</Text>
-            <Text style={styles.value}>{athlete.age}</Text>
+            <Text style={styles.value}>{athlete.age ?? "N/A"}</Text>
 
             <Text style={styles.label}>Level</Text>
-            <Text style={styles.value}>{athlete.level}</Text>
+            <Text style={styles.value}>{athlete.level ?? "N/A"}</Text>
 
             <Text style={styles.label}>Email</Text>
-            <Text style={styles.value}>{athlete.email}</Text>
+            <Text style={styles.value}>{athlete.email ?? "N/A"}</Text>
           </View>
 
           <View style={styles.card}>
@@ -121,16 +142,17 @@ const AthleteProfile = () => {
                 <Text style={styles.sectionTitle}>Trainer Details</Text>
                 <Text style={styles.label}>Trainer</Text>
                 <Text style={styles.value}>
-                  {athlete.trainer.first_name} {athlete.trainer.last_name}
+                  {athlete.trainer.first_name ?? "N/A"}{" "}
+                  {athlete.trainer.last_name ?? "N/A"}
                 </Text>
 
                 <Text style={styles.label}>Experience</Text>
                 <Text style={styles.value}>
-                  {athlete.trainer.years_experience} years
+                  {athlete.trainer.years_experience ?? "N/A"} years
                 </Text>
 
                 <Text style={styles.label}>Trainer Bio</Text>
-                <Text style={styles.value}>{athlete.trainer.bio}</Text>
+                <Text style={styles.value}>{athlete.trainer.bio ?? "N/A"}</Text>
               </>
             ) : (
               <>
@@ -151,102 +173,3 @@ const AthleteProfile = () => {
 };
 
 export default AthleteProfile;
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f2f4f7",
-  },
-  scrollContainer: {
-    padding: 20,
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: width * 0.07,
-    fontWeight: "700",
-    color: "#1f2937",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  profileImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#3b82f6",
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    marginBottom: 16,
-    shadowColor: "#3b82f6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  profileInitials: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginTop: 12,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#111827",
-    marginTop: 4,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loading: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#6b7280",
-    marginTop: 20,
-  },
-  topButtonRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 2,
-    marginBottom: 12,
-  },
-  cardTopRight: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginBottom: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: 10,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fee2e2",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
