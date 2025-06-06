@@ -1,5 +1,5 @@
+//imports to use in app
 import {
-  StyleSheet,
   Text,
   View,
   Alert,
@@ -18,18 +18,23 @@ import { loginAthlete } from "../../utils/apiServices";
 import { styles } from "../../styles/athleteLogin.styles";
 
 const AthleteLogin = () => {
+  //useState variables
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  //create a reference to the password text input
   const passwordRef = useRef<TextInput>(null);
 
+  //variable to handle the state of button
   const buttonStyle =
     submitting || !username || !password
       ? [styles.button, styles.buttonDisabled]
       : styles.button;
 
+  //async function to handle submit pressable
   const handleSubmit = async () => {
     if (!username || !password) {
       setErrorMessage("Both fields are required.");
@@ -83,7 +88,7 @@ const AthleteLogin = () => {
               autoCapitalize="none"
               returnKeyType="next"
               onSubmitEditing={() => passwordRef.current?.focus()}
-              blurOnSubmit={false}
+              submitBehavior="blurAndSubmit"
               accessibilityLabel="Username input"
             />
 
@@ -98,6 +103,8 @@ const AthleteLogin = () => {
               }}
               value={password}
               secureTextEntry
+              textContentType="password"
+              autoComplete="password"
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
               accessibilityLabel="Password input"
