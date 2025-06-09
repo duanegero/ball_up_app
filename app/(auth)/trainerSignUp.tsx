@@ -1,5 +1,5 @@
+//imports to use in the app
 import {
-  StyleSheet,
   Text,
   TextInput,
   Alert,
@@ -9,15 +9,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-
 import { signUpTrainer } from "../../utils/apiServices";
+import { styles } from "../../styles/trainerSignUp.styles";
 
 const TrainerSignUp = () => {
+  //instance of router
   const router = useRouter();
 
+  //useState variables
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,42 +28,51 @@ const TrainerSignUp = () => {
   const [last_name, setLast_name] = useState("");
   const [years_experience, setYears_experience] = useState("");
   const [bio, setBio] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
-    const years_experience_number = parseInt(years_experience, 10);
+  //async function to handle submit pressable
+  const handleSubmit = async (): Promise<void> => {
+    if (submitting) return;
 
+    //object to handle form data
+    const formData = {
+      email: email.trim(),
+      username: username.trim(),
+      password: password.trim(),
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+      years_experience: parseInt(years_experience.trim(), 10),
+      bio: bio.trim(),
+    };
+
+    //checks on the data
     if (
-      !email ||
-      !username ||
-      !password ||
-      !first_name ||
-      !last_name ||
-      !years_experience ||
-      !bio
+      !formData.email ||
+      !formData.username ||
+      !formData.password ||
+      !formData.first_name ||
+      !formData.last_name ||
+      isNaN(formData.years_experience) ||
+      !formData.bio
     ) {
-      Alert.alert("All fields are required.");
+      Alert.alert("All fields are required and must be valid.");
       return;
     }
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
       Alert.alert("Invalid email format.");
       return;
     }
-
-    if (isNaN(years_experience_number)) {
-      Alert.alert("Years of experience must be numbers.");
+    if (formData.years_experience < 0 || formData.years_experience > 80) {
+      Alert.alert("Please enter a valid number of years (0–80).");
       return;
     }
+
+    Keyboard.dismiss();
+    setSubmitting(true);
+
     try {
-      const response = await signUpTrainer({
-        email,
-        username,
-        password,
-        first_name,
-        last_name,
-        years_experience: years_experience_number,
-        bio,
-      });
+      const response = await signUpTrainer(formData);
 
       const { message, username: signedUpUsername } = response;
 
@@ -79,7 +91,11 @@ const TrainerSignUp = () => {
       setYears_experience("");
       setBio("");
     } catch (error: any) {
-      Alert.alert("Sign Up Failed", error.message);
+      const errorMsg =
+        error?.message || "Something went wrong. Please try again.";
+      Alert.alert("Sign Up Failed", errorMsg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -100,6 +116,8 @@ const TrainerSignUp = () => {
             value={email}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor="#999"
           />
           <TextInput
             style={styles.input}
@@ -107,6 +125,8 @@ const TrainerSignUp = () => {
             onChangeText={(text) => setUsername(text.trim())}
             value={username}
             autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor="#999"
           />
           <TextInput
             style={styles.input}
@@ -114,6 +134,8 @@ const TrainerSignUp = () => {
             onChangeText={(text) => setPassword(text.trim())}
             value={password}
             secureTextEntry
+            autoCorrect={false}
+            placeholderTextColor="#999"
           />
           <TextInput
             style={styles.input}
@@ -121,6 +143,7 @@ const TrainerSignUp = () => {
             onChangeText={(text) => setFirst_name(text.trim())}
             value={first_name}
             autoCapitalize="words"
+            placeholderTextColor="#999"
           />
           <TextInput
             style={styles.input}
@@ -128,13 +151,17 @@ const TrainerSignUp = () => {
             onChangeText={(text) => setLast_name(text.trim())}
             value={last_name}
             autoCapitalize="words"
+            placeholderTextColor="#999"
           />
           <TextInput
             style={styles.input}
             placeholder="Years Experience"
-            onChangeText={setYears_experience}
+            onChangeText={(text) =>
+              setYears_experience(text.replace(/[^0-9]/g, ""))
+            }
             value={years_experience}
             keyboardType="numeric"
+            placeholderTextColor="#999"
           />
           <TextInput
             style={[styles.input, styles.bioInput]}
@@ -143,10 +170,24 @@ const TrainerSignUp = () => {
             value={bio}
             multiline
             numberOfLines={4}
+            placeholderTextColor="#999"
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+          <TouchableOpacity
+            style={[styles.button, submitting && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={submitting}>
+            {submitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign Up</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push("/trainerLogin")}>
+            <Text style={{ color: "#0066cc", marginTop: 20, marginBottom: 40 }}>
+              Already have an account? Login
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
@@ -155,46 +196,3 @@ const TrainerSignUp = () => {
 };
 
 export default TrainerSignUp;
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#f9f9f9",
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "600",
-    marginBottom: 32,
-    color: "#333",
-  },
-  input: {
-    width: "100%",
-    padding: 14,
-    marginBottom: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    fontSize: 16,
-  },
-  bioInput: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  button: {
-    width: "100%",
-    backgroundColor: "#2f80ed",
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});

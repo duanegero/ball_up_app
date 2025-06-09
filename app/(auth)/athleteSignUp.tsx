@@ -1,6 +1,5 @@
 //imports to use in the app
 import {
-  StyleSheet,
   Text,
   TextInput,
   Alert,
@@ -46,6 +45,7 @@ const AthleteSignUp = () => {
       level: parseInt(level.trim(), 10),
     };
 
+    //checks on the data
     if (
       !formData.email ||
       !formData.username ||
@@ -73,6 +73,7 @@ const AthleteSignUp = () => {
       return;
     }
 
+    Keyboard.dismiss();
     setSubmitting(true);
 
     try {
@@ -121,6 +122,7 @@ const AthleteSignUp = () => {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor="#999"
+            autoCorrect={false}
           />
 
           <TextInput
@@ -130,6 +132,7 @@ const AthleteSignUp = () => {
             value={username}
             autoCapitalize="none"
             placeholderTextColor="#999"
+            autoCorrect={false}
           />
 
           <TextInput
@@ -141,6 +144,7 @@ const AthleteSignUp = () => {
             textContentType="password"
             autoComplete="password"
             placeholderTextColor="#999"
+            autoCorrect={false}
           />
 
           <TextInput
