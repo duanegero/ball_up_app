@@ -1,7 +1,7 @@
+//imports to use in the app
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   Pressable,
   Alert,
@@ -12,25 +12,32 @@ import {
   Keyboard,
   TextInput,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createSession } from "../../utils/apiServices";
+import { LENGTH_OPTIONS, LEVELS } from "../../components/constants";
+import { styles } from "../../styles/createSession.styles";
 
 const CreateSession = () => {
+  //instance of router
   const router = useRouter();
 
+  //useState variables
   const [length, setLength] = useState<number | null>(null);
   const [level, setLevel] = useState<number | null>(null);
   const [session_name, setSession_name] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  //async function to handle submit pressable
   const handleSubmit = async (): Promise<void> => {
     const trimmedName = session_name.trim();
 
+    //checks on the data
     if (length === null || level === null || !trimmedName) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
@@ -43,7 +50,17 @@ const CreateSession = () => {
     }
 
     const trainer_user_id = parseInt(idString, 10);
+    if (isNaN(trainer_user_id)) {
+      Alert.alert("Error", "Invalid trainer ID.");
+      return;
+    }
 
+    if (trimmedName.length < 3) {
+      Alert.alert("Session name must be at least 3 characters.");
+      return;
+    }
+
+    Keyboard.dismiss();
     setLoading(true);
 
     try {
@@ -60,15 +77,14 @@ const CreateSession = () => {
     } catch (error: any) {
       console.error("Create session error:", error);
       const message =
-        error.response?.data?.message ||
-        "An error occurred while creating a session.";
+        error?.response?.data?.message ||
+        error?.message ||
+        "An unexpected error occurred.";
       Alert.alert("Create Session Failed", message);
     } finally {
       setLoading(false);
     }
   };
-
-  const lengthOptions = [30, 45, 60, 90];
 
   return (
     <KeyboardAvoidingView
@@ -103,7 +119,7 @@ const CreateSession = () => {
 
             <Text style={styles.label}>Level</Text>
             <View style={[styles.levelContainer, styles.centeredBox]}>
-              {[1, 2, 3, 4, 5].map((lvl) => (
+              {LEVELS.map((lvl) => (
                 <Pressable
                   key={lvl}
                   onPress={() => setLevel(lvl)}
@@ -123,18 +139,26 @@ const CreateSession = () => {
             </View>
 
             <Pressable
-              style={[styles.submitButton, styles.centeredBox]}
-              onPress={handleSubmit}>
-              <Text style={styles.submitText}>Create Session</Text>
+              style={[
+                styles.submitButton,
+                styles.centeredBox,
+                loading && { opacity: 0.6 },
+              ]}
+              onPress={handleSubmit}
+              disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>Create Session</Text>
+              )}
             </Pressable>
           </ScrollView>
 
-          {/* Modal */}
           <Modal transparent visible={showModal} animationType="slide">
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>Select Session Length</Text>
-                {lengthOptions.map((option) => (
+                {LENGTH_OPTIONS.map((option) => (
                   <Pressable
                     key={option}
                     onPress={() => {
@@ -142,6 +166,7 @@ const CreateSession = () => {
                       setLength(option);
                       setShowModal(false);
                     }}
+                    disabled={loading}
                     style={styles.modalOption}>
                     <Text style={styles.modalOptionText}>{option} minutes</Text>
                   </Pressable>
@@ -159,113 +184,3 @@ const CreateSession = () => {
 };
 
 export default CreateSession;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 20,
-  },
-  inner: {
-    paddingTop: 40,
-    paddingBottom: 20,
-  },
-  centeredBox: {
-    width: "90%",
-    alignSelf: "center",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 6,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  input: {
-    backgroundColor: "#f2f2f2",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 20,
-    fontSize: 16,
-  },
-  selector: {
-    backgroundColor: "#f2f2f2",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  selectorText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  levelContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 30,
-  },
-  levelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: "#e6e6e6",
-  },
-  levelButtonSelected: {
-    backgroundColor: "#007AFF",
-  },
-  levelText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  levelTextSelected: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  submitButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  submitText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  modalOption: {
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  modalOptionText: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  modalCancel: {
-    marginTop: 16,
-    fontSize: 16,
-    textAlign: "center",
-    color: "#FF3B30",
-  },
-});
