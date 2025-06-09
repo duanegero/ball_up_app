@@ -16,7 +16,7 @@ import { ActivityIndicator } from "react-native";
 import { signUpAthlete } from "../../utils/apiServices";
 import { styles } from "../../styles/athleteSignUp.styles";
 
-const AthleteSignUp = () => {
+const AthleteSignUp: React.FC = () => {
   //instance of router
   const router = useRouter();
 

@@ -1,7 +1,7 @@
+//imports to use in the app
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   Pressable,
   Alert,
@@ -13,36 +13,48 @@ import {
   TextInput,
   Modal,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createDrill } from "../../utils/apiServices";
-
-const DRILL_TYPES = [
-  { label: "Warm-Up", value: "warmup" },
-  { label: "Shooting", value: "shoot" },
-  { label: "Passing", value: "pass" },
-  { label: "Dribbling", value: "dribble" },
-  { label: "Rebound/Defence", value: "reb_defence" },
-];
-
-const LEVELS = [1, 2, 3, 4, 5];
+import { DRILL_TYPES, LEVELS } from "../../components/constants";
+import { styles } from "../../styles/createDrill.styles";
 
 const CreateDrill: React.FC = () => {
+  //instance of router
   const router = useRouter();
 
+  //useState variables
   const [drill_type, setDrill_type] = useState("");
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [level, setLevel] = useState<number | null>(null);
   const [description, setDescription] = useState("");
   const [drill_name, setDrill_name] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
+  //async function to handle submit pressable
   const handleSubmit = async (): Promise<void> => {
-    if (!drill_type || !description || !level || !drill_name) {
+    if (submitting) return;
+
+    //checks on the data
+    if (!drill_type || !description || level === null || !drill_name) {
       Alert.alert("Please fill out all fields before submitting.");
       return;
     }
+    if (!drill_name.trim() || drill_name.trim().length < 3) {
+      Alert.alert("Drill name must be at least 3 characters.");
+      return;
+    }
+
+    if (!description.trim() || description.trim().length < 10) {
+      Alert.alert("Description should be at least 10 characters.");
+      return;
+    }
+
+    Keyboard.dismiss();
+    setSubmitting(true);
 
     try {
       const result = await createDrill({
@@ -52,7 +64,14 @@ const CreateDrill: React.FC = () => {
         drill_name,
       });
 
-      Alert.alert("New Drill Created", `Type: ${result.newDrill.drill_type}`);
+      const drillLabel =
+        DRILL_TYPES.find((d) => d.value === result.newDrill.drill_type)
+          ?.label || result.newDrill.drill_type;
+
+      Alert.alert(
+        "New Drill Created",
+        `${result.newDrill.drill_name} (${drillLabel})`
+      );
 
       setDescription("");
       setDrill_type("");
@@ -64,11 +83,21 @@ const CreateDrill: React.FC = () => {
         "Create drill error:",
         error?.response?.data || error.message
       );
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "An error occurred during creating new drill.";
+
+      const status = error.response?.status;
+      let message = "An error occurred during creating new drill.";
+
+      if (status === 400) {
+        message = error.response?.data?.message || "Invalid input.";
+      } else if (status === 401) {
+        message = "Unauthorized. Please log in again.";
+      } else if (status === 500) {
+        message = "Server error. Please try again later.";
+      }
+
       Alert.alert("Create Drill Failed", message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -98,7 +127,11 @@ const CreateDrill: React.FC = () => {
             <Pressable
               onPress={() => setShowTypeModal(true)}
               style={styles.modalSelector}>
-              <Text style={{ color: drill_type ? "#000" : "#aaa" }}>
+              <Text
+                style={[
+                  styles.drillTypeText,
+                  !drill_type && styles.placeholderText,
+                ]}>
                 {drill_type
                   ? `Drill Type: ${
                       DRILL_TYPES.find((d) => d.value === drill_type)?.label
@@ -107,7 +140,13 @@ const CreateDrill: React.FC = () => {
               </Text>
             </Pressable>
 
-            <Modal visible={showTypeModal} transparent animationType="slide">
+            <Modal
+              visible={showTypeModal}
+              transparent
+              animationType="slide"
+              accessible={true}
+              accessibilityViewIsModal={true}
+              onRequestClose={() => setShowTypeModal(false)}>
               <View style={styles.modalOverlay}>
                 <TouchableWithoutFeedback
                   onPress={() => setShowTypeModal(false)}>
@@ -162,11 +201,17 @@ const CreateDrill: React.FC = () => {
 
             <Pressable
               onPress={handleSubmit}
+              disabled={submitting}
               style={({ pressed }) => [
                 styles.button,
-                pressed && { opacity: 0.7 },
+                pressed && !submitting && { opacity: 0.7 },
+                submitting && styles.buttonDisabled,
               ]}>
-              <Text style={styles.buttonText}>Submit</Text>
+              {submitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Submit</Text>
+              )}
             </Pressable>
           </ScrollView>
         </SafeAreaView>
@@ -176,99 +221,3 @@ const CreateDrill: React.FC = () => {
 };
 
 export default CreateDrill;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollContainer: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 24,
-    textAlign: "center",
-    color: "#111",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 6,
-    marginTop: 10,
-    color: "#333",
-  },
-  input: {
-    backgroundColor: "#F1F1F1",
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: "top",
-  },
-  modalSelector: {
-    backgroundColor: "#F1F1F1",
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    paddingHorizontal: 40,
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-  },
-  modalOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomColor: "#eee",
-    borderBottomWidth: 1,
-  },
-  segmentContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  segmentButton: {
-    flex: 1,
-    backgroundColor: "#E0E0E0",
-    marginHorizontal: 4,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  segmentSelected: {
-    backgroundColor: "#3D7BF7",
-  },
-  segmentText: {
-    color: "#333",
-    fontWeight: "500",
-  },
-  segmentTextSelected: {
-    color: "#fff",
-  },
-  button: {
-    backgroundColor: "#3D7BF7",
-    paddingVertical: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textTransform: "uppercase",
-  },
-});
