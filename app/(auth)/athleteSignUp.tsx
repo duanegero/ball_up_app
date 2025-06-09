@@ -1,3 +1,4 @@
+//imports to use in the app
 import {
   StyleSheet,
   Text,
@@ -12,11 +13,15 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { ActivityIndicator } from "react-native";
 import { signUpAthlete } from "../../utils/apiServices";
+import { styles } from "../../styles/athleteSignUp.styles";
 
 const AthleteSignUp = () => {
+  //instance of router
   const router = useRouter();
 
+  //useState variables
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,42 +29,54 @@ const AthleteSignUp = () => {
   const [last_name, setLast_name] = useState("");
   const [age, setAge] = useState("");
   const [level, setLevel] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
+  //async function to handle submit pressable
   const handleSubmit = async (): Promise<void> => {
-    const age_number = parseInt(age, 10);
-    const level_number = parseInt(level, 10);
+    if (submitting) return;
+
+    //object to handle form data
+    const formData = {
+      email: email.trim(),
+      username: username.trim(),
+      password: password.trim(),
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+      age: parseInt(age.trim(), 10),
+      level: parseInt(level.trim(), 10),
+    };
 
     if (
-      !email ||
-      !username ||
-      !password ||
-      !first_name ||
-      !last_name ||
-      !age ||
-      !level
+      !formData.email ||
+      !formData.username ||
+      !formData.password ||
+      !formData.first_name ||
+      !formData.last_name ||
+      isNaN(formData.age) ||
+      isNaN(formData.level)
     ) {
-      Alert.alert("All fields are required.");
+      Alert.alert("All fields are required and must be valid.");
       return;
     }
-    if (!/\S+@\S+\.\S+/.test(email)) {
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
       Alert.alert("Invalid email format.");
       return;
     }
-    if (isNaN(age_number) || isNaN(level_number)) {
-      Alert.alert("Age and Level must be numbers.");
+
+    if (formData.age < 5 || formData.age > 100) {
+      Alert.alert("Please enter a valid age between 5 and 100.");
+      return;
+    }
+    if (formData.level < 1 || formData.level >= 5) {
+      Alert.alert("Please enter a valid level between 1 and 5.");
       return;
     }
 
+    setSubmitting(true);
+
     try {
-      const response = await signUpAthlete({
-        email,
-        username,
-        password,
-        first_name,
-        last_name,
-        age: age_number,
-        level: level_number,
-      });
+      const response = await signUpAthlete(formData);
 
       const { message, username: signedUpUsername } = response;
 
@@ -78,7 +95,11 @@ const AthleteSignUp = () => {
       setAge("");
       setLevel("");
     } catch (error: any) {
-      Alert.alert("Sign Up Failed", error.message);
+      const errorMsg =
+        error?.message || "Something went wrong. Please try again.";
+      Alert.alert("Sign Up Failed", errorMsg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -116,7 +137,9 @@ const AthleteSignUp = () => {
             placeholder="Password"
             onChangeText={(text) => setPassword(text.trim())}
             value={password}
-            secureTextEntry
+            secureTextEntry={true}
+            textContentType="password"
+            autoComplete="password"
             placeholderTextColor="#999"
           />
 
@@ -141,7 +164,7 @@ const AthleteSignUp = () => {
           <TextInput
             style={styles.input}
             placeholder="Age"
-            onChangeText={setAge}
+            onChangeText={(text) => setAge(text.replace(/[^0-9]/g, ""))}
             value={age}
             keyboardType="numeric"
             placeholderTextColor="#999"
@@ -156,11 +179,19 @@ const AthleteSignUp = () => {
             placeholderTextColor="#999"
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+          <TouchableOpacity
+            style={[styles.button, submitting && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={submitting}>
+            {submitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
+
           <TouchableOpacity onPress={() => router.push("/athleteLogin")}>
-            <Text style={{ color: "#0066cc", marginTop: 20 }}>
+            <Text style={{ color: "#0066cc", marginTop: 20, marginBottom: 30 }}>
               Already have an account? Login
             </Text>
           </TouchableOpacity>
@@ -171,46 +202,3 @@ const AthleteSignUp = () => {
 };
 
 export default AthleteSignUp;
-
-const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "600",
-    color: "#222",
-    marginBottom: 30,
-  },
-  input: {
-    width: "100%",
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: "#fff",
-    color: "#333",
-  },
-  button: {
-    width: "100%",
-    padding: 16,
-    backgroundColor: "#0066cc",
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});
