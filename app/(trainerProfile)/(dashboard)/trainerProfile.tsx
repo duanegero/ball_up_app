@@ -1,45 +1,61 @@
 import {
-  StyleSheet,
   Text,
   View,
   SafeAreaView,
   ScrollView,
   Pressable,
-  Dimensions,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Trainer } from "../../../components/types";
 import { getTrainerById } from "../../../utils/apiServices";
-
-const { width } = Dimensions.get("window");
+import { styles } from "../../../styles/trainerProfile.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const TrainerProfile = () => {
+  //variable to handle router
   const router = useRouter();
 
+  //useState varaibles
   const [trainer, setTrainer] = useState<Trainer | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  const fetchTrainer = async () => {
+  //async callback function to fetch and load trainer
+  const fetchTrainer = useCallback(async () => {
+    setIsRetrying(true);
     try {
-      setError(null);
       const trainerData = await getTrainerById();
-      setTrainer(trainerData);
-    } catch (error: any) {
-      setError(
-        error.message ||
-          "Failed to load trainer profile. Please try again later."
-      );
+      if (trainerData) {
+        setTrainer(trainerData);
+        setError(null);
+      } else {
+        setError("Failed to load profile. Please try again later.");
+        console.error("Fetch Trainer returned null or undefined");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again later.");
+      console.error("Error loading athlete profile:", err);
+    } finally {
+      setIsRetrying(false);
     }
-  };
-
-  useEffect(() => {
-    fetchTrainer();
   }, []);
 
+  //useFocusEffect runs everytime screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrainer();
+    }, [])
+  );
+
+  //function to handle logout press click
   const handleLogout = async () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
@@ -59,6 +75,14 @@ const TrainerProfile = () => {
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
+          <Pressable
+            onPress={fetchTrainer}
+            style={[styles.retryButton, isRetrying && { opacity: 0.5 }]}
+            disabled={isRetrying}>
+            <Text style={styles.retryText}>
+              {isRetrying ? "Retrying..." : "Retry"}
+            </Text>
+          </Pressable>
         </View>
       ) : trainer ? (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -107,113 +131,16 @@ const TrainerProfile = () => {
           </View>
         </ScrollView>
       ) : (
-        <Text style={styles.loading}>Loading...</Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator
+            size={APP_ACTIVITY_INDICATOR_SIZE}
+            color={APP_ACTIVITY_INDICATOR_COLOR}
+          />
+          <Text style={styles.loading}>Loading Profile...</Text>
+        </View>
       )}
     </SafeAreaView>
   );
 };
 
 export default TrainerProfile;
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f2f4f7",
-  },
-  scrollContainer: {
-    padding: 20,
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: width * 0.07,
-    fontWeight: "700",
-    color: "#1f2937",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6b7280",
-    marginTop: 12,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#111827",
-    marginTop: 4,
-  },
-  loading: {
-    marginTop: 20,
-    textAlign: "center",
-  },
-  profileImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#3b82f6",
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    marginBottom: 16,
-    shadowColor: "#3b82f6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  profileInitials: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#ffffff",
-  },
-  topButtonRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 2,
-    marginBottom: 12,
-  },
-  cardTopRight: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginBottom: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: 10,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fee2e2",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  errorText: {
-    color: "#dc2626",
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-});

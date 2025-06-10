@@ -41,7 +41,7 @@ const AthleteProfile = () => {
         setError(null);
       } else {
         setError("Failed to load profile. Please try again later.");
-        console.error("fetchAthlete returned null or undefined");
+        console.error("Fetch Athlete returned null or undefined");
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again later.");
