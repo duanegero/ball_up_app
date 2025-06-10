@@ -29,10 +29,17 @@ const TrainerDrills = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [deletingDrillId, setDeletingDrillId] = useState<number | null>(null);
 
-  const fetchTrainerDrills = async () => {
+  //async function to fetch and load trainer drills
+  const fetchTrainerDrills = useCallback(async () => {
+    setLoading(true);
     try {
       const data = await getTrainerDrills();
-      setDrills(data);
+      if (data) {
+        setDrills(data);
+      } else {
+        console.error("Fetch Trainer Drills returned null or undefined");
+        Alert.alert("Data error");
+      }
     } catch (error) {
       console.error("Failed to load trainer drills:", error);
       Alert.alert("Error", "Could not load drills.");
@@ -40,8 +47,9 @@ const TrainerDrills = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
+  //useFocusEffect runs everytime screen comes into focus
   useFocusEffect(
     useCallback(() => {
       fetchTrainerDrills();
@@ -53,6 +61,7 @@ const TrainerDrills = () => {
     await fetchTrainerDrills();
   }, []);
 
+  //async function to handle delete press
   const handleDelete = (drill_id: number) => {
     if (deletingDrillId !== null) {
       return;

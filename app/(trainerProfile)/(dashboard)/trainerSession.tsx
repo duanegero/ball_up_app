@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
+//imports to use in app
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   View,
   Text,
-  StyleSheet,
   Alert,
   SafeAreaView,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Session } from "../../../components/types";
@@ -18,30 +19,63 @@ import {
   getSessionDrills,
   getTrainerSessions,
 } from "../../../utils/apiServices";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
+import { styles } from "../../../styles/trainerSession.styles";
 
 const TrainerSession = () => {
+  //variable to handle router
   const router = useRouter();
 
+  //useState varibles
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<number | null>(
+    null
+  );
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchTrainerSessions = async () => {
+  //async function to fetch and load trainer sessions
+  const fetchTrainerSessions = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const sessions = await getTrainerSessions();
-      setSessions(sessions);
+      const sessionsData = await getTrainerSessions();
+      if (sessionsData) {
+        setSessions(sessionsData);
+      } else {
+        setError("No session data received. Please try again.");
+        console.error("Fetch Trainer Sessions returned null or undefined");
+        Alert.alert("Data error");
+      }
     } catch (error) {
+      setError("An unexpected error occurred. Please try again later.");
       console.error("Failed to fetch trainer sessions", error);
       Alert.alert("Error", "Unable to load sessions. Please try again later.");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchTrainerSessions();
   }, []);
 
+  //useFocusEffect runs everytime screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (!refreshing) {
+        fetchTrainerSessions();
+      }
+    }, [])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchTrainerSessions();
+    setRefreshing(false);
+  }, [fetchTrainerSessions]);
+
+  //async function to handle pressable
   const handlePress = async (session: Session) => {
     try {
       const drills = await getSessionDrills(session.session_id);
@@ -49,9 +83,11 @@ const TrainerSession = () => {
       showSessionOptions(session, drillNames);
     } catch (error) {
       Alert.alert("Error", "Could not fetch drills for this session.");
+      console.error("Failed to fetch drills for session:", error);
     }
   };
 
+  //function to handle showing session options
   const showSessionOptions = (session: Session, drillNames: string) => {
     Alert.alert(
       `${session.session_name}`,
@@ -68,6 +104,10 @@ const TrainerSession = () => {
         {
           text: "Delete",
           onPress: () => {
+            if (deletingSessionId !== null) {
+              Alert.alert("Please wait", "A session is already being deleted.");
+              return;
+            }
             Alert.alert(
               "Confirm Delete",
               `Are you sure you want to delete "${session.session_name}"?`,
@@ -75,17 +115,25 @@ const TrainerSession = () => {
                 {
                   text: "Yes, Delete",
                   onPress: async () => {
+                    setDeletingSessionId(session.session_id);
                     try {
                       await deleteTrainerSession(session.session_id);
                       setSessions((prev) =>
                         prev.filter((s) => s.session_id !== session.session_id)
                       );
+                      Alert.alert(
+                        "Success",
+                        `"${session.session_name}" has been deleted.`
+                      );
+                      setError(null);
                     } catch (error) {
                       console.error("Failed to delete session", error);
                       Alert.alert(
                         "Error",
                         "Could not delete session. Please try again."
                       );
+                    } finally {
+                      setDeletingSessionId(null);
                     }
                   },
                   style: "destructive",
@@ -103,19 +151,24 @@ const TrainerSession = () => {
     );
   };
 
+  //function to handle formatting drill names
   const formatDrillNames = (drills: SessionDrill[]) => {
-    return drills.map((d) => `• ${d.drill.drill_name}`).join("\n");
+    if (!drills || drills.length === 0) return "No drills added.";
+    const names = drills.map((d) => `• ${d.drill.drill_name}`);
+    return names.length > 5
+      ? [...names.slice(0, 5), "• ...and more"].join("\n")
+      : names.join("\n");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Your Sessions</Text>
+      {error && !loading && <Text style={styles.errorText}>{error}</Text>}
 
-      {loading ? (
+      {loading && !refreshing ? (
         <ActivityIndicator
-          size="large"
-          color="#007BFF"
-          style={{ marginTop: 20 }}
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
         />
       ) : (
         <FlatList
@@ -127,106 +180,68 @@ const TrainerSession = () => {
               No sessions found. Tap below to create one.
             </Text>
           }
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.label}>
-                Name: <Text style={styles.value}>{item.session_name}</Text>
-              </Text>
-              <Text style={styles.label}>
-                Length: <Text style={styles.value}>{item.length}</Text>
-              </Text>
-              <Text style={styles.label}>
-                Level: <Text style={styles.value}>{item.level}</Text>
-              </Text>
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#9ca3af"
+            />
+          }
+          renderItem={({ item }) => {
+            const isDeleting = deletingSessionId === item.session_id;
 
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handlePress(item)}>
-                <Ionicons name="create-outline" size={20} color="#fff" />
-                <Text style={styles.actionText}>View/Edit</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+            return (
+              <View style={styles.card}>
+                <Text style={styles.label}>
+                  Name: <Text style={styles.value}>{item.session_name}</Text>
+                </Text>
+                <Text style={styles.label}>
+                  Length: <Text style={styles.value}>{item.length}</Text>
+                </Text>
+                <Text style={styles.label}>
+                  Level: <Text style={styles.value}>{item.level}</Text>
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+
+                    isDeleting && styles.actionButtonDisabled,
+                  ]}
+                  onPress={() => handlePress(item)}
+                  disabled={isDeleting}
+                  accessibilityLabel={
+                    isDeleting
+                      ? `Deleting session ${item.session_name}`
+                      : `View or edit session ${item.session_name}`
+                  }
+                  accessibilityRole="button">
+                  {isDeleting ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Ionicons name="create-outline" size={20} color="#fff" />
+                  )}
+                  <Text style={styles.actionText}>
+                    {isDeleting ? "Deleting..." : "View / Edit"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
         />
       )}
 
       {!loading && (
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => router.push("/createSession")}>
+          onPress={() => router.push("/createSession")}
+          accessibilityLabel="Add New Session"
+          accessibilityRole="button">
           <Text style={styles.addText}>Add New Session</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  heading: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  actionButton: {
-    flexDirection: "row",
-    backgroundColor: "#FF4C4C",
-    padding: 8,
-    borderRadius: 8,
-    marginTop: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionText: {
-    color: "#fff",
-    fontWeight: "bold",
-    marginLeft: 6,
-  },
-  value: {
-    fontWeight: "normal",
-  },
-  addButton: {
-    backgroundColor: "#007BFF",
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 10,
-    alignItems: "center",
-  },
-  addText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  scrollContainer: {
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  noSessionsText: {
-    textAlign: "center",
-    marginTop: 20,
-    fontSize: 16,
-    color: "#888",
-  },
-});
 
 export default TrainerSession;
