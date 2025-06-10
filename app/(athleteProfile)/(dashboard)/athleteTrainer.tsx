@@ -16,6 +16,10 @@ import {
   assignTrainerToAthlete,
 } from "../../../utils/apiServices";
 import { styles } from "../../../styles/athleteTrainer.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const AthleteTrainerScreen = () => {
   //useState varibles
@@ -85,8 +89,8 @@ const AthleteTrainerScreen = () => {
 
       {loading ? (
         <ActivityIndicator
-          size="large"
-          color="#007BFF"
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
           style={{ marginTop: 20 }}
         />
       ) : (

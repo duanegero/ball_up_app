@@ -17,6 +17,10 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { Athlete } from "../../../components/types";
 import { fetchAthlete } from "../../../utils/apiServices";
 import { styles } from "../../../styles/athleteProfile.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const AthleteProfile = () => {
   //variable to handle router
@@ -164,7 +168,10 @@ const AthleteProfile = () => {
         </ScrollView>
       ) : (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#3b82f6" />
+          <ActivityIndicator
+            size={APP_ACTIVITY_INDICATOR_SIZE}
+            color={APP_ACTIVITY_INDICATOR_COLOR}
+          />
           <Text style={styles.loading}>Loading Profile...</Text>
         </View>
       )}

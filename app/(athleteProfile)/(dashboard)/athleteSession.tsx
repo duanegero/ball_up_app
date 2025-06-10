@@ -18,6 +18,10 @@ import {
 } from "../../../utils/apiServices";
 import { useFocusEffect } from "expo-router";
 import { styles } from "../../../styles/athleteSession.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const AthleteSession = () => {
   //useState variables
@@ -117,8 +121,8 @@ const AthleteSession = () => {
 
       {loading ? (
         <ActivityIndicator
-          size="large"
-          color="#28a745"
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
           style={{ marginTop: 20 }}
         />
       ) : sessions.length === 0 ? (

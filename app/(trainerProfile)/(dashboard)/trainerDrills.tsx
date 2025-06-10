@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -15,6 +14,10 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Drill } from "../../../components/types";
 import { deleteDrillById, getTrainerDrills } from "../../../utils/apiServices";
 import { styles } from "../../../styles/trainerDrills.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const TrainerDrills = () => {
   //instance of router
@@ -95,7 +98,10 @@ const TrainerDrills = () => {
         }>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#28a745" />
+            <ActivityIndicator
+              size={APP_ACTIVITY_INDICATOR_SIZE}
+              color={APP_ACTIVITY_INDICATOR_COLOR}
+            />
           </View>
         ) : drills.length === 0 ? (
           <Text style={styles.noDrillsText}>No drills found.</Text>

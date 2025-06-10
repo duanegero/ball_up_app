@@ -20,6 +20,10 @@ import {
   updateAthleteProfile,
 } from "../../utils/apiServices";
 import { styles } from "../../styles/athleteEditProfile.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../components/constants";
 
 const EditProfileScreen = () => {
   //useState varibles
@@ -136,7 +140,10 @@ const EditProfileScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
+        />
       </View>
     );
   }

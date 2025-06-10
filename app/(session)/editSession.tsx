@@ -24,6 +24,10 @@ import {
 } from "../../utils/apiServices";
 import { Drill, SessionDrill } from "../../components/types";
 import { styles } from "../../styles/editSession.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../components/constants";
 
 const EditSession = () => {
   //variable to handle ID
@@ -222,8 +226,8 @@ const EditSession = () => {
 
       {loadingDrills ? (
         <ActivityIndicator
-          size="large"
-          color="#2563eb"
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
           style={{ marginTop: 20 }}
         />
       ) : (

@@ -16,6 +16,10 @@ import {
   removeAthleteFromTrainer,
 } from "../../../utils/apiServices";
 import { styles } from "../../../styles/trainerAthletes.styles";
+import {
+  APP_ACTIVITY_INDICATOR_COLOR,
+  APP_ACTIVITY_INDICATOR_SIZE,
+} from "../../../components/constants";
 
 const TrainerAthletes = () => {
   //useState variables
@@ -180,7 +184,10 @@ const TrainerAthletes = () => {
           styles.container,
           { justifyContent: "center", alignItems: "center" },
         ]}>
-        <ActivityIndicator size="large" color="#333" />
+        <ActivityIndicator
+          size={APP_ACTIVITY_INDICATOR_SIZE}
+          color={APP_ACTIVITY_INDICATOR_COLOR}
+        />
       </SafeAreaView>
     );
   }
@@ -189,7 +196,10 @@ const TrainerAthletes = () => {
     <SafeAreaView style={styles.container}>
       {assigningSession && (
         <SafeAreaView style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#333" />
+          <ActivityIndicator
+            size={APP_ACTIVITY_INDICATOR_SIZE}
+            color={APP_ACTIVITY_INDICATOR_COLOR}
+          />
         </SafeAreaView>
       )}
       <ScrollView>
