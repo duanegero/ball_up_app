@@ -73,8 +73,9 @@ const EditSession = () => {
       }
       const trainerId = parseInt(idString, 10);
       const drillsData = await fetchTrainerDrills(trainerId);
-      const sortedDrills = drillsData.sort((a, b) =>
-        a.drill_name.localeCompare(b.drill_name)
+      const sortedDrills = drillsData.sort(
+        (a: { drill_name: string }, b: { drill_name: any }) =>
+          a.drill_name.localeCompare(b.drill_name)
       );
 
       setDrills(sortedDrills);

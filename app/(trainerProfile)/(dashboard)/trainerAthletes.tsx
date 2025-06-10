@@ -1,10 +1,10 @@
 import {
   Text,
-  StyleSheet,
   ScrollView,
   Pressable,
   Alert,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Session, Athlete } from "../../../components/types";
@@ -14,22 +14,34 @@ import {
   putSessionToAthlete,
   removeAthleteFromTrainer,
 } from "../../../utils/apiServices";
+import { styles } from "../../../styles/trainerAthletes.styles";
 
 const TrainerAthletes = () => {
   const [trainerId, setTrainerId] = useState<number | null>(null);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true); // for initial load
+  const [assigningSession, setAssigningSession] = useState(false);
+  const [removingAthleteId, setRemovingAthleteId] = useState<number | null>(
+    null
+  );
 
   const loadTrainerData = async () => {
+    setLoading(true);
     try {
       const data = await fetchTrainerData();
       if (data) {
         setTrainerId(data.trainer_user_id);
         setSessions(data.sessions);
-        setAthletes(data.athletes);
+        setAthletes(
+          data.athletes.sort((a, b) => a.first_name.localeCompare(b.first_name))
+        );
       }
     } catch (error) {
       console.error("Failed to load trainer data:", error);
+      Alert.alert("Error", "Failed to load trainer info.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,11 +81,14 @@ const TrainerAthletes = () => {
   };
 
   const assignSessionToAthlete = async (session: Session, athlete: Athlete) => {
+    setAssigningSession(true);
     try {
       await putSessionToAthlete(session.session_id, athlete.athlete_user_id);
       Alert.alert("Success", "Session assigned to athlete.");
     } catch (error) {
       Alert.alert("Error", "Failed to assign session.");
+    } finally {
+      setAssigningSession(false);
     }
   };
 
@@ -109,6 +124,7 @@ const TrainerAthletes = () => {
   };
 
   const removeAthlete = async (athlete: Athlete) => {
+    setRemovingAthleteId(athlete.athlete_user_id);
     try {
       await removeAthleteFromTrainer(athlete.athlete_user_id);
 
@@ -119,68 +135,64 @@ const TrainerAthletes = () => {
       Alert.alert("Success", "Athlete removed successfully.");
     } catch (error) {
       Alert.alert("Error", "Failed to remove athlete.");
+    } finally {
+      setRemovingAthleteId(null);
     }
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}>
+        <ActivityIndicator size="large" color="#333" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      {assigningSession && (
+        <SafeAreaView style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#333" />
+        </SafeAreaView>
+      )}
       <ScrollView>
         <Text style={styles.title}>My Athletes</Text>
+
+        {athletes.length === 0 && (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            No athletes found.
+          </Text>
+        )}
 
         {athletes.map((athlete) => (
           <Pressable
             key={athlete.athlete_user_id}
             onPress={() => handlePress(athlete)}
-            style={styles.card}>
-            <Text style={styles.cardName}>
-              {athlete.first_name} {athlete.last_name}
-            </Text>
-            <Text style={styles.cardDetail}>Age: {athlete.age}</Text>
-            <Text style={styles.cardDetail}>Level: {athlete.level}</Text>
-            <Text style={styles.cardDetail}>Email: {athlete.email}</Text>
+            style={styles.card}
+            disabled={
+              assigningSession || removingAthleteId === athlete.athlete_user_id
+            }>
+            {removingAthleteId === athlete.athlete_user_id ? (
+              <ActivityIndicator size="small" color="#333" />
+            ) : (
+              <>
+                <Text style={styles.cardName}>
+                  {athlete.first_name} {athlete.last_name}
+                </Text>
+                <Text style={styles.cardDetail}>Age: {athlete.age}</Text>
+                <Text style={styles.cardDetail}>Level: {athlete.level}</Text>
+                <Text style={styles.cardDetail}>Email: {athlete.email}</Text>
+              </>
+            )}
           </Pressable>
         ))}
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#ffffff",
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 16,
-    color: "#333",
-    textAlign: "center",
-  },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardName: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 8,
-    color: "#333",
-  },
-  cardDetail: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 4,
-  },
-});
 
 export default TrainerAthletes;
