@@ -1,3 +1,4 @@
+//imports to use in app
 import {
   Text,
   ScrollView,
@@ -17,6 +18,7 @@ import {
 import { styles } from "../../../styles/trainerAthletes.styles";
 
 const TrainerAthletes = () => {
+  //useState variables
   const [trainerId, setTrainerId] = useState<number | null>(null);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -26,6 +28,7 @@ const TrainerAthletes = () => {
     null
   );
 
+  //async function to load trainer data
   const loadTrainerData = async () => {
     setLoading(true);
     try {
@@ -45,10 +48,12 @@ const TrainerAthletes = () => {
     }
   };
 
+  //useEffect to call function
   useEffect(() => {
     loadTrainerData();
   }, []);
 
+  //async function to handle pressable
   const handlePress = async (athlete: Athlete) => {
     try {
       const athleteSessions = await getAthleteSessions(athlete.athlete_user_id);
@@ -80,18 +85,44 @@ const TrainerAthletes = () => {
     }
   };
 
+  //async function to assign session
   const assignSessionToAthlete = async (session: Session, athlete: Athlete) => {
     setAssigningSession(true);
     try {
       await putSessionToAthlete(session.session_id, athlete.athlete_user_id);
       Alert.alert("Success", "Session assigned to athlete.");
     } catch (error) {
-      Alert.alert("Error", "Failed to assign session.");
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "status" in error.response
+      ) {
+        const statusCode = (error.response as { status: number }).status; // Safely access status
+
+        if (statusCode === 500) {
+          Alert.alert(
+            "Error",
+            "An unexpected server error occurred. It might be a duplicate entry."
+          );
+        } else {
+          Alert.alert("Error", `Failed to assign session: ${statusCode}`);
+        }
+      } else {
+        console.error("Unknown error:", error);
+        Alert.alert(
+          "Error",
+          "An unexpected error occurred. Please check your network connection."
+        );
+      }
     } finally {
       setAssigningSession(false);
     }
   };
 
+  //function to show sessions in picker
   const showSessionPicker = (athlete: Athlete) => {
     if (sessions.length === 0) {
       Alert.alert("No sessions found for this trainer.");
@@ -108,21 +139,7 @@ const TrainerAthletes = () => {
     );
   };
 
-  const confirmRemoveAthlete = (athlete: Athlete) => {
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Remove",
-          style: "destructive",
-          onPress: () => removeAthlete(athlete),
-        },
-      ]
-    );
-  };
-
+  //async function to remove athlete
   const removeAthlete = async (athlete: Athlete) => {
     setRemovingAthleteId(athlete.athlete_user_id);
     try {
@@ -138,6 +155,22 @@ const TrainerAthletes = () => {
     } finally {
       setRemovingAthleteId(null);
     }
+  };
+
+  //function to confirm remove
+  const confirmRemoveAthlete = (athlete: Athlete) => {
+    Alert.alert(
+      "Confirm Delete",
+      `Are you sure you want to remove "${athlete.first_name} ${athlete.last_name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Remove",
+          style: "destructive",
+          onPress: () => removeAthlete(athlete),
+        },
+      ]
+    );
   };
 
   if (loading) {
