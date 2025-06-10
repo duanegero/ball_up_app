@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const HOSTNAME = "TC567.WPA.Dal.Ca";
+const HOSTNAME = "Duanes-MBP.ht.home";
 const PORT = 3005;
 
 const api = axios.create({
