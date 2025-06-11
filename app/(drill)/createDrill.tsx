@@ -104,29 +104,57 @@ const CreateDrill: React.FC = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      style={styles.container}
+      accessibilityLabel="Create Drill screen"
+      accessibilityHint="Fill out the form to create a new drill">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View>
-              <Pressable onPress={() => router.push("/trainerDrills")}>
+              <Pressable
+                onPress={() => router.push("/trainerDrills")}
+                accessibilityRole="button"
+                accessibilityLabel="Back button"
+                accessibilityHint="Navigates back to trainer drills list">
                 <Ionicons name="chevron-back" size={24} color="#2563eb" />
               </Pressable>
             </View>
-            <Text style={styles.title}>Create Drill</Text>
 
-            <Text style={styles.label}>Drill Name</Text>
+            <Text
+              style={styles.title}
+              accessibilityRole="header"
+              accessibilityLabel="Create Drill title">
+              Create Drill
+            </Text>
+
+            <Text style={styles.label} accessibilityRole="text">
+              Drill Name
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Drill Name"
               value={drill_name}
               onChangeText={setDrill_name}
+              accessibilityLabel="Drill Name input"
+              accessibilityHint="Enter the name of the drill"
+              accessibilityRole="text"
             />
 
-            <Text style={styles.label}>Drill Type</Text>
+            <Text style={styles.label} accessibilityRole="text">
+              Drill Type
+            </Text>
             <Pressable
               onPress={() => setShowTypeModal(true)}
-              style={styles.modalSelector}>
+              style={styles.modalSelector}
+              accessibilityRole="button"
+              accessibilityLabel="Select Drill Type"
+              accessibilityHint={
+                drill_type
+                  ? `Current drill type is ${
+                      DRILL_TYPES.find((d) => d.value === drill_type)?.label
+                    }. Tap to change drill type`
+                  : "No drill type selected. Tap to select drill type"
+              }>
               <Text
                 style={[
                   styles.drillTypeText,
@@ -146,10 +174,13 @@ const CreateDrill: React.FC = () => {
               animationType="slide"
               accessible={true}
               accessibilityViewIsModal={true}
-              onRequestClose={() => setShowTypeModal(false)}>
+              onRequestClose={() => setShowTypeModal(false)}
+              accessibilityLabel="Drill Type selection modal"
+              accessibilityHint="Select a drill type from the list">
               <View style={styles.modalOverlay}>
                 <TouchableWithoutFeedback
-                  onPress={() => setShowTypeModal(false)}>
+                  onPress={() => setShowTypeModal(false)}
+                  accessible={false}>
                   <View style={{ flex: 1 }} />
                 </TouchableWithoutFeedback>
 
@@ -161,7 +192,10 @@ const CreateDrill: React.FC = () => {
                         setDrill_type(type.value);
                         setShowTypeModal(false);
                       }}
-                      style={styles.modalOption}>
+                      style={styles.modalOption}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select drill type ${type.label}`}
+                      accessibilityHint={`Select ${type.label} as the drill type`}>
                       <Text>{type.label}</Text>
                     </TouchableOpacity>
                   ))}
@@ -169,17 +203,26 @@ const CreateDrill: React.FC = () => {
               </View>
             </Modal>
 
-            <Text style={styles.label}>Description</Text>
+            <Text style={styles.label} accessibilityRole="text">
+              Description
+            </Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="A short description of the drill"
               value={description}
               onChangeText={setDescription}
               multiline
+              accessibilityLabel="Description input"
+              accessibilityHint="Enter a short description of the drill"
+              accessibilityRole="text"
             />
 
-            <Text style={styles.label}>Level</Text>
-            <View style={styles.segmentContainer}>
+            <Text style={styles.label} accessibilityRole="text">
+              Level
+            </Text>
+            <View
+              style={styles.segmentContainer}
+              accessibilityRole="radiogroup">
               {LEVELS.map((lvl) => (
                 <Pressable
                   key={lvl}
@@ -187,7 +230,11 @@ const CreateDrill: React.FC = () => {
                   style={[
                     styles.segmentButton,
                     level === lvl && styles.segmentSelected,
-                  ]}>
+                  ]}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: level === lvl }}
+                  accessibilityLabel={`Level ${lvl}`}
+                  accessibilityHint={`Select level ${lvl} for the drill`}>
                   <Text
                     style={[
                       styles.segmentText,
@@ -206,9 +253,16 @@ const CreateDrill: React.FC = () => {
                 styles.button,
                 pressed && !submitting && { opacity: 0.7 },
                 submitting && styles.buttonDisabled,
-              ]}>
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Submit button"
+              accessibilityHint="Submit the drill creation form"
+              accessible={true}>
               {submitting ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator
+                  color="#fff"
+                  accessibilityLabel="Loading indicator"
+                />
               ) : (
                 <Text style={styles.buttonText}>Submit</Text>
               )}

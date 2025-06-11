@@ -162,27 +162,53 @@ const EditSession = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={styles.container}
+      accessibilityLabel="Edit Session Drills screen"
+      accessibilityHint="Manage drills for your training session">
       <View>
-        <Pressable onPress={() => router.push("/trainerSession")}>
+        <Pressable
+          onPress={() => router.push("/trainerSession")}
+          accessibilityRole="button"
+          accessibilityLabel="Back button"
+          accessibilityHint="Go back to the sessions list">
           <Ionicons name="chevron-back" size={24} color="#2563eb" />
         </Pressable>
       </View>
 
-      <Text style={styles.title}>Edit Session Drills</Text>
+      <Text
+        style={styles.title}
+        accessibilityRole="header"
+        accessibilityLabel="Edit Session Drills">
+        Edit Session Drills
+      </Text>
 
       <View style={{ marginVertical: 10 }}>
-        <Button title="Select Drill" onPress={() => setModalVisible(true)} />
+        <Button
+          title="Select Drill"
+          onPress={() => setModalVisible(true)}
+          accessibilityLabel="Select Drill button"
+        />
       </View>
 
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(false)}
+        accessibilityViewIsModal={true}
+        accessible={true}
+        accessibilityLabel="Select Drill Modal"
+        accessibilityHint="Tap a drill to add it to the session">
         <View style={styles.modalBackground}>
           <View style={styles.modalContent}>
-            <Text style={styles.label}>Tap a drill to add:</Text>
+            <Text
+              style={styles.label}
+              accessibilityRole="header"
+              accessibilityLabel="Select a drill to add">
+              Tap a drill to add:
+            </Text>
+
             <FlatList
               data={drills}
               keyExtractor={(item) => item.drill_id.toString()}
@@ -190,7 +216,11 @@ const EditSession = () => {
                 <TouchableOpacity
                   disabled={addingDrillId !== null}
                   style={styles.drillButton}
-                  onPress={() => handleAddDrill(item)}>
+                  onPress={() => handleAddDrill(item)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.drill_name}, Level ${item.level}`}
+                  accessibilityState={{ disabled: addingDrillId !== null }}
+                  accessibilityHint="Adds this drill to the session">
                   <Text style={styles.drillButtonText}>
                     {addingDrillId === item.drill_id
                       ? "Adding..."
@@ -206,20 +236,29 @@ const EditSession = () => {
                 color="gray"
                 disabled={addingDrillId !== null}
                 onPress={() => setModalVisible(false)}
+                accessibilityLabel="Cancel button"
               />
             </View>
           </View>
         </View>
       </Modal>
 
-      <Text style={styles.sectionTitle}>Drills </Text>
+      <Text
+        style={styles.sectionTitle}
+        accessibilityRole="header"
+        accessibilityLabel="Drills section">
+        Drills
+      </Text>
 
       {sessionDrills.length === 0 && !loadingDrills && (
         <View style={{ alignItems: "center", marginTop: 20 }}>
-          <Text style={styles.emptyText}>No drills added yet.</Text>
+          <Text style={styles.emptyText} accessibilityLiveRegion="polite">
+            No drills added yet.
+          </Text>
           <Button
             title="Add Your First Drill"
             onPress={() => setModalVisible(true)}
+            accessibilityLabel="Add Your First Drill button"
           />
         </View>
       )}
@@ -229,13 +268,17 @@ const EditSession = () => {
           size={APP_ACTIVITY_INDICATOR_SIZE}
           color={APP_ACTIVITY_INDICATOR_COLOR}
           style={{ marginTop: 20 }}
+          accessibilityLabel="Loading drills"
         />
       ) : (
         <FlatList
           data={sessionDrills}
           keyExtractor={(item) => `${item.session_id}-${item.drill_id}`}
           renderItem={({ item }) => (
-            <View style={styles.drillItem}>
+            <View
+              style={styles.drillItem}
+              accessible={true}
+              accessibilityLabel={`${item.drill?.drill_name}, Level ${item.drill?.level}`}>
               <Text style={styles.drillText}>
                 {item.drill?.drill_name} - Level {item.drill?.level}
               </Text>
@@ -248,7 +291,10 @@ const EditSession = () => {
                       setRemovingDrillId(null)
                     );
                   }
-                }}>
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${item.drill?.drill_name} drill`}
+                accessibilityHint="Removes this drill from the session">
                 <Text style={styles.removeText}>
                   {removingDrillId === item.drill_id ? "Removing..." : "Remove"}
                 </Text>
