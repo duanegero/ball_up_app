@@ -32,7 +32,7 @@ const AthleteProfile = () => {
   const [isRetrying, setIsRetrying] = useState(false);
 
   //async function to fetch and load athlete
-  const loadAthlete = useCallback(async () => {
+  const loadAthlete = useCallback(async (): Promise<void> => {
     setIsRetrying(true);
     try {
       const data = await fetchAthlete();
@@ -76,45 +76,77 @@ const AthleteProfile = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       {error ? (
-        <View style={styles.loadingContainer}>
+        <View
+          style={styles.loadingContainer}
+          accessible={true}
+          accessibilityLabel="Error loading profile"
+          accessibilityRole="alert">
           <Text style={styles.loading}>{error}</Text>
+
           <Pressable
             onPress={loadAthlete}
             style={[styles.retryButton, isRetrying && { opacity: 0.5 }]}
-            disabled={isRetrying}>
+            disabled={isRetrying}
+            accessibilityRole="button"
+            accessibilityLabel="Retry loading profile"
+            accessibilityHint="Attempts to reload the athlete profile data">
             <Text style={styles.retryText}>
               {isRetrying ? "Retrying..." : "Retry"}
             </Text>
           </Pressable>
         </View>
       ) : athlete ? (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          accessible={true}
+          accessibilityLabel="Athlete profile information">
           <View style={styles.topButtonRow}>
             <Pressable
               accessible={true}
               accessibilityLabel="Log out"
+              accessibilityRole="button"
+              accessibilityHint="Logs out of your account"
               onPress={handleLogout}
               style={styles.iconButton}>
               <Ionicons name="log-out-outline" size={20} color="#ef4444" />
             </Pressable>
           </View>
 
-          <View style={styles.profileImagePlaceholder}>
+          <View
+            style={styles.profileImagePlaceholder}
+            accessible={true}
+            accessibilityLabel={`Profile initials: ${
+              athlete.first_name?.[0] ?? "?"
+            } ${athlete.last_name?.[0] ?? "?"}`}
+            accessibilityRole="image">
             <Text style={styles.profileInitials}>
               {athlete.first_name?.[0] ?? "?"}
               {athlete.last_name?.[0] ?? "?"}
             </Text>
           </View>
 
-          <Text style={styles.title}>{athlete.first_name}'s Profile</Text>
+          <Text
+            style={styles.title}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel={`${athlete.first_name}'s Profile`}>
+            {athlete.first_name}'s Profile
+          </Text>
 
-          <View style={styles.card}>
+          {/* Athlete Card */}
+          <View
+            style={styles.card}
+            accessible={true}
+            accessibilityLabel="Athlete details card">
             <View style={styles.cardTopRight}>
               <Pressable
                 onPress={() =>
                   router.push("(athleteProfile)/athleteEditProfile")
                 }
-                hitSlop={10}>
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Edit profile"
+                accessibilityHint="Navigates to edit profile screen">
                 <Ionicons
                   name="ellipsis-horizontal"
                   size={24}
@@ -140,10 +172,15 @@ const AthleteProfile = () => {
             <Text style={styles.value}>{athlete.email ?? "N/A"}</Text>
           </View>
 
-          <View style={styles.card}>
+          {/* Trainer Card */}
+          <View
+            style={styles.card}
+            accessible={true}
+            accessibilityLabel="Trainer details card">
             {athlete.trainer ? (
               <>
                 <Text style={styles.sectionTitle}>Trainer Details</Text>
+
                 <Text style={styles.label}>Trainer</Text>
                 <Text style={styles.value}>
                   {athlete.trainer.first_name ?? "N/A"}{" "}
@@ -167,7 +204,11 @@ const AthleteProfile = () => {
           </View>
         </ScrollView>
       ) : (
-        <View style={styles.loadingContainer}>
+        <View
+          style={styles.loadingContainer}
+          accessible={true}
+          accessibilityLabel="Loading athlete profile"
+          accessibilityRole="progressbar">
           <ActivityIndicator
             size={APP_ACTIVITY_INDICATOR_SIZE}
             color={APP_ACTIVITY_INDICATOR_COLOR}

@@ -116,17 +116,31 @@ const AthleteSession = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>My Training Sessions</Text>
+    <SafeAreaView
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="summary"
+      accessibilityLabel="My Training Sessions screen">
+      <Text
+        style={styles.heading}
+        accessibilityRole="header"
+        accessibilityLabel="My Training Sessions">
+        My Training Sessions
+      </Text>
 
       {loading ? (
         <ActivityIndicator
           size={APP_ACTIVITY_INDICATOR_SIZE}
           color={APP_ACTIVITY_INDICATOR_COLOR}
           style={{ marginTop: 20 }}
+          accessibilityRole="progressbar"
+          accessibilityLabel="Loading training sessions"
         />
       ) : sessions.length === 0 ? (
-        <Text style={{ textAlign: "center", marginTop: 20 }}>
+        <Text
+          style={{ textAlign: "center", marginTop: 20 }}
+          accessibilityRole="text"
+          accessibilityLabel="No training sessions available">
           No training sessions available.
         </Text>
       ) : (
@@ -135,18 +149,30 @@ const AthleteSession = () => {
           onRefresh={onRefresh}
           data={sessions}
           keyExtractor={(item) => item.session_id.toString()}
+          accessibilityRole="list"
+          accessibilityLabel="List of training sessions"
           renderItem={({ item }) => {
             if (!item || !item.session || !item.session_id) return null;
             const { session } = item;
             const isCompleted = item.completed;
 
             return (
-              <View style={styles.card}>
+              <View
+                style={styles.card}
+                accessible={true}
+                accessibilityLabel={`Training session: ${session.session_name}`}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.sessionName}>{session.session_name}</Text>
+                  <Text
+                    style={styles.sessionName}
+                    accessibilityRole="text"
+                    accessibilityLabel={`Session name: ${session.session_name}`}>
+                    {session.session_name}
+                  </Text>
                   <Pressable
-                    accessible
+                    accessible={true}
+                    accessibilityRole="button"
                     accessibilityLabel="Delete session"
+                    accessibilityHint="Deletes this training session"
                     onPress={() =>
                       handleDelete(item.athlete_user_id, item.session_id)
                     }>
@@ -154,15 +180,34 @@ const AthleteSession = () => {
                   </Pressable>
                 </View>
 
-                <Text style={styles.detail}>
+                <Text
+                  style={styles.detail}
+                  accessibilityRole="text"
+                  accessibilityLabel={`Session length: ${session.length} minutes, Level: ${session.level}`}>
                   Length: {session.length} mins | Level: {session.level}
                 </Text>
 
                 {Array.isArray(session.Session_Drill) &&
                 session.Session_Drill.length > 0 ? (
-                  <View style={styles.drillList}>
+                  <View
+                    style={styles.drillList}
+                    accessible={true}
+                    accessibilityRole="list"
+                    accessibilityLabel="List of drills in this session">
                     {session.Session_Drill.map((drillItem, i) => (
-                      <Text key={`drill-${i}`} style={styles.drillText}>
+                      <Text
+                        key={`drill-${i}`}
+                        style={styles.drillText}
+                        accessibilityRole="text"
+                        accessibilityLabel={`Drill ${i + 1}: ${
+                          drillItem?.drill?.drill_type?.toUpperCase() ??
+                          "Unknown"
+                        }, level ${
+                          drillItem?.drill?.level ?? "unknown"
+                        }, description: ${
+                          drillItem?.drill?.description?.trim() ??
+                          "No description"
+                        }`}>
                         •{" "}
                         {typeof drillItem?.drill?.drill_type === "string"
                           ? drillItem.drill.drill_type.toUpperCase()
@@ -175,7 +220,10 @@ const AthleteSession = () => {
                     ))}
                   </View>
                 ) : (
-                  <Text style={styles.noDrills}>
+                  <Text
+                    style={styles.noDrills}
+                    accessibilityRole="text"
+                    accessibilityLabel="No drills in this session">
                     No drills in this session.
                   </Text>
                 )}

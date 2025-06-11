@@ -151,17 +151,30 @@ const EditProfileScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
+      style={styles.container}
+      accessibilityLabel="Edit Profile Form"
+      accessibilityHint="Edit your profile details here">
       <View style={styles.backIconContainer}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          accessibilityHint="Navigates to the previous screen">
           <Ionicons name="chevron-back" size={24} color="#2563eb" />
         </Pressable>
       </View>
+
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Edit Profile</Text>
+        <Text
+          style={styles.title}
+          accessibilityRole="header"
+          accessibilityLabel="Edit Profile">
+          Edit Profile
+        </Text>
 
+        {/* First Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>First Name</Text>
           <TextInput
@@ -169,9 +182,12 @@ const EditProfileScreen = () => {
             value={formData.first_name}
             onChangeText={(value) => handleChange("first_name", value)}
             placeholder="First Name"
+            accessibilityLabel="First Name"
+            accessibilityHint="Enter your first name"
           />
         </View>
 
+        {/* Last Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Last Name</Text>
           <TextInput
@@ -179,9 +195,12 @@ const EditProfileScreen = () => {
             value={formData.last_name}
             onChangeText={(value) => handleChange("last_name", value)}
             placeholder="Last Name"
+            accessibilityLabel="Last Name"
+            accessibilityHint="Enter your last name"
           />
         </View>
 
+        {/* Email */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -190,9 +209,12 @@ const EditProfileScreen = () => {
             onChangeText={(value) => handleChange("email", value)}
             placeholder="Email"
             keyboardType="email-address"
+            accessibilityLabel="Email"
+            accessibilityHint="Enter your email address"
           />
         </View>
 
+        {/* Age */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Age</Text>
           <TextInput
@@ -204,9 +226,12 @@ const EditProfileScreen = () => {
             }}
             placeholder="Age"
             keyboardType="numeric"
+            accessibilityLabel="Age"
+            accessibilityHint="Enter your age in numbers"
           />
         </View>
 
+        {/* Level */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Level</Text>
           <TextInput
@@ -222,9 +247,12 @@ const EditProfileScreen = () => {
             }}
             placeholder="Level (1–5)"
             keyboardType="numeric"
+            accessibilityLabel="Level"
+            accessibilityHint="Enter your skill level from 1 to 5"
           />
         </View>
 
+        {/* Save Button */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
@@ -232,7 +260,10 @@ const EditProfileScreen = () => {
               submitting && { backgroundColor: "#ccc" },
             ]}
             onPress={handleSubmit}
-            disabled={submitting}>
+            disabled={submitting}
+            accessibilityRole="button"
+            accessibilityLabel="Save changes"
+            accessibilityHint="Saves the form and updates your profile">
             <Text style={styles.saveButtonText}>
               {submitting ? "Saving..." : "Save Changes"}
             </Text>
