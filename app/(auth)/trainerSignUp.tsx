@@ -102,12 +102,19 @@ const TrainerSignUp = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      style={{ flex: 1 }}
+      accessibilityLabel="Trainer Sign Up screen"
+      accessibilityHint="Fill out the form to create a trainer account">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Trainer Sign Up</Text>
+          <Text
+            style={styles.title}
+            accessibilityRole="header"
+            accessibilityLabel="Trainer Sign Up">
+            Trainer Sign Up
+          </Text>
 
           <TextInput
             style={styles.input}
@@ -118,7 +125,11 @@ const TrainerSignUp = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholderTextColor="#999"
+            accessibilityLabel="Email input"
+            accessibilityHint="Enter your email address"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Username"
@@ -127,7 +138,11 @@ const TrainerSignUp = () => {
             autoCapitalize="none"
             autoCorrect={false}
             placeholderTextColor="#999"
+            accessibilityLabel="Username input"
+            accessibilityHint="Enter your desired username"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -136,7 +151,11 @@ const TrainerSignUp = () => {
             secureTextEntry
             autoCorrect={false}
             placeholderTextColor="#999"
+            accessibilityLabel="Password input"
+            accessibilityHint="Enter a secure password"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={styles.input}
             placeholder="First Name"
@@ -144,7 +163,11 @@ const TrainerSignUp = () => {
             value={first_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
+            accessibilityLabel="First Name input"
+            accessibilityHint="Enter your first name"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Last Name"
@@ -152,7 +175,11 @@ const TrainerSignUp = () => {
             value={last_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
+            accessibilityLabel="Last Name input"
+            accessibilityHint="Enter your last name"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={styles.input}
             placeholder="Years Experience"
@@ -162,7 +189,11 @@ const TrainerSignUp = () => {
             value={years_experience}
             keyboardType="numeric"
             placeholderTextColor="#999"
+            accessibilityLabel="Years Experience input"
+            accessibilityHint="Enter number of years of experience"
+            accessibilityRole="text"
           />
+
           <TextInput
             style={[styles.input, styles.bioInput]}
             placeholder="Bio"
@@ -171,20 +202,35 @@ const TrainerSignUp = () => {
             multiline
             numberOfLines={4}
             placeholderTextColor="#999"
+            accessibilityLabel="Bio input"
+            accessibilityHint="Enter a short biography"
+            accessibilityRole="text"
           />
 
           <TouchableOpacity
             style={[styles.button, submitting && styles.buttonDisabled]}
             onPress={handleSubmit}
-            disabled={submitting}>
+            disabled={submitting}
+            accessibilityRole="button"
+            accessibilityLabel="Sign Up button"
+            accessibilityHint="Submits the sign up form"
+            accessible={true}>
             {submitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator
+                color="#fff"
+                accessibilityLabel="Loading indicator"
+              />
             ) : (
               <Text style={styles.buttonText}>Sign Up</Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/trainerLogin")}>
+          <TouchableOpacity
+            onPress={() => router.push("/trainerLogin")}
+            accessibilityRole="link"
+            accessibilityLabel="Already have an account? Login link"
+            accessibilityHint="Navigates to trainer login page"
+            accessible={true}>
             <Text style={{ color: "#0066cc", marginTop: 20, marginBottom: 40 }}>
               Already have an account? Login
             </Text>

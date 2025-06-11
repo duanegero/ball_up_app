@@ -65,14 +65,24 @@ const TrainerLogin = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={styles.safeArea}
+      accessibilityLabel="Trainer Access Portal screen"
+      accessibilityHint="Log in to manage and monitor athletes">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.fullScreen}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.container}>
-            <Text style={styles.title}>Trainer Access Portal</Text>
-            <Text style={styles.subtitle}>
+            <Text
+              style={styles.title}
+              accessibilityRole="header"
+              accessibilityLabel="Trainer Access Portal">
+              Trainer Access Portal
+            </Text>
+            <Text
+              style={styles.subtitle}
+              accessibilityLabel="Log in to manage and monitor athletes">
               Log in to manage and monitor athletes
             </Text>
 
@@ -91,6 +101,8 @@ const TrainerLogin = () => {
               onSubmitEditing={() => passwordRef.current?.focus()}
               submitBehavior="blurAndSubmit"
               accessibilityLabel="Username input"
+              accessibilityHint="Enter your username"
+              accessibilityRole="text"
             />
 
             <TextInput
@@ -109,10 +121,18 @@ const TrainerLogin = () => {
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
               accessibilityLabel="Password input"
+              accessibilityHint="Enter your password"
+              accessibilityRole="text"
             />
 
             {errorMessage !== "" && (
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text
+                style={styles.errorText}
+                accessibilityLiveRegion="polite"
+                accessibilityRole="alert"
+                accessibilityLabel={`Error: ${errorMessage}`}>
+                {errorMessage}
+              </Text>
             )}
 
             <View style={styles.buttonContainer}>
@@ -124,13 +144,20 @@ const TrainerLogin = () => {
                 accessible={true}
                 accessibilityLabel="Login button"
                 accessibilityHint="Attempts to log you in with entered credentials">
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>
+                  {submitting ? "Logging in..." : "Login"}
+                </Text>
               </TouchableOpacity>
             </View>
 
             <Text style={styles.linkText}>
               Don’t have an account?{" "}
-              <Link href="/trainerSignUp" style={styles.link}>
+              <Link
+                href="/trainerSignUp"
+                style={styles.link}
+                accessibilityRole="link"
+                accessibilityLabel="Sign Up link"
+                accessibilityHint="Navigates to trainer sign up page">
                 Sign Up
               </Link>
             </Text>

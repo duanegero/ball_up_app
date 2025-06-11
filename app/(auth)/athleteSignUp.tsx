@@ -107,12 +107,22 @@ const AthleteSignUp: React.FC = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.wrapper}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      style={styles.wrapper}
+      accessibilityRole="summary"
+      accessibilityLabel="Create Account screen"
+      accessibilityHint="Fill in the form to create a new account">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView
           contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Create Account</Text>
+          keyboardShouldPersistTaps="handled"
+          accessibilityLabel="Create account form"
+          accessibilityHint="Enter your details to create a new account">
+          <Text
+            style={styles.title}
+            accessibilityRole="header"
+            accessibilityLabel="Create Account">
+            Create Account
+          </Text>
 
           <TextInput
             style={styles.input}
@@ -123,6 +133,9 @@ const AthleteSignUp: React.FC = () => {
             autoCapitalize="none"
             placeholderTextColor="#999"
             autoCorrect={false}
+            accessibilityLabel="Email input"
+            accessibilityHint="Enter your email address"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -133,6 +146,9 @@ const AthleteSignUp: React.FC = () => {
             autoCapitalize="none"
             placeholderTextColor="#999"
             autoCorrect={false}
+            accessibilityLabel="Username input"
+            accessibilityHint="Enter your desired username"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -145,6 +161,9 @@ const AthleteSignUp: React.FC = () => {
             autoComplete="password"
             placeholderTextColor="#999"
             autoCorrect={false}
+            accessibilityLabel="Password input"
+            accessibilityHint="Enter your password"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -154,6 +173,9 @@ const AthleteSignUp: React.FC = () => {
             value={first_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
+            accessibilityLabel="First Name input"
+            accessibilityHint="Enter your first name"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -163,6 +185,9 @@ const AthleteSignUp: React.FC = () => {
             value={last_name}
             autoCapitalize="words"
             placeholderTextColor="#999"
+            accessibilityLabel="Last Name input"
+            accessibilityHint="Enter your last name"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -172,6 +197,9 @@ const AthleteSignUp: React.FC = () => {
             value={age}
             keyboardType="numeric"
             placeholderTextColor="#999"
+            accessibilityLabel="Age input"
+            accessibilityHint="Enter your age as a number"
+            accessibilityRole="text"
           />
 
           <TextInput
@@ -181,20 +209,33 @@ const AthleteSignUp: React.FC = () => {
             value={level}
             keyboardType="numeric"
             placeholderTextColor="#999"
+            accessibilityLabel="Level input"
+            accessibilityHint="Enter your level as a number"
+            accessibilityRole="text"
           />
 
           <TouchableOpacity
             style={[styles.button, submitting && styles.buttonDisabled]}
             onPress={handleSubmit}
-            disabled={submitting}>
+            disabled={submitting}
+            accessibilityRole="button"
+            accessibilityLabel="Sign Up"
+            accessibilityHint="Submit the form to create your account">
             {submitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator
+                color="#fff"
+                accessibilityLabel="Loading indicator"
+              />
             ) : (
               <Text style={styles.buttonText}>Sign Up</Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/athleteLogin")}>
+          <TouchableOpacity
+            onPress={() => router.push("/athleteLogin")}
+            accessibilityRole="link"
+            accessibilityLabel="Already have an account? Login"
+            accessibilityHint="Navigate to the login screen">
             <Text style={{ color: "#0066cc", marginTop: 20, marginBottom: 30 }}>
               Already have an account? Login
             </Text>
