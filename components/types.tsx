@@ -74,3 +74,21 @@ export type DrillResponse = {
     created_at: string;
   };
 };
+
+export type TrainerUpdatePayload = {
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  years_experience?: number;
+  bio?: string;
+};
+
+export interface TrainerFormData {
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  years_experience: string;
+  bio: string;
+}

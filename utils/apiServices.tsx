@@ -25,16 +25,27 @@ export const fetchAthlete = async (): Promise<Athlete | null> => {
   }
 };
 
+//function to fetch a athlete profile
 export const fetchAthleteProfile = async (athlete_user_id: number) => {
   const response = await api.get(`/athletes/${athlete_user_id}`);
   return response.data;
 };
 
+//function to update a athlete profile
 export const updateAthleteProfile = async (
   athlete_user_id: number,
   data: { [key: string]: string | number }
 ) => {
   const res = await api.put(`/athletes/${athlete_user_id}`, data);
+  return res;
+};
+
+//function to update a trainer profile
+export const updateTrainerProfile = async (
+  trainer_user_id: number,
+  data: { [key: string]: string | number }
+) => {
+  const res = await api.put(`/trainers/${trainer_user_id}`, data);
   return res;
 };
 
@@ -83,6 +94,18 @@ export const fetchTrainers = async (): Promise<Trainer[]> => {
   } catch (error) {
     console.error("Error fetching trainers:", error);
     throw error;
+  }
+};
+
+//function to fetch trainer profile
+export const fetchTrainerProfile = async (trainer_user_id: number) => {
+  try {
+    const response = await api.get(`/trainers/${trainer_user_id}`);
+    return response.data; // return only data for easier use
+  } catch (error) {
+    console.error("Error fetching trainer profile:", error);
+    // Optionally, wrap and throw a custom error or return null
+    throw new Error("Unable to fetch trainer profile");
   }
 };
 
