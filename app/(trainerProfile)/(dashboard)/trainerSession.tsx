@@ -161,14 +161,31 @@ const TrainerSession = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>Your Sessions</Text>
-      {error && !loading && <Text style={styles.errorText}>{error}</Text>}
+    <SafeAreaView
+      style={styles.container}
+      accessibilityLabel="Your sessions screen">
+      <Text
+        style={styles.heading}
+        accessibilityRole="header"
+        accessibilityLabel="Your Sessions">
+        Your Sessions
+      </Text>
+
+      {error && !loading && (
+        <Text
+          style={styles.errorText}
+          accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
+          accessibilityLabel={`Error: ${error}`}>
+          {error}
+        </Text>
+      )}
 
       {loading && !refreshing ? (
         <ActivityIndicator
           size={APP_ACTIVITY_INDICATOR_SIZE}
           color={APP_ACTIVITY_INDICATOR_COLOR}
+          accessibilityLabel="Loading sessions"
         />
       ) : (
         <FlatList
@@ -176,7 +193,10 @@ const TrainerSession = () => {
           keyExtractor={(item) => item.session_id.toString()}
           contentContainerStyle={styles.scrollContainer}
           ListEmptyComponent={
-            <Text style={styles.noSessionsText}>
+            <Text
+              style={styles.noSessionsText}
+              accessibilityLiveRegion="polite"
+              accessibilityLabel="No sessions found. Tap below to create one.">
               No sessions found. Tap below to create one.
             </Text>
           }
@@ -185,39 +205,66 @@ const TrainerSession = () => {
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor="#9ca3af"
+              accessibilityLabel="Pull to refresh sessions"
             />
           }
           renderItem={({ item }) => {
             const isDeleting = deletingSessionId === item.session_id;
 
             return (
-              <View style={styles.card}>
+              <View
+                style={styles.card}
+                accessible={true}
+                accessibilityLabel={`Session: ${item.session_name}, Length: ${item.length}, Level: ${item.level}`}>
                 <Text style={styles.label}>
-                  Name: <Text style={styles.value}>{item.session_name}</Text>
+                  Name:{" "}
+                  <Text
+                    style={styles.value}
+                    accessibilityLabel={`Session name: ${item.session_name}`}>
+                    {item.session_name}
+                  </Text>
                 </Text>
                 <Text style={styles.label}>
-                  Length: <Text style={styles.value}>{item.length}</Text>
+                  Length:{" "}
+                  <Text
+                    style={styles.value}
+                    accessibilityLabel={`Session length: ${item.length}`}>
+                    {item.length}
+                  </Text>
                 </Text>
                 <Text style={styles.label}>
-                  Level: <Text style={styles.value}>{item.level}</Text>
+                  Level:{" "}
+                  <Text
+                    style={styles.value}
+                    accessibilityLabel={`Session level: ${item.level}`}>
+                    {item.level}
+                  </Text>
                 </Text>
 
                 <TouchableOpacity
                   style={[
                     styles.actionButton,
-
                     isDeleting && styles.actionButtonDisabled,
                   ]}
                   onPress={() => handlePress(item)}
                   disabled={isDeleting}
+                  accessibilityRole="button"
                   accessibilityLabel={
                     isDeleting
                       ? `Deleting session ${item.session_name}`
                       : `View or edit session ${item.session_name}`
                   }
-                  accessibilityRole="button">
+                  accessibilityState={{
+                    busy: isDeleting,
+                    disabled: isDeleting,
+                  }}
+                  accessibilityHint="Tap to view or edit this session">
                   {isDeleting ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator
+                      size="small"
+                      color="#fff"
+                      accessibilityLabel="Deleting session"
+                    />
                   ) : (
                     <Ionicons name="create-outline" size={20} color="#fff" />
                   )}
@@ -235,8 +282,9 @@ const TrainerSession = () => {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push("/createSession")}
-          accessibilityLabel="Add New Session"
-          accessibilityRole="button">
+          accessibilityLabel="Add new session"
+          accessibilityRole="button"
+          accessibilityHint="Tap to add a new session">
           <Text style={styles.addText}>Add New Session</Text>
         </TouchableOpacity>
       )}

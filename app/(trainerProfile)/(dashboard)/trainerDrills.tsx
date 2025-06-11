@@ -94,8 +94,17 @@ const TrainerDrills = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>My Drills</Text>
+    <SafeAreaView
+      style={styles.container}
+      accessibilityLabel="My Drills screen"
+      accessibilityHint="View and manage your drills">
+      <Text
+        style={styles.heading}
+        accessibilityRole="header"
+        accessibilityLabel="My Drills">
+        My Drills
+      </Text>
+
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         refreshControl={
@@ -103,23 +112,40 @@ const TrainerDrills = () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor="#9ca3af"
+            accessibilityLabel="Pull to refresh drills list"
           />
-        }>
+        }
+        accessible={true}>
         {loading ? (
-          <View style={styles.loadingContainer}>
+          <View
+            style={styles.loadingContainer}
+            accessible={true}
+            accessibilityRole="alert"
+            accessibilityLiveRegion="assertive"
+            accessibilityLabel="Loading drills, please wait">
             <ActivityIndicator
               size={APP_ACTIVITY_INDICATOR_SIZE}
               color={APP_ACTIVITY_INDICATOR_COLOR}
+              accessibilityLabel="Loading indicator"
             />
           </View>
         ) : drills.length === 0 ? (
-          <Text style={styles.noDrillsText}>No drills found.</Text>
+          <Text
+            style={styles.noDrillsText}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel="No drills found">
+            No drills found.
+          </Text>
         ) : (
           drills.map((drill) => {
             const isDeleting = deletingDrillId === drill.drill_id;
 
             return (
-              <View key={drill.drill_id} style={styles.card}>
+              <View
+                key={drill.drill_id}
+                style={styles.card}
+                accessible={true}
+                accessibilityLabel={`Drill: ${drill.drill_name}, Type: ${drill.drill_type}, Level: ${drill.level}, Description: ${drill.description}`}>
                 <Text style={styles.drillName}>{drill.drill_name}</Text>
 
                 <Text style={styles.label}>Type:</Text>
@@ -138,14 +164,23 @@ const TrainerDrills = () => {
                   ]}
                   onPress={() => handleDelete(drill.drill_id)}
                   disabled={isDeleting}
+                  accessibilityRole="button"
                   accessibilityLabel={
                     isDeleting
-                      ? `Deleting drill ${drill.drill_type}`
-                      : `Delete drill ${drill.drill_type}`
+                      ? `Deleting drill ${drill.drill_name}`
+                      : `Delete drill ${drill.drill_name}`
                   }
-                  accessibilityRole="button">
+                  accessibilityHint="Deletes this drill"
+                  accessibilityState={{
+                    busy: isDeleting,
+                    disabled: isDeleting,
+                  }}>
                   {isDeleting ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator
+                      size="small"
+                      color="#fff"
+                      accessibilityLabel="Deleting drill"
+                    />
                   ) : (
                     <Ionicons name="trash" size={20} color="#fff" />
                   )}
@@ -161,7 +196,10 @@ const TrainerDrills = () => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => router.push("/createDrill")}>
+        onPress={() => router.push("/createDrill")}
+        accessibilityRole="button"
+        accessibilityLabel="Add new drill"
+        accessibilityHint="Navigates to create new drill screen">
         <Text style={styles.addText}>Add New Drill</Text>
       </TouchableOpacity>
     </SafeAreaView>

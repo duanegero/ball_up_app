@@ -177,16 +177,23 @@ const EditTrainerProfile = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <SafeAreaView
+      style={styles.container}
+      accessibilityLabel="Edit Trainer Profile screen">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}>
           {loading ? (
-            <View style={styles.loadingContainer}>
+            <View
+              style={styles.loadingContainer}
+              accessibilityRole="alert"
+              accessibilityLabel="Loading edit profile screen"
+              accessibilityLiveRegion="assertive">
               <ActivityIndicator
                 size={APP_ACTIVITY_INDICATOR_SIZE}
                 color={APP_ACTIVITY_INDICATOR_COLOR}
+                accessibilityLabel="Loading"
               />
             </View>
           ) : (
@@ -194,15 +201,26 @@ const EditTrainerProfile = () => {
               <View>
                 <Pressable
                   onPress={() => router.back()}
-                  accessibilityLabel="Go back"
+                  accessibilityRole="button"
+                  accessibilityLabel="Go back to previous screen"
                   hitSlop={10}>
                   <Ionicons name="chevron-back" size={24} color="#2563eb" />
                 </Pressable>
               </View>
-              <Text style={styles.title}>Edit Trainer Profile</Text>
+
+              <Text
+                style={styles.title}
+                accessibilityRole="header"
+                accessibilityLabel="Edit Trainer Profile">
+                Edit Trainer Profile
+              </Text>
 
               {error && (
-                <Text style={styles.errorText} accessibilityLiveRegion="polite">
+                <Text
+                  style={styles.errorText}
+                  accessibilityRole="alert"
+                  accessibilityLiveRegion="polite"
+                  accessibilityLabel={`Error: ${error}`}>
                   {error}
                 </Text>
               )}
@@ -213,6 +231,12 @@ const EditTrainerProfile = () => {
                 value={formData.username}
                 onChangeText={(text) => handleChange("username", text)}
                 returnKeyType="next"
+                accessible={true}
+                accessibilityLabel="Username input"
+                accessibilityHint="Enter your username"
+                importantForAccessibility="yes"
+                autoComplete="username"
+                textContentType="username"
               />
               <TextInput
                 style={styles.input}
@@ -222,6 +246,12 @@ const EditTrainerProfile = () => {
                 returnKeyType="next"
                 autoCapitalize="words"
                 autoCorrect
+                accessible={true}
+                accessibilityLabel="First Name input"
+                accessibilityHint="Enter your first name"
+                importantForAccessibility="yes"
+                autoComplete="name-given"
+                textContentType="givenName"
               />
               <TextInput
                 style={styles.input}
@@ -231,6 +261,12 @@ const EditTrainerProfile = () => {
                 returnKeyType="next"
                 autoCapitalize="words"
                 autoCorrect
+                accessible={true}
+                accessibilityLabel="Last Name input"
+                accessibilityHint="Enter your last name"
+                importantForAccessibility="yes"
+                autoComplete="name-family"
+                textContentType="familyName"
               />
               <TextInput
                 style={styles.input}
@@ -239,6 +275,12 @@ const EditTrainerProfile = () => {
                 onChangeText={(text) => handleChange("email", text)}
                 keyboardType="email-address"
                 returnKeyType="next"
+                accessible={true}
+                accessibilityLabel="Email input"
+                accessibilityHint="Enter your email address"
+                importantForAccessibility="yes"
+                autoComplete="email"
+                textContentType="emailAddress"
               />
               <TextInput
                 style={styles.input}
@@ -247,6 +289,12 @@ const EditTrainerProfile = () => {
                 onChangeText={(text) => handleChange("years_experience", text)}
                 keyboardType="numeric"
                 returnKeyType="next"
+                accessible={true}
+                accessibilityLabel="Years of experience input"
+                accessibilityHint="Enter your years of experience"
+                importantForAccessibility="yes"
+                autoComplete="off"
+                textContentType="none"
               />
               <TextInput
                 style={[styles.input, styles.bioInput]}
@@ -254,7 +302,12 @@ const EditTrainerProfile = () => {
                 value={formData.bio}
                 onChangeText={(text) => handleChange("bio", text)}
                 multiline
-                returnKeyType="next"
+                returnKeyType="done"
+                accessible={true}
+                accessibilityLabel="Bio input"
+                accessibilityHint="Enter your biography or description"
+                importantForAccessibility="yes"
+                textContentType="none"
               />
 
               <View style={styles.buttonContainer}>
@@ -263,6 +316,13 @@ const EditTrainerProfile = () => {
                   onPress={handleSubmit}
                   color="#007AFF"
                   disabled={submitting || loading}
+                  accessibilityLabel={
+                    submitting ? "Saving changes" : "Save changes"
+                  }
+                  accessibilityState={{
+                    disabled: submitting || loading,
+                    busy: submitting,
+                  }}
                 />
               </View>
             </ScrollView>

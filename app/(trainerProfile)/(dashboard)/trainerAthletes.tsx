@@ -193,20 +193,38 @@ const TrainerAthletes = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={styles.container}
+      accessibilityLabel="My Athletes screen"
+      accessibilityHint="List of your athletes to select and assign sessions">
       {assigningSession && (
-        <SafeAreaView style={styles.loadingOverlay}>
+        <SafeAreaView
+          style={styles.loadingOverlay}
+          accessible={true}
+          accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
+          accessibilityLabel="Assigning session, please wait">
           <ActivityIndicator
             size={APP_ACTIVITY_INDICATOR_SIZE}
             color={APP_ACTIVITY_INDICATOR_COLOR}
+            accessibilityLabel="Loading indicator"
           />
         </SafeAreaView>
       )}
+
       <ScrollView>
-        <Text style={styles.title}>My Athletes</Text>
+        <Text
+          style={styles.title}
+          accessibilityRole="header"
+          accessibilityLabel="My Athletes">
+          My Athletes
+        </Text>
 
         {athletes.length === 0 && (
-          <Text style={{ textAlign: "center", marginTop: 20 }}>
+          <Text
+            style={{ textAlign: "center", marginTop: 20 }}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel="No athletes found">
             No athletes found.
           </Text>
         )}
@@ -218,9 +236,22 @@ const TrainerAthletes = () => {
             style={styles.card}
             disabled={
               assigningSession || removingAthleteId === athlete.athlete_user_id
-            }>
+            }
+            accessibilityRole="button"
+            accessibilityLabel={`${athlete.first_name} ${athlete.last_name}, age ${athlete.age}, level ${athlete.level}, email ${athlete.email}`}
+            accessibilityHint="Tap to assign a session to this athlete"
+            accessibilityState={{
+              disabled:
+                assigningSession ||
+                removingAthleteId === athlete.athlete_user_id,
+              busy: removingAthleteId === athlete.athlete_user_id,
+            }}>
             {removingAthleteId === athlete.athlete_user_id ? (
-              <ActivityIndicator size="small" color="#333" />
+              <ActivityIndicator
+                size="small"
+                color="#333"
+                accessibilityLabel="Removing athlete indicator"
+              />
             ) : (
               <>
                 <Text style={styles.cardName}>
