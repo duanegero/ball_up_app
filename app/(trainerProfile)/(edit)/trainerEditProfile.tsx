@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -311,10 +312,12 @@ const EditTrainerProfile = () => {
               />
 
               <View style={styles.buttonContainer}>
-                <Button
-                  title={submitting ? "Saving..." : "Save Changes"}
+                <TouchableOpacity
+                  style={[
+                    styles.saveButton,
+                    submitting && { backgroundColor: "#ccc" },
+                  ]}
                   onPress={handleSubmit}
-                  color="#007AFF"
                   disabled={submitting || loading}
                   accessibilityLabel={
                     submitting ? "Saving changes" : "Save changes"
@@ -322,8 +325,21 @@ const EditTrainerProfile = () => {
                   accessibilityState={{
                     disabled: submitting || loading,
                     busy: submitting,
-                  }}
-                />
+                  }}>
+                  <Text style={styles.saveButtonText}>
+                    {submitting ? "Saving..." : "Save Changes"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.updateButton}
+                  onPress={() => router.push("/(auth)/trainerPasswordReset")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Change password"
+                  accessibilityHint="Navigates to the password reset screen">
+                  <Text style={styles.updateButtonText}>Update Password</Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           )}

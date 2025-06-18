@@ -59,4 +59,16 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
   },
+  updateButton: {
+    backgroundColor: "#34C759",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  updateButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });

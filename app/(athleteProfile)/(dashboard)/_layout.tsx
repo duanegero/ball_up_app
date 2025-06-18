@@ -54,19 +54,6 @@ const DashboardLayout = () => {
           ),
         }}
       />
-      <Tabs.Screen
-        name="editProfile"
-        options={{
-          title: "Edit",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
     </Tabs>
   );
 };

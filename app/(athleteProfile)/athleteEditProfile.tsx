@@ -269,6 +269,21 @@ const EditProfileScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={() =>
+              router.push({
+                pathname: "/(auth)/athletePasswordReset",
+                params: { athleteId: athleteId?.toString() || "" },
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Change password"
+            accessibilityHint="Navigates to the password reset screen">
+            <Text style={styles.updateButtonText}>Update Password</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

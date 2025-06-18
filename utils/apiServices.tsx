@@ -519,3 +519,24 @@ export const deleteAthleteSession = async (
     throw new Error("Could not delete session");
   }
 };
+
+export const resetAthletePassword = async (
+  athlete_user_id: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  try {
+    await api.put(`athletes/password/${athlete_user_id}`, {
+      currentPassword,
+      newPassword,
+    });
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error(
+        "An unexpected error occurred while resetting the password."
+      );
+    }
+  }
+};
