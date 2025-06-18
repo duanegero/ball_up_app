@@ -540,3 +540,24 @@ export const resetAthletePassword = async (
     }
   }
 };
+
+export const resetTrainerPassword = async (
+  trainer_user_id: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  try {
+    await api.put(`trainers/password/${trainer_user_id}`, {
+      currentPassword,
+      newPassword,
+    });
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else {
+      throw new Error(
+        "An unexpected error occurred while resetting the password."
+      );
+    }
+  }
+};

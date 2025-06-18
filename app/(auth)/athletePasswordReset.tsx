@@ -1,3 +1,4 @@
+//imports to use in app
 import { useEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -5,7 +6,6 @@ import {
   Text,
   TextInput,
   Button,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -16,12 +16,15 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAthletePassword } from "../../utils/apiServices";
+import { styles } from "../../styles/athletePasswordReset.styles";
 
 const AthletePasswordReset = () => {
   const params = useLocalSearchParams();
 
+  //variable to handle id from params
   const athleteIdParam = params.athleteId;
 
+  //converting the id from param to a number
   const athleteUserIdFromParam =
     typeof athleteIdParam === "string"
       ? parseInt(athleteIdParam, 10)
@@ -29,6 +32,7 @@ const AthletePasswordReset = () => {
         ? parseInt(athleteIdParam[0], 10)
         : null;
 
+  //useState variables
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -39,7 +43,7 @@ const AthletePasswordReset = () => {
   );
 
   useEffect(() => {
-    // If no athleteUserId passed via param, try to get it from AsyncStorage
+    //if no athleteUserId passed via param, try to get it from AsyncStorage
     if (athleteUserIdFromParam === null) {
       const getUserId = async () => {
         const idString = await AsyncStorage.getItem("athlete_user_id");
@@ -50,7 +54,9 @@ const AthletePasswordReset = () => {
     }
   }, [athleteUserIdFromParam]);
 
+  //variable to handle submit press in form
   const handleSubmit = async () => {
+    //checks to the data
     if (!athleteUserId) {
       setErrorMessage("User ID not found.");
       return;
@@ -70,7 +76,6 @@ const AthletePasswordReset = () => {
       setSubmitting(true);
       setErrorMessage("");
 
-      // Replace this with your real API call
       await resetAthletePassword(athleteUserId, currentPassword, newPassword);
 
       Alert.alert("Success", "Your password has been updated.", [
@@ -133,37 +138,3 @@ const AthletePasswordReset = () => {
 };
 
 export default AthletePasswordReset;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  inner: {
-    flex: 1,
-    padding: 24,
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 16,
-  },
-  buttonContainer: {
-    marginTop: 8,
-  },
-  error: {
-    color: "#FF3B30",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-});
